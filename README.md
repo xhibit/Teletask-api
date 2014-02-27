@@ -7,7 +7,7 @@ It is the purpose to generate a REST API for software developers or domotics ent
 
 If you own a Teletask MICROS, you have access to the free DLL32 LIBRARY (TDS15132).  However, if you're a java programmer like myself, you don't want to use a windows dll :-)
 Started discussing the possibilities on the Teletask forum: http://www.teletask.be/forum/default.aspx?g=posts&t=195
-And ended up programming a java interface based on IP Sockets, exposed by a basic JSON REST service.
+...and ended up programming a java interface based on IP Sockets, exposed by a basic JSON REST service.
 
 Initially only setting and getting RELAYS is supported.
 On the roadmap: support all micros features (moods, dimming, ...) and make the API more generic.
