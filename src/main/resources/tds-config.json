@@ -1,56 +1,10 @@
 {
-    "host": "192.168.1.150",
+    "host": "hostname",
     "port": 4660,
     "componentsTypes": {
         "RELAY": [
-             {"number":  1, "description": "L03: slaapkamer 1, 1ste deel"}
-            ,{"number":  2, "description": "L04: slaapkamer 1, 2de deel"}
-            ,{"number":  3, "description": "L01: slaapkamer 2, 1ste deel"}
-            ,{"number":  4, "description": "L01: slaapkamer 2, 2de deel"}
-            ,{"number":  5, "description": "L15: wc boven"}
-            ,{"number":  6, "description": "L14: dressing"}
-            ,{"number":  7, "description": "L19: overloop - wandverlichting"}
-            ,{"number":  8, "description": "L31: berging - achteraan"}
-            ,{"number":  9, "description": "L09: traphal 1ste verdiep aan bureau (spot)"}
-            ,{"number": 10, "description": "L16: slaapkamer 1 - centraal"}
-            ,{"number": 11, "description": "L05: traphal 2de verdiep"}
-            ,{"number": 12, "description": "L40: zolder"}
-            ,{"number": 13, "description": "L24: wc beneden"}
-            ,{"number": 14, "description": "L12: badkamer - centraal"}
-            ,{"number": 15, "description": "L13: badkamer - douche"}
-            ,{"number": 16, "description": "L44: zithoek - LED's wanden"}
-            ,{"number": 17, "description": "L42: tuin - halogeenspot"}
-            ,{"number": 18, "description": "L43: tuin - verlichting (pad/planten)"}
-            ,{"number": 19, "description": "L07: bureau - centraal licht"}
-            ,{"number": 20, "description": "L34: leefkeuken - LED vals plafond"}
-            ,{"number": 21, "description": "XX: VDI Netwerk"}
-            ,{"number": 22, "description": "L41: overloop - ballustrade"}
-            ,{"number": 23, "description": "L37: leefkeuken - boven tafel"}
-            ,{"number": 24, "description": "L29: living - luster"}
-            ,{"number": 25, "description": "L20: voordeur - spots afdak"}
-            ,{"number": 26, "description": "L21: voordeur - wandverlichting"}
-            ,{"number": 27, "description": "L22: inkomhal - spots"}
-            ,{"number": 28, "description": "L46: terras - LED"}
-            ,{"number": 29, "description": "L27: inkomhal - spot voor trap"}
-            ,{"number": 30, "description": "L28: living - spots"}
-            ,{"number": 31, "description": "L36: leefkeuken - boven eiland"}
-            ,{"number": 32, "description": "L30: living - wandverlichting tredes"}
-            ,{"number": 33, "description": "L25: berging - vooraan"}
-            ,{"number": 34, "description": "L23: inkomhal - wandverlichting"}
-            ,{"number": 35, "description": "L38: terras: afdak (gang)"}
-            ,{"number": 36, "description": "L32: berging - TL verlichting"}
-            ,{"number": 37, "description": "L11: badkamer - lavabo"}
-            ,{"number": 38, "description": "L35: leefkeuken - spots aan kasten"}
-            ,{"number": 39, "description": "L06: bureau - spots tegen muur"}
-            ,{"number": 40, "description": "L08: bureau - spots aan vide"}
-            ,{"number": 41, "description": "L47: zithoek - lichtkring 1 (zijde oprit)"}
-            ,{"number": 42, "description": "L48: zithoek - lichtkring 2 (zijde berging)"}
-            ,{"number": 43, "description": "L45: slaapkamer 1 - LED's hoofdbord"}
-            ,{"number": 44, "description": "L39: living - LED's nis"}
-            ,{"number": 45, "description": "L17: slaapkamer 1 - wandlicht Bruno"}
-            ,{"number": 46, "description": "L18: slaapkamer 1 - wandlicht Isabelle"}
-            ,{"number": 47, "description": "L10: terras - afdak (zitplaats) [UNDEFINED]"}
-            ,{"number": 48, "description": "L33: leefkeuken - TL nis [UNDEFINED]"}
+             {"number":  1, "description": "L01: bedroom 1"}
+            ,{"number":  2, "description": "L02: kitchen"}
         ],
         "MTRUPDOWN": [
              {"number": 0,  "description": "Screen cinema"}
@@ -77,24 +31,7 @@
         ]
     },
     "rooms": [
-         {"id":1, "level":0, "name": "Gang", "components": {"RELAY": [27,34]}}
-        ,{"id":2, "level":0, "name": "Keuken", "components": {"RELAY": [20,23,31,38],"LOCMOOD": [7,8]}}
-        ,{"id":3, "level":0, "name": "Toilet beneden", "components": {"RELAY": [13]}}
-        ,{"id":4, "level":0, "name": "Living", "components": {"RELAY": [22,24,30,32,44]}}
-        ,{"id":5, "level":0, "name": "Berging", "components": {"RELAY": [8,21,33,36]}}
-        ,{"id":6, "level":0, "name": "Trap onder", "components": {"RELAY": [9,29]}}
-        ,{"id":7, "level":0, "name": "Tuin (voor)", "components": {"RELAY": [25,26]}}
-        ,{"id":8, "level":0, "name": "Tuin (achter)", "components": {"RELAY": [17,18,28,35]}}
-        ,{"id":9, "level":1, "name": "Bureau", "components": {"RELAY": [19,39,40]}}
-        ,{"id":10, "level":1, "name": "Toilet boven", "components": {"RELAY": [5]}}
-        ,{"id":11, "level":1, "name": "Overloop", "components": {"RELAY": [7]}}
-        ,{"id":12, "level":1, "name": "Slaapkamer ouders", "components": {"RELAY": [10,43,45,46]}}
-        ,{"id":13, "level":1, "name": "Dressing", "components": {"RELAY": [6]}}
-        ,{"id":14, "level":1, "name": "Badkamer", "components": {"RELAY": [14,15,37]}}
-        ,{"id":15, "level":1, "name": "Trap boven", "components": {"RELAY": [11]}}
-        ,{"id":16, "level":2, "name": "Slaapkamer Jonathan", "components": {"RELAY": [3,4]}}
-        ,{"id":17, "level":2, "name": "Slaamkamer Alexander", "components": {"RELAY": [1,2]}}
-        ,{"id":18, "level":3, "name": "Zolder", "components": {"RELAY": [12]}}
-        ,{"id":19, "level":0, "name": "Zithoek", "components": {"RELAY": [16,41,42], "LOCMOOD": [0]}}
+         {"id":1, "level":0, "name": "Hallway", "components": {"RELAY": [27,34]}}
+        ,{"id":2, "level":0, "name": "Kitchen", "components": {"RELAY": [20,23,31,38],"LOCMOOD": [7,8]}}
     ]
 }
