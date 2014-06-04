@@ -26,8 +26,8 @@ http://<host>:<port>/teletask/api
 
 **Relay**
 
-* URI: GET <base_url>/relay/{number}
-..* Description: Gets the relay state.  Returns 0 for off, 1 for on.
+- URI: GET <base_url>/relay/{number}
+- Description: Gets the relay state.  Returns 0 for off, 1 for on.
 
 - URI: PUT <base_url>/relay/{number}/state/{0/1}
 - Description: Switches the relay on/off.  Use 0 for off, 1 for on. 
@@ -36,10 +36,10 @@ http://<host>:<port>/teletask/api
 **Motor**
 
 - URI: GET <base_url>/motor/{number}
-- Description:
+- Description: Gets the motor state.  1 for down, 0 for up.
 
 - URI: PUT <base_url>/motor/{number}/state/{0/1}
-- Description: Switches the motor up or down.  Use 1 for up, 0 for down.  
+- Description: Switches the motor up or down.  Use 0 for up, 1 for down.
 
 **Local Mood**
 
