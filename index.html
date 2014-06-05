@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Teletask-api by xhibit</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Teletask-api</h1>
+        <p>An open source java REST API for Teletask domotics.</p>
+        <p class="view"><a href="https://github.com/xhibit/Teletask-api">View the Project on GitHub <small>xhibit/Teletask-api</small></a></p>
+        <ul>
+          <li><a href="https://github.com/xhibit/Teletask-api/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/xhibit/Teletask-api/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/xhibit/Teletask-api">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="teletask-api" class="anchor" href="#teletask-api"><span class="octicon octicon-link"></span></a>Teletask-api</h1>
+
+<p>An open source java JSON REST API for Teletask domotics.</p>
+
+<p>It is the purpose to generate a REST API for software developers or domotics enthusiasts, who are interested in generating their own control environment for the TELETASK domotics systems, so you can create your own user interface and connected solutions and services.</p>
+
+<p>If you own a Teletask MICROS (note: not the latest MICROS+), you have access to the free DLL32 LIBRARY (TDS15132).  However, if you're a java programmer like myself, you don't want to use a windows dll :-)
+Bought me a RS232 &gt; LAN converter (TDS10118) so I could access my MICROS server through regular IP.</p>
+
+<p>Started discussing the possibilities on the Teletask forum: <a href="http://www.teletask.be/forum/default.aspx?g=posts&amp;t=195">http://www.teletask.be/forum/default.aspx?g=posts&amp;t=195</a>
+...and ended up programming a java interface based on IP Sockets, exposed by a basic JSON REST service.</p>
+
+<p>Initially only setting and getting RELAYS, MTRUPDOWN, GENMOOD, LOCMOOD is supported.</p>
+
+<h3>
+<a name="how-this-api-works" class="anchor" href="#how-this-api-works"><span class="octicon octicon-link"></span></a>How this API works:</h3>
+
+<ul>
+<li>Your Teletask config is read from the tds-config.json file.  This file holds all info on your personal setup.</li>
+<li>Once configured correctly, build the war file using maven.</li>
+<li>Deploy to a java app server on a device on your local network, so it has access to your MICROS server.  I used a low power <a href="http://www.raspberrypi.org">Raspberry PI</a>
+</li>
+</ul><h3>
+<a name="rest-api" class="anchor" href="#rest-api"><span class="octicon octicon-link"></span></a>REST API</h3>
+
+<p>Base URL API
+http://:/teletask/api</p>
+
+<p><strong>Relay</strong></p>
+
+<ul>
+<li>URI: GET /relay/{number}</li>
+<li><p>Description: Gets the relay state.  Returns 0 for off, 1 for on.</p></li>
+<li><p>URI: PUT /relay/{number}/state/{0/1}</p></li>
+<li>Description: Switches the relay on/off.  Use 0 for off, 1 for on. </li>
+</ul><p><strong>Motor</strong></p>
+
+<ul>
+<li>URI: GET /motor/{number}</li>
+<li><p>Description: Gets the motor state.  1 for down, 0 for up.</p></li>
+<li><p>URI: PUT /motor/{number}/state/{0/1}</p></li>
+<li>Description: Switches the motor up or down.  Use 0 for up, 1 for down.</li>
+</ul><p><strong>Local Mood</strong></p>
+
+<ul>
+<li>URI: GET /mood/local/{number}</li>
+<li><p>Description: Gets the mood state.  Returns 0 for off, 1 for on.</p></li>
+<li><p>URI: PUT /mood/local/{number}/state/{0/1}</p></li>
+<li>Description: Switches the mood on/off.  Use 0 for off, 1 for on. </li>
+</ul><p><strong>General Mood</strong></p>
+
+<ul>
+<li>URI: GET /mood/general/{number}</li>
+<li><p>Description: Gets the mood state.  Returns 0 for off, 1 for on.</p></li>
+<li><p>URI: PUT /mood/general/{number}/state/{0/1}</p></li>
+<li>Description: Switches the mood on/off.  Use 0 for off, 1 for on. </li>
+</ul><h3>
+<a name="roadmap" class="anchor" href="#roadmap"><span class="octicon octicon-link"></span></a>Roadmap:</h3>
+
+<p>Current status: fully working REST API.</p>
+
+<p>Future release:</p>
+
+<ul>
+<li>Support all micros features (dimming, check flags, conditions...)</li>
+<li>Add iBeacon support: this way I can use presence detection and switch relays depending on being close to a beacon.</li>
+<li>Add support for an <a href="http://www.globalcache.com/products/itachflex/">iTach Flex</a> device so I can control additional devices through IR (airco units, projector, tv, ....</li>
+<li>A HTML 5 GUI for access on a mobile device (possibly using Twitter Bootstrap, Sencha Touch, ...).</li>
+</ul>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/xhibit">xhibit</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
