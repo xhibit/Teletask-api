@@ -49,6 +49,56 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/relay/{number}")
     public Response relay(@PathParam("number") int number) {
+        return getComponentState(number, Function.RELAY);
+    }
+
+    /**
+     *
+     * Gets the condition state.  Returns 1 for true, 0 for false.
+     * URI: (GET) http://localhost:8080/teletask/api/condition/{number}
+     *
+     * @param number The condition you want to query the state for.
+     * @return JSON response confirming if the switch request was successful, together with the correct state.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/condition/{number}")
+    public Response condition(@PathParam("number") int number) {
+        return getComponentState(number, Function.COND);
+    }
+
+    /**
+     *
+     * Gets the flag state.  Returns 1 for true, 0 for false.
+     * URI: (GET) http://localhost:8080/teletask/api/flag/{number}
+     *
+     * @param number The flag you want to query the state for.
+     * @return JSON response confirming if the switch request was successful, together with the correct state.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/flag/{number}")
+    public Response flag(@PathParam("number") int number) {
+        return getComponentState(number, Function.FLAG);
+    }
+
+    /**
+     *
+     * Gets the motor state.  Returns 1 for up, 0 for down.
+     * URI: (GET) http://localhost:8080/teletask/api/motor/{number}
+     *
+     * @param number The motor you want to query the state for.
+     * @return JSON response confirming if the switch request was successful, together with the correct state.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/motor/{number}")
+    public Response motor(@PathParam("number") int number) {
+        return getComponentState(number, Function.MTRUPDOWN);
+    }
+
+
+    private Response getComponentState(int number, Function function) {
         //TODO: validate the relay to be an integer (common method), if not, return correct HTTP status code
         // Use RestEasy built-in validation: http://docs.jboss.org/resteasy/docs/3.0.7.Final/userguide/html/Validation.html
 
@@ -56,7 +106,7 @@ public class ComponentResource {
         //APIResponse response = new APIResponse("success", component);
 
         // component always holds the correct state, so no need to call client.getRelayState(number)
-        APIResponse response = new APIResponse("success", client.getComponent(Function.RELAY, number));
+        APIResponse response = new APIResponse("success", client.getComponent(function, number));
         return Response.status(200).entity(response).build();
     }
 
@@ -88,10 +138,37 @@ public class ComponentResource {
 
     /**
      *
+     * Sets the motor state.  Returns 1 for up, 0 for down.
+     * URI: (PUT) http://localhost:8080/teletask/api/motor/{number}/state/{0|1}
+     *
+     * @param number The motor you want to switch.
+     * @param state The state you want to the relay to switch to, either 0 (up) or 1 (down) .
+     * @return JSON response confirming if the switch request was successful.
+     */
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/motor/{number}/state/{state}")
+    public Response motor(@PathParam("number") int number, @PathParam("state") int state) {
+        //TODO: validate the relay to be an integer (common method), if not, return correct HTTP status code
+        //TODO: validate the status to be an integer (common method) and either value 0 or 1, if not, return correct HTTP status code(s)
+        // Use RestEasy built-in validation: http://docs.jboss.org/resteasy/docs/3.0.7.Final/userguide/html/Validation.html
+
+        if (state == 1) {
+            client.switchMotorUp(number);
+        } else {
+            client.switchMotorDown(number);
+        }
+
+        return this.buildResponse(number, state, Function.MTRUPDOWN);
+    }
+
+    /**
+     *
      * Sets the general / local mood state.  Returns 0 for off, 1 for on.
      * URI: (PUT) http://localhost:8080/teletask/api/mood/{type}/{number}/state/{0|1}
      *
-     * @param number The general / local mood you want to switch.
+     * @param type The general / local mood type you want to switch.
+     * @param number The general / local mood number you want to switch.
      * @param state The state you want to the mood to switch to, either 0 (off) or 1 (on) .
      * @return JSON response confirming if the switch request was successful.
      */
@@ -125,6 +202,41 @@ public class ComponentResource {
         }
 
         return this.buildResponse(number, state, function);
+    }
+
+
+    /**
+     *
+     * Gets the general / local mood state.  Returns 0 for off, 1 for on.
+     * URI: (GET) http://localhost:8080/teletask/api/mood/{type}/{number}/state/
+     *
+     * @param type The general / local mood type you want to switch.
+     * @param number The general / local mood number you want to switch.
+     * @return JSON response confirming if the switch request was successful.
+     */
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/mood/{type}/{number}")
+    public Response mood(@PathParam("type") String type, @PathParam("number") int number) {
+        //TODO: validate the type to be a string (common method), if not, return correct HTTP status code
+        // Use RestEasy built-in validation: http://docs.jboss.org/resteasy/docs/3.0.7.Final/userguide/html/Validation.html
+
+        // no need to call, state changes are continuously monitored, and the component always holds the correct state
+        /*if ("general".equals(type)) {
+            client.getGeneralMoodState(number);
+        } else if ("local".equals(type)) {
+            client.getLocalMoodState(number);
+        }*/
+
+        Function function = null;
+        if ("general".equals(type)) {
+            function = Function.GENMOOD;
+        } else if ("local".equals(type)) {
+            function = Function.LOCMOOD;
+        }
+
+        APIResponse response = new APIResponse("success", client.getComponent(function, number));
+        return Response.status(200).entity(response).build();
     }
 
     /**

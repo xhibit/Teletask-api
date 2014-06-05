@@ -36,10 +36,10 @@ http://<host>:<port>/teletask/api
 **Motor**
 
 - URI: GET <base_url>/motor/{number}
-- Description: Gets the motor state.  1 for down, 0 for up.
+- Description: Gets the motor state.  0 for down, 1 for up.
 
 - URI: PUT <base_url>/motor/{number}/state/{0/1}
-- Description: Switches the motor up or down.  Use 0 for up, 1 for down.
+- Description: Switches the motor up or down.  Use 1 for up, 0 for down.
 
 **Local Mood**
 
@@ -55,7 +55,18 @@ http://<host>:<port>/teletask/api
 - Description: Gets the mood state.  Returns 0 for off, 1 for on.
 
 - URI: PUT <base_url>/mood/general/{number}/state/{0/1}
-- Description: Switches the mood on/off.  Use 0 for off, 1 for on. 
+- Description: Switches the mood on/off.  Use 0 for off, 1 for on.
+
+**Condition**
+
+- URI: GET <base_url>/condition/{number}
+- Description: Gets the condition state.  Returns 0 for false, 1 for true.
+
+**Flag**
+
+- URI: GET <base_url>/flag/{number}
+- Description: Gets the flag state.  Returns 0 for false, 1 for true.
+
 
 ### Roadmap:
 
