@@ -42,6 +42,22 @@ public class ComponentResource {
      * Gets the relay state.  Returns 0 for off, 1 for on.
      * URI: (GET) http://localhost:8080/teletask/api/relay/{number}
      *
+     * @return JSON response confirming if the switch request was successful, together with the correct state.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/config")
+    public Response config() {
+        //APIResponse response = new APIResponse("success", );
+        TDSClientConfig config = client.getConfig();
+        return Response.status(200).entity(config).build();
+    }
+
+    /**
+     *
+     * Gets the relay state.  Returns 0 for off, 1 for on.
+     * URI: (GET) http://localhost:8080/teletask/api/relay/{number}
+     *
      * @param number The relay you want to query the state for.
      * @return JSON response confirming if the switch request was successful, together with the correct state.
      */

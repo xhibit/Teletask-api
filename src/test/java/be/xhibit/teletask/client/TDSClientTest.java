@@ -77,7 +77,7 @@ public class TDSClientTest {
 
         /*
 
-            Motor "relais":
+            Motor "relay":
             - 0: Projectiescherm
             - 1: Screens Bureau
             - 2: Screen Groot Raam
@@ -157,19 +157,19 @@ public class TDSClientTest {
 
         Writing message with bytes "[2, 6, 1, 1, 38, -1, 47]", socket connected: true, host=192.168.1.150
         Socket data received - toString: [10, 2, 6, 8, 1, 38, -1, 54]
-        relaisState parsed: 38, -1
+        relayState parsed: 38, -1
 
         Writing message with bytes "[2, 5, 2, 1, 38, 48, 0]", socket connected: true, host=192.168.1.150
         Socket data received - toString: [10, 2, 6, 8, 1, 38, -1, 54]
-        relaisState parsed: 38, -1
+        relayState parsed: 38, -1
 
         Writing message with bytes "[2, 6, 1, 1, 38, 0, 48]", socket connected: true, host=192.168.1.150
         Socket data received - toString: [10, 2, 6, 8, 1, 38, 0, 55]
-        relaisState parsed: 38, 0,
+        relayState parsed: 38, 0,
 
         Writing message with bytes "[2, 5, 2, 1, 38, 48, 0]", socket connected: true, host=192.168.1.150
         Socket data received - toString: [10, 2, 6, 8, 1, 38, 0, 55]
-        relaisState parsed: 38, 0,
+        relayState parsed: 38, 0,
 
         Disconnecting from 192.168.1.150
         Socket connected: true
@@ -181,24 +181,24 @@ public class TDSClientTest {
 
 
 
-21:20:55.222 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching relais on
-21:20:55.729 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 1 of function: RELAIS of component number: 38
-21:20:58.222 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching relais off
-21:20:58.736 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: RELAIS of component number: 38
+21:20:55.222 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching relay on
+21:20:55.729 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 1 of function: relay of component number: 38
+21:20:58.222 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching relay off
+21:20:58.736 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: relay of component number: 38
 21:21:01.224 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching motor down
 21:21:01.740 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: MOTOR of component number: 0
 21:21:04.226 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching motor up
 21:21:04.746 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 1 of function: MOTOR of component number: 0
 21:21:07.226 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching local mood on
-21:21:07.751 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 1 of function: RELAIS of component number: 31
-21:21:07.751 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 1 of function: RELAIS of component number: 38
+21:21:07.751 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 1 of function: relay of component number: 31
+21:21:07.751 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 1 of function: relay of component number: 38
 21:21:07.751 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 1 of function: LOCMOOD of component number: 8
 21:21:10.227 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching local mood off
-21:21:10.757 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: RELAIS of component number: 31
-21:21:10.757 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: RELAIS of component number: 38
+21:21:10.757 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: relay of component number: 31
+21:21:10.757 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: relay of component number: 38
 21:21:10.757 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: LOCMOOD of component number: 8
 21:21:13.229 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching general mood on
-21:21:13.764 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: RELAIS of component number: 32
+21:21:13.764 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: relay of component number: 32
 21:21:13.764 [Thread-3] DEBUG be.xhibit.teletask.client.TDSClient - RECEIVED NEW STATE FROM TDS: 0 of function: LOCMOOD of component number: 17
 21:21:16.229 [main] DEBUG be.xhibit.teletask.client.TDSClientTest - ########## Switching general mood off
 

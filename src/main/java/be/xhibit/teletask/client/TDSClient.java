@@ -18,9 +18,10 @@ import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
- * User: bruno
+ * User: Bruno Braes, http://www.xhibit.be
  * Date: 7/09/12
  * Time: 15:40
+ *
  * <p/>
  * FunctionSet(int Fnc, int Opt, int Number, int State)
  * > example to switch relays: FunctionSet(1, 0, 19, 1) -> switches relays 19 to on (=bureau).
@@ -130,6 +131,7 @@ public class TDSClient {
      * Singleton class.  Private constructor to prevent new instance creations.
      */
     private TDSClient() {
+        logger.debug("##### TDSClient initialization - START");
         //TODO: find better way to load the config
         // Should we load and parse the config to POJO from a URL using JAX-RS?
         // This way the config can be loaded from webroot as a simple resource, or from any location.
@@ -143,7 +145,7 @@ public class TDSClient {
 
             //convert json string to object
             clientConfig = objectMapper.readValue(jsonData, TDSClientConfig.class);
-            logger.debug("TDS HOST: " +clientConfig.getHost() +":" +clientConfig.getPort());
+            logger.debug("Config loaded: TDS HOST: " +clientConfig.getHost() +":" +clientConfig.getPort());
 
             // TODO: define timeout for connection attempt.
             this.createSocket(clientConfig.getHost(), clientConfig.getPort());
@@ -152,6 +154,7 @@ public class TDSClient {
             // retrieve all initial component states
             this.getInitialComponentStates();
 
+            logger.debug("##### TDSClient initialization - END");
         } catch (IOException e) {
             logger.error("Exception while parsing JSON config. " , e);
         }
@@ -170,11 +173,11 @@ public class TDSClient {
         return client;
     }
 
-    public static TDSClientConfig getConfig() {
+    // ################################################ PUBLIC API FUNCTIONS
+
+    public TDSClientConfig getConfig() {
         return clientConfig;
     }
-
-    // ################################################ PUBLIC API FUNCTIONS
 
     public int switchRelayOn(int number) {
         byte[] messageBytes = this.composeSetMessage(Function.RELAY.getCode(), number, 255);
@@ -399,12 +402,12 @@ public class TDSClient {
                 // 7th bit: unsure, no use?
 
                 String[] responseArray = response.split("2, 6, 8, ");
-                if (responseArray.length > 0) {
+                if (0 < responseArray.length) {
                     for (String element : responseArray) {
                         if (element != null && !"".equals(element) && element.contains(",")) {
                             //logger.debug("\t - relays element part: " +element);
                             String[] relaysArray = element.split(", ");
-                            if (relaysArray != null && relaysArray.length >= 3) {
+                            if (3 <= relaysArray.length) {
                                 Integer functionCode = Integer.valueOf(relaysArray[0]);
                                 Integer number = Integer.valueOf(relaysArray[1]);
                                 Integer state = Integer.valueOf(relaysArray[2]);
@@ -510,8 +513,8 @@ public class TDSClient {
 
         // ChkSm: Command Number + Command Parameters + Length + STX
         int checkSumByte = 0;
-        for (int i=0 ; i<commandBytes.length ; i++) {
-            checkSumByte += commandBytes[i];
+        for (int commandByte : commandBytes) {
+            checkSumByte += commandByte;
             //logger.debug("checkSum item count=" +i +", value:" +commandBytes[i]);
         }
         //logger.debug("checkSum val=" +checkSumByte);
@@ -536,8 +539,8 @@ public class TDSClient {
 
         // ChkSm: Command Number + Command Parameters + Length + STX
         int checkSumByte = 0;
-        for (int i=0 ; i<commandBytes.length ; i++) {
-            checkSumByte += commandBytes[i];
+        for (int commandByte : commandBytes) {
+            checkSumByte += commandByte;
             //logger.debug("checkSum item count=" +i +", value:" +commandBytes[i]);
         }
         //logger.debug("checkSum val=" +checkSumByte);
@@ -562,8 +565,8 @@ public class TDSClient {
 
         // ChkSm: Command Number + Command Parameters + Length + STX
         int checkSumByte = 0;
-        for (int i=0 ; i<commandBytes.length ; i++) {
-            checkSumByte += commandBytes[i];
+        for (int commandByte : commandBytes) {
+            checkSumByte += commandByte;
             //logger.debug("checkSum item count=" +i +", value:" +commandBytes[i]);
         }
         //logger.debug("checkSum val=" +checkSumByte);
@@ -579,7 +582,7 @@ public class TDSClient {
      */
     public TDSClient clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
-        // that'll teach 'em ;)
+        // that 'll teach 'em ;)
     }
 
 
