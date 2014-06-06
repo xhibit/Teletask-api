@@ -1,0 +1,47 @@
+/* fonts created by http://icomoon.io/#toHome */
+
+@font-face {
+	font-family: 'icomoon';
+	src:url('fonts/icomoon.eot');
+	src:url('fonts/icomoon.eot?#iefix') format('embedded-opentype'),
+		url('fonts/icomoon.svg#icomoon') format('svg'),
+		url('fonts/icomoon.woff') format('woff'),
+		url('fonts/icomoon.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+/* Use the following CSS code if you want to have a class per icon */
+[class^="icon-"]:after, [class*=" icon-"]:after {
+	font-family: 'icomoon';
+	font-style: normal;
+	speak: none;
+	font-weight: normal;
+	font-size: 24px;
+	-webkit-font-smoothing: antialiased;
+}
+.icon-equalizer:after {
+	content: "\21";
+}
+.icon-switch:after {
+	content: "\22";
+}
+.icon-equalizer-2:after {
+	content: "\25";
+}
+.icon-sun-fill:after {
+	content: "\24";
+}
+.icon-moon-fill:after {
+	content: "\26";
+}
+
+/* Custom indentations are needed because the length of custom labels differs from
+   the length of the standard labels */
+.custom-label-flipswitch.ui-flipswitch .ui-btn.ui-flipswitch-on {
+    text-indent: -3.4em;
+}
+.custom-label-flipswitch.ui-flipswitch .ui-flipswitch-off {
+    text-indent: 0.5em;
+}
+
