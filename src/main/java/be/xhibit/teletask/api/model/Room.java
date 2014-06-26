@@ -12,7 +12,8 @@ public class Room {
     private int id;
     private int level;
     private String name;
-    private HashMap<Function, List<Integer>> components;
+    private HashMap<Function, List<TDSComponent>> components;
+    private HashMap<Function, List<Integer>> componentTypes;
 
     public int getId() {
         return id;
@@ -38,11 +39,22 @@ public class Room {
         this.name = name;
     }
 
-    public HashMap<Function, List<Integer>> getComponents() {
+    public HashMap<Function, List<TDSComponent>> getComponents() {
+        if (components == null) {
+            components = new HashMap<Function, List<TDSComponent>>();
+        }
         return components;
     }
 
-    public void setComponents(HashMap<Function, List<Integer>> components) {
+    public void setComponents(HashMap<Function, List<TDSComponent>> components) {
         this.components = components;
+    }
+
+    public HashMap<Function, List<Integer>> getComponentTypes() {
+        return componentTypes;
+    }
+
+    public void setComponentTypes(HashMap<Function, List<Integer>> componentTypes) {
+        this.componentTypes = componentTypes;
     }
 }

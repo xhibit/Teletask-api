@@ -1,6 +1,7 @@
 package be.xhibit.teletask.client;
 
 import be.xhibit.teletask.api.enums.Function;
+import be.xhibit.teletask.api.model.Room;
 import be.xhibit.teletask.api.model.TDSClientConfig;
 import be.xhibit.teletask.api.model.TDSComponent;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -145,14 +146,19 @@ public class TDSClient {
 
             //convert json string to object
             clientConfig = objectMapper.readValue(jsonData, TDSClientConfig.class);
-            logger.debug("Config loaded: TDS HOST: " +clientConfig.getHost() +":" +clientConfig.getPort());
+            logger.debug("Config loaded: TDS HOST: " +clientConfig.getHost() +":" +clientConfig.getPort() +" - TESTMODE: " +clientConfig.isTestMode());
 
-            // TODO: define timeout for connection attempt.
-            this.createSocket(clientConfig.getHost(), clientConfig.getPort());
-            //this.createSocket("192.168.1.150", 4660);
+            // until a better Jackson ObjectMapper implementation, loop through all rooms and replace component number by actual object reference
+            clientConfig.initRooms();
 
-            // retrieve all initial component states
-            this.getInitialComponentStates();
+            // don't connect to the TDS server if testMode is enabled in the JSON config; his enables us to test the UI.
+            if (!clientConfig.isTestMode()) {
+                // TODO: define timeout for connection attempt.
+                this.createSocket(clientConfig.getHost(), clientConfig.getPort());
+
+                // retrieve all initial component states
+                this.getInitialComponentStates();
+            }
 
             logger.debug("##### TDSClient initialization - END");
         } catch (IOException e) {
@@ -418,10 +424,15 @@ public class TDSClient {
                                 // get the component reference
                                 Function function = Function.valueOf(functionCode);
                                 TDSComponent component = clientConfig.getComponent(function, number);
-                                // update the component state
-                                component.setState(state);
 
-                                logger.debug("RECEIVED NEW STATE FROM TDS: " + state + " of function: " + function.name() + " of component number: " + number);
+                                if (component != null) {
+                                    // update the component state
+                                    component.setState(state);
+                                    logger.debug("RECEIVED NEW STATE FROM TDS: " + state + " of function: " + function.name() + " of component number: " + number);
+                                } else {
+                                    logger.warn("RECEIVED NEW STATE FROM TDS for component which doesnt exist in tds-config.json.  Likely not listed there because you don't want it to show in the UI.");
+                                    logger.debug("RECEIVED NEW STATE FROM TDS: " + state + " of function: " + functionCode + " of component number: " + number);
+                                }
                             }
                         }
                     }

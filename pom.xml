@@ -15,7 +15,9 @@
         <log4j.version>2.0-rc1</log4j.version>
         <resteasy.version>3.0.7.Final</resteasy.version>
         <junit.version>4.11</junit.version>
-        <servlet.version>2.5</servlet.version>
+        <servlet.version>3.0.1</servlet.version>
+        <javax.el.version>2.2</javax.el.version>
+        <jstl.version>1.2</jstl.version>
     </properties>
 
     <repositories>
@@ -69,8 +71,19 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
             <version>${servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>jstl</artifactId>
+            <version>${jstl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>el-api</artifactId>
+            <version>${javax.el.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -50,7 +50,7 @@ public class ComponentResource {
     public Response config() {
         //APIResponse response = new APIResponse("success", );
         TDSClientConfig config = client.getConfig();
-        return Response.status(200).entity(config).build();
+        return Response.status(200).entity(config).header("Access-Control-Allow-Origin", "*").build();
     }
 
     /**
@@ -123,7 +123,7 @@ public class ComponentResource {
 
         // component always holds the correct state, so no need to call client.getRelayState(number)
         APIResponse response = new APIResponse("success", client.getComponent(function, number));
-        return Response.status(200).entity(response).build();
+        return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
     }
 
     /**
@@ -265,7 +265,7 @@ public class ComponentResource {
     private Response buildResponse(int number, int state, Function function) {
         TDSComponent component = new TDSComponent(function, state, number);
         APIResponse apiResponse = new APIResponse("success", component);
-        return Response.status(200).entity(apiResponse).build();
+        return Response.status(200).entity(apiResponse).header("Access-Control-Allow-Origin", "*").build();
     }
 
     /**
