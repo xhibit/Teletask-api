@@ -40,7 +40,7 @@ Bought me a RS232 &gt; LAN converter (TDS10118) so I could access my MICROS serv
 <p>Started discussing the possibilities on the Teletask forum: <a href="http://www.teletask.be/forum/default.aspx?g=posts&amp;t=195">http://www.teletask.be/forum/default.aspx?g=posts&amp;t=195</a>
 ...and ended up programming a java interface based on IP Sockets, exposed by a basic JSON REST service.</p>
 
-<p>Initially only setting and getting RELAYS, MTRUPDOWN, GENMOOD, LOCMOOD is supported.</p>
+<p>Initially only setting and getting RELAYS, MTRUPDOWN, GENMOOD, LOCMOOD, COND, FLAG is supported.</p>
 
 <h3>
 <a name="how-this-api-works" class="anchor" href="#how-this-api-works"><span class="octicon octicon-link"></span></a>How this API works:</h3>
@@ -50,9 +50,18 @@ Bought me a RS232 &gt; LAN converter (TDS10118) so I could access my MICROS serv
 <li>Once configured correctly, build the war file using maven.</li>
 <li>Deploy to a java app server on a device on your local network, so it has access to your MICROS server.  I used a low power <a href="http://www.raspberrypi.org">Raspberry PI</a>
 </li>
-</ul><p><strong>UPDATE</strong>: Added an HTML 5 GUI for access on a mobile device (looked into Twitter Bootstrap, Sencha Touch, ...).  Fastest implementation is jQuery Mobile.  Added a basic interface.  Will be improved in the future, but for now I have a dynamical UI which suits it's purpose...</p>
+</ul><p><strong>UPDATE</strong>: Added a basic HTML 5 GUI for access on a mobile device.  Fastest implementation proved to be jQuery Mobile.   Will be improved in the future, but for now I have a dynamical UI which suits it's purpose...</p>
 
-<h3>
+<h4>
+<a name="libraries--technologies" class="anchor" href="#libraries--technologies"><span class="octicon octicon-link"></span></a>Libraries / Technologies</h4>
+
+<ul>
+<li>Maven 3</li>
+<li>JBoss RESTEasy</li>
+<li>Jackson JSON processor</li>
+<li>jQuery Mobile</li>
+<li>...</li>
+</ul><h3>
 <a name="rest-api" class="anchor" href="#rest-api"><span class="octicon octicon-link"></span></a>REST API</h3>
 
 <p>Base URL API
@@ -61,35 +70,67 @@ http://:/teletask/api</p>
 <p><strong>Relay</strong></p>
 
 <ul>
-<li>URI: GET /relay/{number}</li>
-<li><p>Description: Gets the relay state.  Returns 0 for off, 1 for on.</p></li>
-<li><p>URI: PUT /relay/{number}/state/{0/1}</p></li>
+<li>URI: GET /relay/{number}
+
+<ul>
+<li>Description: Gets the relay state.  Returns 0 for off, 1 for on.</li>
+</ul>
+</li>
+<li>URI: PUT /relay/{number}/state/{0/1}
+
+<ul>
 <li>Description: Switches the relay on/off.  Use 0 for off, 1 for on. </li>
+</ul>
+</li>
 </ul><p><strong>Motor</strong></p>
 
 <ul>
-<li>URI: GET /motor/{number}</li>
-<li><p>Description: Gets the motor state.  1 for down, 0 for up.</p></li>
-<li><p>URI: PUT /motor/{number}/state/{0/1}</p></li>
+<li>URI: GET /motor/{number}
+
+<ul>
+<li>Description: Gets the motor state.  1 for down, 0 for up.</li>
+</ul>
+</li>
+<li>URI: PUT /motor/{number}/state/{0/1}
+
+<ul>
 <li>Description: Switches the motor up or down.  Use 0 for up, 1 for down.</li>
+</ul>
+</li>
 </ul><p><strong>Local Mood</strong></p>
 
 <ul>
-<li>URI: GET /mood/local/{number}</li>
-<li><p>Description: Gets the mood state.  Returns 0 for off, 1 for on.</p></li>
-<li><p>URI: PUT /mood/local/{number}/state/{0/1}</p></li>
+<li>URI: GET /mood/local/{number}
+
+<ul>
+<li>Description: Gets the mood state.  Returns 0 for off, 1 for on.</li>
+</ul>
+</li>
+<li>URI: PUT /mood/local/{number}/state/{0/1}
+
+<ul>
 <li>Description: Switches the mood on/off.  Use 0 for off, 1 for on. </li>
+</ul>
+</li>
 </ul><p><strong>General Mood</strong></p>
 
 <ul>
-<li>URI: GET /mood/general/{number}</li>
-<li><p>Description: Gets the mood state.  Returns 0 for off, 1 for on.</p></li>
-<li><p>URI: PUT /mood/general/{number}/state/{0/1}</p></li>
+<li>URI: GET /mood/general/{number}
+
+<ul>
+<li>Description: Gets the mood state.  Returns 0 for off, 1 for on.</li>
+</ul>
+</li>
+<li>URI: PUT /mood/general/{number}/state/{0/1}
+
+<ul>
 <li>Description: Switches the mood on/off.  Use 0 for off, 1 for on. </li>
+</ul>
+</li>
 </ul><h3>
 <a name="roadmap" class="anchor" href="#roadmap"><span class="octicon octicon-link"></span></a>Roadmap:</h3>
 
-<p>Current status: fully working REST API.</p>
+<p>Current status: fully working REST API &amp; UI.</p>
 
 <p>Future release:</p>
 
@@ -97,6 +138,7 @@ http://:/teletask/api</p>
 <li>Support all micros features (dimming, check flags, conditions...)</li>
 <li>Add iBeacon support: this way I can use presence detection and switch relays depending on being close to a beacon.</li>
 <li>Add support for an <a href="http://www.globalcache.com/products/itachflex/">iTach Flex</a> device so I can control additional devices through IR (airco units, projector, tv, ....</li>
+<li>A more advanced HTML 5 GUI for access on a mobile device (possibly using Twitter Bootstrap, Sencha Touch, ...).</li>
 </ul>
       </section>
     </div>
