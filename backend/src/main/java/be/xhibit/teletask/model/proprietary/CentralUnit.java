@@ -1,5 +1,6 @@
 package be.xhibit.teletask.model.proprietary;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;

@@ -10,7 +10,7 @@ public class RoomLineHandler extends LineHandlerSupport {
     private static final DecimalFormat ID_FORMATTER = new DecimalFormat("00");
 
     private static final RoomLineHandler INSTANCE = new RoomLineHandler();
-    public static final Pattern START_PATTERN = Pattern.compile("\\s*ROOMS");
+    private static final Pattern START_PATTERN = Pattern.compile("\\s*ROOMS");
 
     private RoomLineHandler() {
     }

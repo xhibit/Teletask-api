@@ -9,7 +9,7 @@ public class OutputInterfaceLineHandler extends InterfaceLineHandlerSupport {
     private static final Pattern INTERFACE_PATTERN = Pattern.compile("(\\d)\\s*(\\w)([^\\s]*)\\s([^\\s]*)\\s*(.*)");
 
     private static final OutputInterfaceLineHandler INSTANCE = new OutputInterfaceLineHandler();
-    public static final Pattern START_PATTERN = Pattern.compile("\\s*O\\s\\-\\sINTERFACES");
+    private static final Pattern START_PATTERN = Pattern.compile("\\s*O\\s\\-\\sINTERFACES");
 
     private OutputInterfaceLineHandler() {
     }

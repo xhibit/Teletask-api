@@ -10,7 +10,7 @@ public class InputInterfaceLineHandler extends InterfaceLineHandlerSupport {
 
     private static final InputInterfaceLineHandler INSTANCE = new InputInterfaceLineHandler();
 
-    public static final Pattern START_PATTERN = Pattern.compile("\\s*I\\s\\-\\sINTERFACES");
+    private static final Pattern START_PATTERN = Pattern.compile("\\s*I\\s\\-\\sINTERFACES");
 
     private InputInterfaceLineHandler() {
     }

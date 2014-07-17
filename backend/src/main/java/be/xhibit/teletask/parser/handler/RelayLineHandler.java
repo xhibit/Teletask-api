@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public class RelayLineHandler extends LineHandlerSupport {
     private static final RelayLineHandler INSTANCE = new RelayLineHandler();
 
-    public static final Pattern START_PATTERN = Pattern.compile("\\s*RELAYS");
+    private static final Pattern START_PATTERN = Pattern.compile("\\s*RELAYS");
 
     private static final Pattern RELAY_PATTERN = Pattern.compile("(\\d*)\\s*([^�]*)�\\s*([^�]*)�\\s*(.*)\\s{2}");
 

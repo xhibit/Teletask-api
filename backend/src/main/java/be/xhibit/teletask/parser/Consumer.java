@@ -1,5 +1,7 @@
 package be.xhibit.teletask.parser;
 
+import be.xhibit.teletask.model.proprietary.Action;
+
 public interface Consumer {
     void visitPrincipalSite(String value);
 
@@ -22,4 +24,6 @@ public interface Consumer {
     void visitInputInterface(String autobusId, String autobusType, String autobusNumber, String name);
 
     void visitRelay(String id, String roomName, String type, String description);
+
+    void visitInput(String autobusId, String autobusType, String autobusNumber, String id, String name, String shortActionType, String shortActionId, String longActionType, String longActionId);
 }

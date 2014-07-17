@@ -1,15 +1,17 @@
 package be.xhibit.teletask.parser;
 
+import be.xhibit.teletask.model.proprietary.Action;
 import be.xhibit.teletask.model.proprietary.CentralUnit;
+import be.xhibit.teletask.model.proprietary.Input;
 import be.xhibit.teletask.model.proprietary.InputInterface;
 import be.xhibit.teletask.model.proprietary.OutputInterface;
 import be.xhibit.teletask.model.proprietary.Relay;
 import be.xhibit.teletask.model.proprietary.Room;
 
-public class ProprietaryModelConsumerImpl implements Consumer {
+public class FullProprietaryModelConsumerImpl implements Consumer {
     private final CentralUnit centralUnit;
 
-    public ProprietaryModelConsumerImpl() {
+    public FullProprietaryModelConsumerImpl() {
         this.centralUnit = new CentralUnit();
     }
 
@@ -66,7 +68,28 @@ public class ProprietaryModelConsumerImpl implements Consumer {
     @Override
     public void visitRelay(String id, String roomName, String type, String description) {
         Room room = this.getCentralUnit().findRoom(roomName);
-        this.getCentralUnit().getRelays().add(new Relay(id, room, type, description));
+        Relay relay = new Relay(id, room, type, description);
+        room.getRelays().add(relay);
+        this.getCentralUnit().getRelays().add(relay);
+    }
+
+    @Override
+    public void visitInput(String autobusId, String autobusType, String autobusNumber, String id, String name, String shortActionType, String shortActionId, String longActionType, String longActionId) {
+        InputInterface inputInterface = this.getCentralUnit().findInputInterface(autobusId, autobusType, autobusNumber);
+
+        inputInterface.getInputs().add(new Input(id, name, this.getAction(shortActionType, shortActionId), this.getAction(longActionType, longActionId)));
+    }
+
+    private Action getAction(String actionType, String actionId) {
+        Action action = null;
+        if (actionType != null) {
+            switch (actionType) {
+                case "REL":
+                    action = this.getCentralUnit().findRelay(actionId);
+                    break;
+            }
+        }
+        return action;
     }
 
     public CentralUnit getCentralUnit() {

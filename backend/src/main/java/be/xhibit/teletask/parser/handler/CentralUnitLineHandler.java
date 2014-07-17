@@ -14,7 +14,7 @@ public class CentralUnitLineHandler extends LineHandlerSupport {
 
     private static final Pattern PROPERTY_PATTERN = Pattern.compile("([^:]*):\\s(.*)");
 
-    public static final Pattern START_PATTERN = Pattern.compile("\\s*CENTRAL\\sUNITS");
+    private static final Pattern START_PATTERN = Pattern.compile("\\s*CENTRAL\\sUNITS");
 
     private CentralUnitLineHandler() {
     }

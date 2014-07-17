@@ -1,6 +1,8 @@
 package be.xhibit.teletask.model.proprietary;
 
-public class Relay {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class Relay implements Action {
     private final String id;
     private final Room room;
     private final String type;
@@ -17,6 +19,7 @@ public class Relay {
         return this.id;
     }
 
+    @JsonIgnore
     public Room getRoom() {
         return this.room;
     }
@@ -27,5 +30,19 @@ public class Relay {
 
     public String getDescription() {
         return this.description;
+    }
+
+    @Override
+    public String getActionType() {
+        return "REL";
+    }
+
+    public String getRoomId() {
+        return this.getRoom().getId();
+    }
+
+    @Override
+    public void execute() {
+
     }
 }
