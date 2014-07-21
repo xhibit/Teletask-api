@@ -1,9 +1,9 @@
 <%@ page import="be.xhibit.teletask.client.TDSClient" %>
-<%@ page import="be.xhibit.teletask.api.model.TDSClientConfig" %>
-<%@ page import="be.xhibit.teletask.api.enums.Function" %>
-<%@ page import="be.xhibit.teletask.api.model.TDSComponent" %>
+<%@ page import="be.xhibit.teletask.config.model.json.TDSClientConfig" %>
+<%@ page import="be.xhibit.teletask.model.spec.function.Function" %>
+<%@ page import="be.xhibit.teletask.config.model.json.TDSComponent" %>
 <%@ page import="java.util.List" %>
-<%@ page import="be.xhibit.teletask.api.model.Room" %>
+<%@ page import="be.xhibit.teletask.config.model.json.Room" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%--

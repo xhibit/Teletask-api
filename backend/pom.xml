@@ -12,42 +12,14 @@
 
     <artifactId>teletask-api-backend</artifactId>
 
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>Teletask API - Backend</name>
     <description>The backend code for working with teletask central unit</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-jcl</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>config-spec</module>
+        <module>config-json</module>
+        <!--<module>config-nbt-export</module>-->
+        <module>client</module>
+    </modules>
 </project>

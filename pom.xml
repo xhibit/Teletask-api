@@ -43,6 +43,26 @@
             </dependency>
             <dependency>
                 <groupId>be.xhibit</groupId>
+                <artifactId>teletask-api-config-spec</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>be.xhibit</groupId>
+                <artifactId>teletask-api-config-json</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>be.xhibit</groupId>
+                <artifactId>teletask-api-config-nbt-export</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>be.xhibit</groupId>
+                <artifactId>teletask-api-config-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>be.xhibit</groupId>
                 <artifactId>teletask-api-rest</artifactId>
                 <version>${project.version}</version>
             </dependency>
