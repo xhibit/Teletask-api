@@ -1,10 +1,13 @@
 package be.xhibit.teletask.client;
 
+import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.client.message.GetMessage;
 import be.xhibit.teletask.client.message.LogMessage;
+import be.xhibit.teletask.client.message.SendResult;
 import be.xhibit.teletask.client.message.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfig;
-import be.xhibit.teletask.model.spec.function.Function;
+import be.xhibit.teletask.model.spec.State;
+import be.xhibit.teletask.model.spec.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,15 +15,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -121,13 +121,19 @@ import java.util.TimerTask;
  * - You can send a keep alive to make sure that the central unit don't close the port because there is no activity
  */
 public final class TDSClient {
-
     static final Logger LOG = LogManager.getLogger(TDSClient.class.getName());
 
+    private static final Pattern SPLIT_PATTERN_RESPONSE_ARRAY = Pattern.compile("2, 6, 8, ");
+    private static final Pattern SPLIT_PATTERN_RELAYS = Pattern.compile(", ");
+
     private Socket socket;
+
     private DataOutputStream out;
     private DataInputStream in;
+
     private ClientConfig clientConfig;
+
+    private final Map<String, State> states = new HashMap<>();
 
     private boolean readTDSEvents = false;
 
@@ -160,69 +166,27 @@ public final class TDSClient {
         return client;
     }
 
-    private void configure(ClientConfig clientConfig) {
-        this.clientConfig = clientConfig;
-    }
 // ################################################ PUBLIC API FUNCTIONS
 
-    public ClientConfig getConfig() {
-        return this.clientConfig;
+    public SendResult set(Component component, State state) {
+        Function function = component.getFunction();
+        int number = component.getNumber();
+
+        return this.set(function, number, state);
     }
 
-    public int switchRelayOn(int number) {
-        return new SetMessage(Function.RELAY, number, State.ON).send(this.out);
+    public SendResult set(Function function, int number, State state) {
+        SendResult result = new SetMessage(function, number, state).send(this.out);
+
+        if (result == SendResult.SUCCESS) {
+            this.setState(function, number, state);
+        }
+
+        return result;
     }
 
-    public int switchRelayOff(int number) {
-        return new SetMessage(Function.RELAY, number, State.OFF).send(this.out);
-    }
-
-    public int getRelayState(int number) {
-        return this.clientConfig.getComponent(Function.RELAY, number).getState();
-    }
-
-    public int switchLocalMoodOn(int number) {
-        return new SetMessage(Function.LOCMOOD, number, State.ON).send(this.out);
-    }
-
-    public int switchLocalMoodOff(int number) {
-        return new SetMessage(Function.LOCMOOD, number, State.OFF).send(this.out);
-    }
-
-    public int getLocalMoodState(int number) {
-        return this.clientConfig.getComponent(Function.LOCMOOD, number).getState();
-    }
-
-    public int switchGeneralMoodOn(int number) {
-        return new SetMessage(Function.GENMOOD, number, State.ON).send(this.out);
-    }
-
-    public int switchGeneralMoodOff(int number) {
-        return new SetMessage(Function.GENMOOD, number, State.OFF).send(this.out);
-    }
-
-    public int getGeneralMoodState(int number) {
-        return this.clientConfig.getComponent(Function.GENMOOD, number).getState();
-    }
-
-    public int switchMotorUp(int number) {
-        return new SetMessage(Function.MTRUPDOWN, number, State.UP).send(this.out);
-    }
-
-    public int switchMotorDown(int number) {
-        return new SetMessage(Function.MTRUPDOWN, number, State.DOWN).send(this.out);
-    }
-
-    public int getMotorState(int number) {
-        return this.clientConfig.getComponent(Function.MTRUPDOWN, number).getState();
-    }
-
-    public int getComponentState(Function function, int number) {
-        return this.clientConfig.getComponent(function, number).getState();
-    }
-
-    public TDSComponent getComponent(Function function, int number) {
-        return this.clientConfig.getComponent(function, number);
+    public State get(Component component) {
+        return this.getState(component.getFunction(), component.getNumber());
     }
 
     public void close() {
@@ -243,6 +207,44 @@ public final class TDSClient {
         LOG.debug("Disconnected successfully");
     }
 
+    public ClientConfig getConfig() {
+        return this.clientConfig;
+    }
+
+    // ################################################ PRIVATE API FUNCTIONS
+
+    private void configure(ClientConfig clientConfig) {
+        this.clientConfig = clientConfig;
+    }
+
+    private State getState(Function function, int number) {
+        State state = this.states.get(this.getStateIndex(function, number));
+        if (state == null) {
+            this.getStateFromCentralUnit(function, number);
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                LOG.error("Exception ({}) caught in getState: {}", e.getClass().getName(), e.getMessage(), e);
+            }
+
+            state = this.getState(function, number);
+        }
+        return state;
+    }
+
+    private void setState(Function function, int number, State state) {
+        this.states.put(this.getStateIndex(function, number), state);
+    }
+
+    private void getStateFromCentralUnit(Function function, int number) {
+        new GetMessage(function, number).send(this.out);
+    }
+
+    private String getStateIndex(Function function, int number) {
+        return function + ":" + number;
+    }
+
     private void sendLogEventMessages(State state) {
         this.sendLogEventMessage(Function.RELAY, state);
         this.sendLogEventMessage(Function.LOCMOOD, state);
@@ -250,38 +252,12 @@ public final class TDSClient {
         this.sendLogEventMessage(Function.MTRUPDOWN, state);
     }
 
-    /**
-     * Retrieve all initial component states by sending GET requests.  These values will return as an EVENT and be captured.
-     */
-    private void getInitialComponentStates() {
-
-        Map<Function, List<TDSComponent>> componentsTypes = this.clientConfig.getComponentsTypes();
-        Set<Function> functions = componentsTypes.keySet();
-        for (Function function : functions) {
-            List<TDSComponent> components = componentsTypes.get(function);
-            for (TDSComponent component : components) {
-                int number = component.getNumber();
-                this.sendBytes(this.composeGetMessage(function.getCode(), number));
-
-                //Pause before making new call
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
-
-    // ################################################ PRIVATE API FUNCTIONS
-
     private void createSocket(String host, int port) {
 
         // delay to wait for the first execution, should occur immediately at startup
-        final int TIMER_DELAY = 0;
+        int timerDelay = 0;
         // time in milliseconds to wait between every execution: every 30 minutes
-        final int TIMER_PERIOD = 30 * 60 * 1000;
+        int timerPeriod = 30 * 60 * 1000;
 
         // Connect method
         LOG.debug("Connecting to " + host + ":" + port);
@@ -290,14 +266,8 @@ public final class TDSClient {
             this.socket = new Socket(host, port);
             this.socket.setKeepAlive(true);
             this.socket.setSoTimeout(5000);
-        } catch (UnknownHostException e) {
-            LOG.error("Don't know about host: " + host);
-            System.exit(1);
-        } catch (SocketException e) {
-            LOG.error("Error connecting to host: " + host);
-            System.exit(1);
         } catch (IOException e) {
-            LOG.error("Error connecting to host: " + host);
+            LOG.error("Problem connecting to host: " + host, e);
             System.exit(1);
         }
 
@@ -319,21 +289,20 @@ public final class TDSClient {
                 // open event channel for reporting back state changes
                 TDSClient.this.sendLogEventMessages(State.EVENT);
             }
-        }, TIMER_DELAY, TIMER_PERIOD);
+        }, timerDelay, timerPeriod);
 
         // read the TDS output for log messages every XXX milliseconds
         final int readInterval = 500;
         try {
-
             new Thread() {
+                @Override
                 public void run() {
                     synchronized (TDSClient.this.socket) {
                         try {
                             //LOG.debug("readTDSEvents: " +readTDSEvents);
 
-                            //while (readTDSEvents) {
-                            while (true) {
-                                readLogResponse(TDSClient.this.in);
+                            while (TDSClient.this.readTDSEvents) {
+                                readLogResponse(TDSClient.this);
                                 Thread.sleep(readInterval); //pause for a defined period of time
                             }
                         } catch (Exception ex) {
@@ -352,10 +321,11 @@ public final class TDSClient {
         new LogMessage(function, state).send(this.out);
     }
 
-    private static void readLogResponse(DataInputStream in) throws Exception {
+    private static void readLogResponse(TDSClient client) throws Exception {
+        DataInputStream in = client.in;
         try {
             byte[] data = new byte[in.available()];
-            //not sure to read what length, because sometimes an acknowledge byte is send back (actually after every GET or SET command)
+            //not sure to read what length, because sometimes an acknowledge byte is sent back (actually after every GET or SET command)
             //therefore rule below no good, better to parse for fixed value "2,6,8" as a response for a RELAYS state switch: 2 following items are always relays + state.
             //byte [] data = new byte[7];
 
@@ -372,13 +342,13 @@ public final class TDSClient {
                 // 6th bit is state (0-255 for dimmer) and 0 (off) or -1 (on) for relay etc
                 // 7th bit: unsure, no use?
 
-                String[] responseArray = response.split("2, 6, 8, ");
-                if (0 < responseArray.length) {
+                String[] responseArray = SPLIT_PATTERN_RESPONSE_ARRAY.split(response);
+                if (responseArray.length > 0) {
                     for (String element : responseArray) {
                         if (element != null && !"".equals(element) && element.contains(",")) {
                             //LOG.debug("\t - relays element part: " +element);
-                            String[] relaysArray = element.split(", ");
-                            if (3 <= relaysArray.length) {
+                            String[] relaysArray = SPLIT_PATTERN_RELAYS.split(element);
+                            if (relaysArray.length >= 3) {
                                 Integer functionCode = Integer.valueOf(relaysArray[0]);
                                 Integer number = Integer.valueOf(relaysArray[1]);
                                 Integer state = Integer.valueOf(relaysArray[2]);
@@ -386,18 +356,9 @@ public final class TDSClient {
                                     state = 1; // -1 means ON, better to use 1.
                                 }
 
-                                // get the component reference
+                                // update the component state
                                 Function function = Function.valueOf(functionCode);
-                                TDSComponent component = this.clientConfig.getComponent(function, number);
-
-                                if (component != null) {
-                                    // update the component state
-                                    component.setState(state);
-                                    LOG.debug("RECEIVED NEW STATE FROM TDS: " + state + " of function: " + function.name() + " of component number: " + number);
-                                } else {
-                                    LOG.warn("RECEIVED NEW STATE FROM TDS for component which doesnt exist in tds-config.json.  Likely not listed there because you don't want it to show in the UI.");
-                                    LOG.debug("RECEIVED NEW STATE FROM TDS: " + state + " of function: " + functionCode + " of component number: " + number);
-                                }
+                                client.setState(function, number, function.getState(state));
                             }
                         }
                     }
@@ -440,8 +401,8 @@ public final class TDSClient {
      * @return Nothing really, because this will always result in an Exception.
      * @throws CloneNotSupportedException when called.
      */
-    public TDSClient clone() throws CloneNotSupportedException {
+    @Override
+    public final TDSClient clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
-        // that 'll teach 'em ;)
     }
 }

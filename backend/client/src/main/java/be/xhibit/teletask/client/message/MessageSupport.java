@@ -1,6 +1,6 @@
 package be.xhibit.teletask.client.message;
 
-import be.xhibit.teletask.model.spec.function.Function;
+import be.xhibit.teletask.model.spec.Function;
 import com.google.common.primitives.Bytes;
 
 import java.io.IOException;
@@ -33,18 +33,18 @@ public abstract class MessageSupport {
         return messageBytes;
     }
 
-    public int send(OutputStream outputStream) {
+    public SendResult send(OutputStream outputStream) {
         byte[] myByteArray = this.compose();
 
-        int result;
+        SendResult result;
         try {
             //Send data over socket
             outputStream.write(myByteArray);
             outputStream.flush();
 
-            result = 1;
+            result = SendResult.SUCCESS;
         } catch (IOException e){
-            result = 0;
+            result = SendResult.FAILED;
         }
 
         return result;

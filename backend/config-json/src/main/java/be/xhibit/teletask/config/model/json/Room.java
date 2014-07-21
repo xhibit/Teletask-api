@@ -1,6 +1,6 @@
 package be.xhibit.teletask.config.model.json;
 
-import be.xhibit.teletask.model.spec.function.Function;
+import be.xhibit.teletask.model.spec.Function;
 
 import java.util.HashMap;
 import java.util.List;

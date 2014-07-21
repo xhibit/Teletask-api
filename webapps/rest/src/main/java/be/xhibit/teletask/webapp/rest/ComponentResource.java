@@ -1,14 +1,18 @@
 package be.xhibit.teletask.webapp.rest;
 
-import be.xhibit.teletask.api.model.APIResponse;
-import be.xhibit.teletask.api.model.TDSComponent;
-import be.xhibit.teletask.api.enums.Function;
-import be.xhibit.teletask.api.model.TDSClientConfig;
 import be.xhibit.teletask.client.TDSClient;
+import be.xhibit.teletask.config.model.json.TDSClientConfig;
+import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -17,21 +21,21 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 public class ComponentResource {
-
-    static final Logger logger = LogManager.getLogger(ComponentResource.class.getName());
+    static final Logger LOG = LogManager.getLogger(ComponentResource.class.getName());
 
     /**
      * The TDSClient object, which makes the IP socket connection to the TDS hardware.
      * The ComponentResource is loaded a a singleton.  This way we know only one instance of the TDSClient is created, and only one client is accessing
      * the TDS domotics central unit.
      */
-    private TDSClient client;
+    private final TDSClient client;
 
     /**
      * Default constructor.
      */
     public ComponentResource() {
-        client = TDSClient.getInstance();
+        TDSClientConfig tdsConfig = TDSClientConfig.read(TDSClientConfig.class.getClassLoader().getResourceAsStream("tds-config.json"));
+        this.client = TDSClient.getInstance(tdsConfig);
     }
 
     /**
@@ -45,8 +49,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/config")
     public Response config() {
-        //APIResponse response = new APIResponse("success", );
-        TDSClientConfig config = client.getConfig();
+        ClientConfig config = this.client.getConfig();
         return Response.status(200).entity(config).header("Access-Control-Allow-Origin", "*").build();
     }
 
@@ -62,7 +65,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/relay/{number}")
     public Response relay(@PathParam("number") int number) {
-        return getComponentState(number, Function.RELAY);
+        return this.getComponentState(number, Function.RELAY);
     }
 
     /**
@@ -77,7 +80,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/condition/{number}")
     public Response condition(@PathParam("number") int number) {
-        return getComponentState(number, Function.COND);
+        return this.getComponentState(number, Function.COND);
     }
 
     /**
@@ -92,7 +95,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/flag/{number}")
     public Response flag(@PathParam("number") int number) {
-        return getComponentState(number, Function.FLAG);
+        return this.getComponentState(number, Function.FLAG);
     }
 
     /**
@@ -107,7 +110,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/motor/{number}")
     public Response motor(@PathParam("number") int number) {
-        return getComponentState(number, Function.MTRUPDOWN);
+        return this.getComponentState(number, Function.MTRUPDOWN);
     }
 
 
@@ -119,7 +122,7 @@ public class ComponentResource {
         //APIResponse response = new APIResponse("success", component);
 
         // component always holds the correct state, so no need to call client.getRelayState(number)
-        APIResponse response = new APIResponse("success", client.getComponent(function, number));
+        APIResponse response = new APIResponse("success", this.client.getConfig().getComponent(function, number));
         return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
     }
 
@@ -135,16 +138,8 @@ public class ComponentResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/relay/{number}/state/{state}")
-    public Response relay(@PathParam("number") int number, @PathParam("state") int state) {
-        //TODO: validate the relay to be an integer (common method), if not, return correct HTTP status code
-        //TODO: validate the status to be an integer (common method) and either value 0 or 1, if not, return correct HTTP status code(s)
-        // Use RestEasy built-in validation: http://docs.jboss.org/resteasy/docs/3.0.7.Final/userguide/html/Validation.html
-
-        if (state == 1) {
-            client.switchRelayOn(number);
-        } else {
-            client.switchRelayOff(number);
-        }
+    public Response relay(@PathParam("number") int number, @PathParam("state") String state) {
+        this.set(Function.RELAY, number, state);
 
         return this.buildResponse(number, state, Function.RELAY);
     }
@@ -161,16 +156,8 @@ public class ComponentResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/motor/{number}/state/{state}")
-    public Response motor(@PathParam("number") int number, @PathParam("state") int state) {
-        //TODO: validate the relay to be an integer (common method), if not, return correct HTTP status code
-        //TODO: validate the status to be an integer (common method) and either value 0 or 1, if not, return correct HTTP status code(s)
-        // Use RestEasy built-in validation: http://docs.jboss.org/resteasy/docs/3.0.7.Final/userguide/html/Validation.html
-
-        if (state == 1) {
-            client.switchMotorUp(number);
-        } else {
-            client.switchMotorDown(number);
-        }
+    public Response motor(@PathParam("number") int number, @PathParam("state") String state) {
+        this.set(Function.MTRUPDOWN, number, state);
 
         return this.buildResponse(number, state, Function.MTRUPDOWN);
     }
@@ -188,31 +175,15 @@ public class ComponentResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/mood/{type}/{number}/state/{state}")
-    public Response mood(@PathParam("type") String type, @PathParam("number") int number, @PathParam("state") int state) {
-        //TODO: validate the type to be a string (common method), if not, return correct HTTP status code
-        //TODO: validate the status to be an integer (common method) and either value 0 or 1, if not, return correct HTTP status code(s)
-        // Use RestEasy built-in validation: http://docs.jboss.org/resteasy/docs/3.0.7.Final/userguide/html/Validation.html
-
-        if (state == 1) {
-            if ("general".equals(type)) {
-                client.switchGeneralMoodOn(number);
-            } else if ("local".equals(type)) {
-                client.switchLocalMoodOn(number);
-            }
-        } else {
-            if ("general".equals(type)) {
-                client.switchGeneralMoodOff(number);
-            } else if ("local".equals(type)) {
-                client.switchLocalMoodOff(number);
-            }
-        }
-
+    public Response mood(@PathParam("type") String type, @PathParam("number") int number, @PathParam("state") String state) {
         Function function = null;
         if ("general".equals(type)) {
             function = Function.GENMOOD;
         } else if ("local".equals(type)) {
             function = Function.LOCMOOD;
         }
+
+        this.set(function, number, state);
 
         return this.buildResponse(number, state, function);
     }
@@ -248,8 +219,12 @@ public class ComponentResource {
             function = Function.LOCMOOD;
         }
 
-        APIResponse response = new APIResponse("success", client.getComponent(function, number));
+        APIResponse response = new APIResponse("success", this.client.getConfig().getComponent(function, number));
         return Response.status(200).entity(response).build();
+    }
+
+    private void set(Function function, int number, String state) {
+        this.client.set(function, number, function.getState("1".equals(state) ? "255" : state));
     }
 
     /**
@@ -259,8 +234,8 @@ public class ComponentResource {
      * @param function The Function which has been changed.
      * @return A JSON REST response.
      */
-    private Response buildResponse(int number, int state, Function function) {
-        TDSComponent component = new TDSComponent(function, state, number);
+    private Response buildResponse(int number, String state, Function function) {
+        Component component = this.client.getConfig().getComponent(function, number);
         APIResponse apiResponse = new APIResponse("success", component);
         return Response.status(200).entity(apiResponse).header("Access-Control-Allow-Origin", "*").build();
     }

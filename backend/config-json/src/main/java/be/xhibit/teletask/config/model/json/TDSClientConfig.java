@@ -1,7 +1,7 @@
 package be.xhibit.teletask.config.model.json;
 
 import be.xhibit.teletask.model.spec.ClientConfig;
-import be.xhibit.teletask.model.spec.function.Function;
+import be.xhibit.teletask.model.spec.Function;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +33,7 @@ public class TDSClientConfig implements ClientConfig {
     /**
      * Default constructor.
      */
-    public TDSClientConfig() {
+    private TDSClientConfig() {
     }
 
     public TDSClientConfig(String host, int port) {
@@ -139,7 +139,7 @@ public class TDSClientConfig implements ClientConfig {
         }
     }
     
-    public static ClientConfig read(InputStream jsonData) {
+    public static TDSClientConfig read(InputStream jsonData) {
         TDSClientConfig clientConfig = null;
         LOG.debug("##### TDSClient initialization - START");
         //TODO: find better way to load the config

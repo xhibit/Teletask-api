@@ -1,4 +1,4 @@
-package be.xhibit.teletask.client;
+package be.xhibit.teletask.model.spec;
 
 public enum State {
     ON(255),

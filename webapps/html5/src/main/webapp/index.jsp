@@ -1,9 +1,10 @@
 <%@ page import="be.xhibit.teletask.client.TDSClient" %>
 <%@ page import="be.xhibit.teletask.config.model.json.TDSClientConfig" %>
-<%@ page import="be.xhibit.teletask.model.spec.function.Function" %>
+<%@ page import="be.xhibit.teletask.model.spec.Function" %>
 <%@ page import="be.xhibit.teletask.config.model.json.TDSComponent" %>
 <%@ page import="java.util.List" %>
 <%@ page import="be.xhibit.teletask.config.model.json.Room" %>
+<%@ page import="be.xhibit.teletask.model.spec.ClientConfig" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%--
@@ -128,8 +129,8 @@
 <body>
 
     <%
-        TDSClient client = TDSClient.getInstance();
-        TDSClientConfig tdsConfig = client.getConfig();
+        TDSClientConfig tdsConfig = TDSClientConfig.read(TDSClientConfig.class.getClassLoader().getResourceAsStream("tds-config.json"));
+        TDSClient client = TDSClient.getInstance(tdsConfig);
         request.setAttribute("tds_relays", tdsConfig.getComponentsTypes().get(Function.RELAY));
         request.setAttribute("tds_locmoods", tdsConfig.getComponentsTypes().get(Function.LOCMOOD));
         request.setAttribute("tds_genmoods", tdsConfig.getComponentsTypes().get(Function.GENMOOD));

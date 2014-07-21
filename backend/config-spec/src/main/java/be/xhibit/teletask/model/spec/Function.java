@@ -1,11 +1,13 @@
-package be.xhibit.teletask.model.spec.function;
+package be.xhibit.teletask.model.spec;
+
+import com.google.common.primitives.Ints;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Define all Teletask functions used by the API here.
- *
+ * <p/>
  * RELAY = 1; //control or get the status of a relay
  * DIMMER = 2; //control or get the status of a dimmer
  * MOTOR = 6; //control or get the status of a Motor: On/Off
@@ -18,23 +20,27 @@ import java.util.Map;
  * COND = 60; //control or get the status of a Condition
  */
 public enum Function {
-    RELAY(1, "relay"),
-    DIMMER(2, "dimmer"),
-    MOTOR(6, "motor on/off"),
-    LOCMOOD(8, "local mood"),
-    TIMEDMOOD(9, "timed mood"),
-    GENMOOD(10, "general mood"),
-    FLAG(15, "flag"),
-    GETSENSVAL(25, "sensor value"),
-    MTRUPDOWN(55, "motor up/down"),
-    COND(60, "condition");
+    RELAY(1, "relay", State.ON, State.OFF),
+    DIMMER(2, "dimmer", State.ON, State.OFF),
+    MOTOR(6, "motor on/off", State.ON, State.OFF),
+    LOCMOOD(8, "local mood", State.ON, State.OFF),
+    TIMEDMOOD(9, "timed mood", State.ON, State.OFF),
+    GENMOOD(10, "general mood", State.ON, State.OFF),
+    FLAG(15, "flag", State.ON, State.OFF),
+    GETSENSVAL(25, "sensor value", State.ON, State.OFF),
+    MTRUPDOWN(55, "motor up/down", State.UP, State.DOWN),
+    COND(60, "condition", State.ON, State.OFF);
 
     private final byte code;
     private final String descr;
+    private Map<Byte, State> states = new HashMap<>();
 
-    Function(int code, String descr) {
+    Function(int code, String descr, State... states) {
         this.code = (byte) code;
         this.descr = descr;
+        for (State state : states) {
+            this.states.put(state.getCode(), state);
+        }
     }
 
     public String getDescription() {
@@ -45,7 +51,15 @@ public enum Function {
         return this.code;
     }
 
-    @Deprecated
+    public State getState(int code) {
+        return this.states.get((byte) code);
+    }
+
+    public State getState(String code) {
+        Integer stateCode = Ints.tryParse(code);
+        return stateCode == null ? State.valueOf(code.toUpperCase()) : this.states.get((byte) stateCode.intValue());
+    }
+
     private static final Map<Integer, Function> map = new HashMap<Integer, Function>();
 
     static {
@@ -54,7 +68,6 @@ public enum Function {
         }
     }
 
-    @Deprecated
     public static Function valueOf(int code) {
         return map.get(code);
     }

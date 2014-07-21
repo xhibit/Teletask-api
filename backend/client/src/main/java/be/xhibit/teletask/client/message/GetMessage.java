@@ -1,6 +1,6 @@
 package be.xhibit.teletask.client.message;
 
-import be.xhibit.teletask.model.spec.function.Function;
+import be.xhibit.teletask.model.spec.Function;
 
 public class GetMessage extends MessageSupport {
     private final int number;

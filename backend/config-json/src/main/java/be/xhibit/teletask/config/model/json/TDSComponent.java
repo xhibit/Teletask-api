@@ -1,14 +1,12 @@
 package be.xhibit.teletask.config.model.json;
 
-import be.xhibit.teletask.model.spec.function.Function;
-import be.xhibit.teletask.model.spec.function.FunctionExecution;
-import be.xhibit.teletask.model.spec.function.FunctionExecutionContext;
-import be.xhibit.teletask.model.spec.function.FunctionExecutionPayload;
+import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.Function;
 
 /**
  * This class represents a Teletask component, being either a: relay, motor, mood, ... basically anything which can be controlled.
  */
-public class TDSComponent implements FunctionExecution<FunctionExecutionContext, FunctionExecutionPayload> {
+public class TDSComponent implements Component {
     private String description;
     private Function function;
     private int number;
@@ -19,8 +17,8 @@ public class TDSComponent implements FunctionExecution<FunctionExecutionContext,
      * The default constructor is used by Jackson.  In order not to have null values, some fields are initialised to empty strings.
      */
     public TDSComponent() {
-        description = "";
-        state = 0;
+        this.description = "";
+        this.state = 0;
     }
 
     /**
@@ -36,12 +34,8 @@ public class TDSComponent implements FunctionExecution<FunctionExecutionContext,
     }
 
     @Override
-    public FunctionExecutionPayload createPayload(FunctionExecutionContext context) {
-        return null;
-    }
-
     public int getNumber() {
-        return number;
+        return this.number;
     }
 
     public void setNumber(int number) {
@@ -49,15 +43,16 @@ public class TDSComponent implements FunctionExecution<FunctionExecutionContext,
     }
 
     public int getState() {
-        return state;
+        return this.state;
     }
 
     public void setState(int state) {
         this.state = state;
     }
 
+    @Override
     public Function getFunction() {
-        return function;
+        return this.function;
     }
 
     public void setFunction(Function function) {
@@ -65,7 +60,7 @@ public class TDSComponent implements FunctionExecution<FunctionExecutionContext,
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public void setDescription(String description) {

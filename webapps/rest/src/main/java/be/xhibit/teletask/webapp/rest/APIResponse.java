@@ -1,11 +1,13 @@
-package be.xhibit.teletask.config.model.json;
+package be.xhibit.teletask.webapp.rest;
+
+import be.xhibit.teletask.model.spec.Component;
 
 /**
  * The APIResponse class used in this API.
  */
 public class APIResponse {
     private String status;
-    private TDSComponent component;
+    private Component component;
 
     /**
      * Default constructor.
@@ -19,7 +21,7 @@ public class APIResponse {
      *               Can be useful in interpreting the result for proper error handling.
      * @param component The TDS Component status.
      */
-    public APIResponse(String status, TDSComponent component) {
+    public APIResponse(String status, Component component) {
         this.status = status;
         this.component = component;
     }
@@ -32,11 +34,11 @@ public class APIResponse {
         this.status = status;
     }
 
-    public TDSComponent getComponent() {
+    public Component getComponent() {
         return component;
     }
 
-    public void setComponent(TDSComponent component) {
+    public void setComponent(Component component) {
         this.component = component;
     }
 }
