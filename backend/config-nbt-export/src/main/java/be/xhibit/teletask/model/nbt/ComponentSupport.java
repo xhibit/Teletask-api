@@ -19,7 +19,6 @@ public abstract class ComponentSupport implements Component {
     }
 
     @Override
-    @JsonIgnore
     public State getComponentState() {
         return this.state;
     }

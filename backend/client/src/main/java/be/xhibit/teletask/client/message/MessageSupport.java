@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableMap;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Map;
 
 public abstract class MessageSupport {
@@ -31,11 +32,13 @@ public abstract class MessageSupport {
         SendResult result;
         try {
             //Send data over socket
-            outputStream.write(myByteArray);
-            outputStream.flush();
+            if (Boolean.getBoolean("production")) {
+                outputStream.write(myByteArray);
+                outputStream.flush();
+            }
 
             result = SendResult.SUCCESS;
-        } catch (Exception e){
+        } catch (Exception e) {
             result = SendResult.FAILED;
         }
 

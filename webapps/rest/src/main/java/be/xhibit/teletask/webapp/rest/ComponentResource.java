@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -141,7 +140,7 @@ public class ComponentResource {
     public Response relay(@PathParam("number") int number, @PathParam("state") String state) {
         this.set(Function.RELAY, number, state);
 
-        return this.buildResponse(number, state, Function.RELAY);
+        return this.buildResponse(number, Function.RELAY);
     }
 
     /**
@@ -153,13 +152,13 @@ public class ComponentResource {
      * @param state The state you want to the relay to switch to, either 0 (up) or 1 (down) .
      * @return JSON response confirming if the switch request was successful.
      */
-    @PUT
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/motor/{number}/state/{state}")
     public Response motor(@PathParam("number") int number, @PathParam("state") String state) {
         this.set(Function.MTRUPDOWN, number, state);
 
-        return this.buildResponse(number, state, Function.MTRUPDOWN);
+        return this.buildResponse(number, Function.MTRUPDOWN);
     }
 
     /**
@@ -172,7 +171,7 @@ public class ComponentResource {
      * @param state The state you want to the mood to switch to, either 0 (off) or 1 (on) .
      * @return JSON response confirming if the switch request was successful.
      */
-    @PUT
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/mood/{type}/{number}/state/{state}")
     public Response mood(@PathParam("type") String type, @PathParam("number") int number, @PathParam("state") String state) {
@@ -185,7 +184,7 @@ public class ComponentResource {
 
         this.set(function, number, state);
 
-        return this.buildResponse(number, state, function);
+        return this.buildResponse(number, function);
     }
 
 
@@ -198,7 +197,7 @@ public class ComponentResource {
      * @param number The general / local mood number you want to switch.
      * @return JSON response confirming if the switch request was successful.
      */
-    @PUT
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/mood/{type}/{number}")
     public Response mood(@PathParam("type") String type, @PathParam("number") int number) {
@@ -230,11 +229,10 @@ public class ComponentResource {
     /**
      * Convenience mathod for creating the REST service's JSON response.
      * @param number The number of the component which has been serviced.
-     * @param state The current state of the component.
      * @param function The Function which has been changed.
      * @return A JSON REST response.
      */
-    private Response buildResponse(int number, String state, Function function) {
+    private Response buildResponse(int number, Function function) {
         Component component = this.client.getConfig().getComponent(function, number);
         APIResponse apiResponse = new APIResponse("success", component);
         return Response.status(200).entity(apiResponse).header("Access-Control-Allow-Origin", "*").build();
