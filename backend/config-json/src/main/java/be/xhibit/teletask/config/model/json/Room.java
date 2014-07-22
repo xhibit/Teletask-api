@@ -16,7 +16,7 @@ public class Room {
     private HashMap<Function, List<Integer>> componentTypes;
 
     public int getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(int id) {
@@ -24,7 +24,7 @@ public class Room {
     }
 
     public int getLevel() {
-        return level;
+        return this.level;
     }
 
     public void setLevel(int level) {
@@ -32,7 +32,7 @@ public class Room {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -40,10 +40,10 @@ public class Room {
     }
 
     public HashMap<Function, List<TDSComponent>> getComponents() {
-        if (components == null) {
-            components = new HashMap<Function, List<TDSComponent>>();
+        if (this.components == null) {
+            this.components = new HashMap<>();
         }
-        return components;
+        return this.components;
     }
 
     public void setComponents(HashMap<Function, List<TDSComponent>> components) {
@@ -51,7 +51,7 @@ public class Room {
     }
 
     public HashMap<Function, List<Integer>> getComponentTypes() {
-        return componentTypes;
+        return this.componentTypes;
     }
 
     public void setComponentTypes(HashMap<Function, List<Integer>> componentTypes) {

@@ -1,7 +1,11 @@
 package be.xhibit.teletask.model.spec;
 
 public interface Component {
-    Function getFunction();
+    State getComponentState();
 
-    int getNumber();
+    void setComponentState(State state);
+
+    Function getComponentFunction();
+
+    int getComponentNumber();
 }

@@ -1,7 +1,6 @@
 package be.xhibit.teletask.webapp.rest;
 
 import be.xhibit.teletask.client.TDSClient;
-import be.xhibit.teletask.config.model.json.TDSClientConfig;
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.model.spec.Function;
@@ -31,11 +30,12 @@ public class ComponentResource {
     private final TDSClient client;
 
     /**
-     * Default constructor.
+     * Constructs a new resource using the given client config.
+     *
+     * @param clientConfig The configuration
      */
-    public ComponentResource() {
-        TDSClientConfig tdsConfig = TDSClientConfig.read(TDSClientConfig.class.getClassLoader().getResourceAsStream("tds-config.json"));
-        this.client = TDSClient.getInstance(tdsConfig);
+    public ComponentResource(ClientConfig clientConfig) {
+        this.client = TDSClient.getInstance(clientConfig);
     }
 
     /**

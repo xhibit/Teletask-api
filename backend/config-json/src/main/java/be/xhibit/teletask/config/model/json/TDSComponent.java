@@ -2,13 +2,14 @@ package be.xhibit.teletask.config.model.json;
 
 import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.model.spec.Function;
+import be.xhibit.teletask.model.spec.State;
 
 /**
  * This class represents a Teletask component, being either a: relay, motor, mood, ... basically anything which can be controlled.
  */
 public class TDSComponent implements Component {
     private String description;
-    private Function function;
+    private int function;
     private int number;
     private int state;
 
@@ -27,13 +28,12 @@ public class TDSComponent implements Component {
      * @param state The current status of the component, for example 0 indicating off for a "relay".
      * @param number The component number you wish to manipulate.
      */
-    public TDSComponent(Function function, int state, int number) {
+    public TDSComponent(int function, int state, int number) {
         this.function = function;
         this.state = state;
         this.number = number;
     }
 
-    @Override
     public int getNumber() {
         return this.number;
     }
@@ -50,12 +50,11 @@ public class TDSComponent implements Component {
         this.state = state;
     }
 
-    @Override
-    public Function getFunction() {
+    public int getFunction() {
         return this.function;
     }
 
-    public void setFunction(Function function) {
+    public void setFunction(int function) {
         this.function = function;
     }
 
@@ -65,5 +64,25 @@ public class TDSComponent implements Component {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Override
+    public State getComponentState() {
+        return this.getComponentFunction().getState(this.getState());
+    }
+
+    @Override
+    public void setComponentState(State state) {
+        this.setState(state.getCode());
+    }
+
+    @Override
+    public Function getComponentFunction() {
+        return Function.valueOf(this.getFunction());
+    }
+
+    @Override
+    public int getComponentNumber() {
+        return this.getNumber();
     }
 }

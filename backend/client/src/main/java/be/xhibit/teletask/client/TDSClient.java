@@ -1,11 +1,13 @@
 package be.xhibit.teletask.client;
 
+import be.xhibit.teletask.model.spec.CentralUnitType;
 import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.client.message.GetMessage;
 import be.xhibit.teletask.client.message.LogMessage;
 import be.xhibit.teletask.client.message.SendResult;
 import be.xhibit.teletask.client.message.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.MessageComposer;
 import be.xhibit.teletask.model.spec.State;
 import be.xhibit.teletask.model.spec.Function;
 import org.apache.logging.log4j.LogManager;
@@ -169,14 +171,14 @@ public final class TDSClient {
 // ################################################ PUBLIC API FUNCTIONS
 
     public SendResult set(Component component, State state) {
-        Function function = component.getFunction();
-        int number = component.getNumber();
+        Function function = component.getComponentFunction();
+        int number = component.getComponentNumber();
 
         return this.set(function, number, state);
     }
 
     public SendResult set(Function function, int number, State state) {
-        SendResult result = new SetMessage(function, number, state).send(this.out);
+        SendResult result = new SetMessage(this.getCentralUnitType(), function, number, state).send(this.out);
 
         if (result == SendResult.SUCCESS) {
             this.setState(function, number, state);
@@ -185,8 +187,12 @@ public final class TDSClient {
         return result;
     }
 
+    private CentralUnitType getCentralUnitType() {
+        return this.getConfig().getCentralUnitType();
+    }
+
     public State get(Component component) {
-        return this.getState(component.getFunction(), component.getNumber());
+        return this.getState(component.getComponentFunction(), component.getComponentNumber());
     }
 
     public void close() {
@@ -235,10 +241,14 @@ public final class TDSClient {
 
     private void setState(Function function, int number, State state) {
         this.states.put(this.getStateIndex(function, number), state);
+        Component component = this.getConfig().getComponent(function, number);
+        if (component != null) {
+            component.setComponentState(state);
+        }
     }
 
     private void getStateFromCentralUnit(Function function, int number) {
-        new GetMessage(function, number).send(this.out);
+        new GetMessage(this.getCentralUnitType(), function, number).send(this.out);
     }
 
     private String getStateIndex(Function function, int number) {
@@ -318,7 +328,7 @@ public final class TDSClient {
     }
 
     private void sendLogEventMessage(Function function, State state) {
-        new LogMessage(function, state).send(this.out);
+        new LogMessage(this.getCentralUnitType(), function, state).send(this.out);
     }
 
     private static void readLogResponse(TDSClient client) throws Exception {

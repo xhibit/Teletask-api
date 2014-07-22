@@ -7,4 +7,6 @@ public interface ClientConfig {
     int getPort();
 
     Component getComponent(Function function, int number);
+
+    CentralUnitType getCentralUnitType();
 }

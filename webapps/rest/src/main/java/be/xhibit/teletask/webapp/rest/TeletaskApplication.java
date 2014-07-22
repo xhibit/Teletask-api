@@ -1,5 +1,7 @@
 package be.xhibit.teletask.webapp.rest;
 
+import be.xhibit.teletask.model.spec.ClientConfig;
+
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
@@ -7,12 +9,12 @@ import java.util.Set;
 /**
  * Defines the components of a JAX-RS application and supplies additional metadata.
  */
-public class TeletaskApplication extends Application {
+public abstract class TeletaskApplication extends Application {
 
-    private Set<Object> singletons = new HashSet<Object>();
+    private final Set<Object> singletons = new HashSet<Object>();
 
     public TeletaskApplication() {
-        singletons.add(new ComponentResource());
+        this.singletons.add(new ComponentResource(this.getClientConfig()));
     }
 
     /**
@@ -33,7 +35,8 @@ public class TeletaskApplication extends Application {
      */
     @Override
     public Set<Object> getSingletons() {
-        return singletons;
+        return this.singletons;
     }
 
+    protected abstract ClientConfig getClientConfig();
 }

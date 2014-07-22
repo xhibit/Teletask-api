@@ -1,7 +1,9 @@
 package be.xhibit.teletask.config.model.json;
 
+import be.xhibit.teletask.model.spec.CentralUnitType;
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Function;
+import be.xhibit.teletask.model.spec.MessageComposer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -83,8 +85,15 @@ public class TDSClientConfig implements ClientConfig {
         this.rooms = rooms;
     }
 
-    // ================================ HELPER METHODS
+    @Override
+    public CentralUnitType getCentralUnitType() {
+        //TODO: Get from json config file
+        return CentralUnitType.MICROS;
+    }
 
+// ================================ HELPER METHODS
+
+    @Override
     public TDSComponent getComponent(Function function, int number) {
         TDSComponent returnValue = null;
 
@@ -93,7 +102,7 @@ public class TDSClientConfig implements ClientConfig {
         //components.get()  ///TODO: refactor: access by index not OK, should be based on number, therefore iterate, or store as HashMap.
         for (TDSComponent component: components) {
             if (component.getNumber() == number) {
-                component.setFunction(function);
+                component.setFunction(function.getCode());
                 returnValue = component;
                 break;
             }
@@ -105,7 +114,7 @@ public class TDSClientConfig implements ClientConfig {
     public List<Room> getRooms(int level) {
 
         //components.get()  ///TODO: refactor: access by index not OK, should be based on number, therefore iterate, or store as HashMap.
-        List<Room> roomsOnLevel = new ArrayList<Room>();
+        List<Room> roomsOnLevel = new ArrayList<>();
         for (Room room: this.rooms) {
             if (room.getLevel() == level) {
                 //returnValue = room;
@@ -127,10 +136,10 @@ public class TDSClientConfig implements ClientConfig {
                 List<Integer> componentTypes = room.getComponentTypes().get(function);
                 for (Integer componentNumber : componentTypes) {
                     TDSComponent component = this.getComponent(function, componentNumber);
-                    HashMap<Function, List<TDSComponent>> components = room.getComponents();
+                    Map<Function, List<TDSComponent>> components = room.getComponents();
                     List<TDSComponent> tdsComponents = components.get(function);
                     if (tdsComponents == null || tdsComponents.size() <= 0) {
-                        tdsComponents = new ArrayList<TDSComponent>();
+                        tdsComponents = new ArrayList<>();
                         components.put(function, tdsComponents);
                     }
                     tdsComponents.add(component);

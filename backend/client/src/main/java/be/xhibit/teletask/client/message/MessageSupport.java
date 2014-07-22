@@ -1,40 +1,33 @@
 package be.xhibit.teletask.client.message;
 
+import be.xhibit.teletask.client.message.v2_8.MicrosMessageComposer;
+import be.xhibit.teletask.client.message.v3_1.MicrosPlusMessageComposer;
+import be.xhibit.teletask.model.spec.CentralUnitType;
+import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
-import com.google.common.primitives.Bytes;
+import be.xhibit.teletask.model.spec.MessageComposer;
+import com.google.common.collect.ImmutableMap;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 public abstract class MessageSupport {
-    private final Function function;
+    private static final Map<CentralUnitType, MessageComposer> COMPOSERS = ImmutableMap.<CentralUnitType, MessageComposer>builder()
+            .put(CentralUnitType.MICROS, new MicrosMessageComposer())
+            .put(CentralUnitType.MICROS_PLUS, new MicrosPlusMessageComposer())
+            .build();
 
-    protected MessageSupport(Function function) {
+    private final Function function;
+    private final CentralUnitType centralUnitType;
+
+    protected MessageSupport(CentralUnitType centralUnitType, Function function) {
+        this.centralUnitType = centralUnitType;
         this.function = function;
     }
 
-    private byte[] compose() {
-        byte[] payload = this.getPayload();
-
-        int msgStx = 2;                                     // STX: is this value always fixed 02h?
-        int msgLength = 4 + payload.length;                 // Length: the length of the command without checksum
-        int msgCommand = this.getCommand().getCode();       // Command Number
-        byte msgFunction = this.getFunction().getCode();    // The function to execute
-
-        byte[] messageBytes = Bytes.concat(new byte[]{(byte) msgStx, (byte) msgLength, (byte) msgCommand, msgFunction}, payload);
-
-        // ChkSm: Command Number + Command Parameters + Length + STX
-        byte checkSumByte = 0;
-        for (byte messageByte : messageBytes) {
-            checkSumByte += messageByte;
-        }
-        messageBytes = Bytes.concat(messageBytes, new byte[]{checkSumByte});
-
-        return messageBytes;
-    }
-
     public SendResult send(OutputStream outputStream) {
-        byte[] myByteArray = this.compose();
+        byte[] myByteArray = this.getMessageComposer().compose(this.getCommand(), this.getFunction(), this.getPayload());
 
         SendResult result;
         try {
@@ -50,6 +43,13 @@ public abstract class MessageSupport {
         return result;
     }
 
+    private MessageComposer getMessageComposer() {
+        return null;
+    }
+
+    public CentralUnitType getCentralUnitType() {
+        return this.centralUnitType;
+    }
 
     /**
      * This should return the payload without the function part of the payload.
