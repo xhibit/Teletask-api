@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Room {
-    private final String id;
+    private final int id;
     private final String name;
     private List<Relay> relays;
 
-    public Room(String id, String name) {
+    public Room(int id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public String getId() {
+    public int getId() {
         return this.id;
     }
 

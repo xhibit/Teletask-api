@@ -75,7 +75,7 @@ public class PrintedFileVisitor {
     public static void main(String[] args) throws IOException {
 //        FullProprietaryModelConsumerImpl consumer = new FullProprietaryModelConsumerImpl();
         InterestingProprietaryModelConsumerImpl consumer = new InterestingProprietaryModelConsumerImpl();
-        getInstance().visit(consumer, new FileInputStream("/home/ridiekel/Projects/git/Teletask-api/backend/src/main/resources/centrale.ttt"));
+        getInstance().visit(consumer, new FileInputStream("/home/ridiekel/Projects/git/Teletask-api/backend/config-nbt-export/src/main/resources/centrale.ttt"));
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(System.out, consumer.getCentralUnit());
     }

@@ -1,12 +1,16 @@
 package be.xhibit.teletask.parser;
 
-import be.xhibit.teletask.model.proprietary.Action;
-import be.xhibit.teletask.model.proprietary.CentralUnit;
-import be.xhibit.teletask.model.proprietary.Input;
-import be.xhibit.teletask.model.proprietary.InputInterface;
-import be.xhibit.teletask.model.proprietary.OutputInterface;
-import be.xhibit.teletask.model.proprietary.Relay;
-import be.xhibit.teletask.model.proprietary.Room;
+import be.xhibit.teletask.model.nbt.CentralUnit;
+import be.xhibit.teletask.model.nbt.Input;
+import be.xhibit.teletask.model.nbt.InputInterface;
+import be.xhibit.teletask.model.nbt.OutputInterface;
+import be.xhibit.teletask.model.nbt.Relay;
+import be.xhibit.teletask.model.nbt.Room;
+import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.Function;
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
 
 public class FullProprietaryModelConsumerImpl implements Consumer {
     private final CentralUnit centralUnit;
@@ -37,12 +41,12 @@ public class FullProprietaryModelConsumerImpl implements Consumer {
 
     @Override
     public void visitIpAddress(String value) {
-        this.getCentralUnit().setIpAddress(value);
+        this.getCentralUnit().setHost(value);
     }
 
     @Override
     public void visitPortNumber(String value) {
-        this.getCentralUnit().setPortNumber(value);
+        this.getCentralUnit().setPort(Integer.valueOf(value));
     }
 
     @Override
@@ -52,7 +56,7 @@ public class FullProprietaryModelConsumerImpl implements Consumer {
 
     @Override
     public void visitRoom(String id, String name) {
-        this.getCentralUnit().getRooms().add(new Room(id, name));
+        this.getCentralUnit().getRooms().add(new Room(Integer.valueOf(id), name));
     }
 
     @Override
@@ -68,29 +72,24 @@ public class FullProprietaryModelConsumerImpl implements Consumer {
     @Override
     public void visitRelay(String id, String roomName, String type, String description) {
         Room room = this.getCentralUnit().findRoom(roomName);
-        Relay relay = new Relay(id, room, type, description);
+        Relay relay = new Relay(Integer.valueOf(id), room, type, description);
         room.getRelays().add(relay);
-        this.getCentralUnit().getRelays().add(relay);
+        this.getCentralUnit().getComponents().add(relay);
     }
 
     @Override
     public void visitInput(String autobusId, String autobusType, String autobusNumber, String id, String name, String shortActionType, String shortActionId, String longActionType, String longActionId) {
         InputInterface inputInterface = this.getCentralUnit().findInputInterface(autobusId, autobusType, autobusNumber);
 
-        inputInterface.getInputs().add(new Input(id, name, this.getAction(shortActionType, shortActionId), this.getAction(longActionType, longActionId)));
+        inputInterface.getInputs().add(new Input(id, name, this.getComponent(shortActionType, shortActionId), this.getComponent(longActionType, longActionId)));
+    }
+    private Component getComponent(String actionType, String actionId) {
+        return this.getCentralUnit().getComponent(ACTION_MAPPING.get(actionType), Integer.valueOf(actionId));
     }
 
-    private Action getAction(String actionType, String actionId) {
-        Action action = null;
-        if (actionType != null) {
-            switch (actionType) {
-                case "REL":
-                    action = this.getCentralUnit().findRelay(actionId);
-                    break;
-            }
-        }
-        return action;
-    }
+    private static Map<String, Function> ACTION_MAPPING = ImmutableMap.<String, Function>builder()
+            .put("REL", Function.RELAY)
+            .build();
 
     public CentralUnit getCentralUnit() {
         return this.centralUnit;

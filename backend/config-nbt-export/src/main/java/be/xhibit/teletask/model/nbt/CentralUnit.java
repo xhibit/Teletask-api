@@ -1,25 +1,36 @@
 package be.xhibit.teletask.model.nbt;
 
-import com.google.common.base.Function;
+import be.xhibit.teletask.model.spec.CentralUnitType;
+import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.Function;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class CentralUnit {
+public class CentralUnit implements ClientConfig {
+    private static final Map<String, CentralUnitType> CENTRAL_UNIT_TYPE_MAP = ImmutableMap.<String, CentralUnitType>builder()
+            .put("TDS 10010: MICROS", CentralUnitType.MICROS)
+            .put("TDS 10012: MICROS+", CentralUnitType.MICROS_PLUS)
+            .build();
+
     private String principalSite;
     private String name;
     private String type;
     private String serialNumber;
-    private String ipAddress;
-    private String portNumber;
+    private String host;
+    private int port;
     private String macAddress;
 
     private List<Room> rooms;
+
     private List<OutputInterface> outputInterfaces;
     private List<InputInterface> inputInterfaces;
-    private List<Relay> relays;
+
+    private List<ComponentSupport> components;
 
     public String getPrincipalSite() {
         return this.principalSite;
@@ -45,6 +56,11 @@ public class CentralUnit {
         this.type = type;
     }
 
+    @Override
+    public CentralUnitType getCentralUnitType() {
+        return CENTRAL_UNIT_TYPE_MAP.get(this.getType());
+    }
+
     public String getSerialNumber() {
         return this.serialNumber;
     }
@@ -53,20 +69,22 @@ public class CentralUnit {
         this.serialNumber = serialNumber;
     }
 
-    public String getIpAddress() {
-        return this.ipAddress;
+    @Override
+    public String getHost() {
+        return this.host;
     }
 
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
+    public void setHost(String host) {
+        this.host = host;
     }
 
-    public String getPortNumber() {
-        return this.portNumber;
+    @Override
+    public int getPort() {
+        return this.port;
     }
 
-    public void setPortNumber(String portNumber) {
-        this.portNumber = portNumber;
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public String getMacAddress() {
@@ -88,15 +106,15 @@ public class CentralUnit {
         this.rooms = rooms;
     }
 
-    public List<Relay> getRelays() {
-        if (this.relays == null) {
-            this.setRelays(new ArrayList<Relay>());
+    public List<ComponentSupport> getComponents() {
+        if (this.components == null) {
+            this.setComponents(new ArrayList<ComponentSupport>());
         }
-        return this.relays;
+        return this.components;
     }
 
-    private void setRelays(List<Relay> relays) {
-        this.relays = relays;
+    private void setComponents(List<ComponentSupport> components) {
+        this.components = components;
     }
 
     public List<OutputInterface> getOutputInterfaces() {
@@ -134,8 +152,9 @@ public class CentralUnit {
         return this.getRoomMap().get(name);
     }
 
-    public Relay findRelay(String id) {
-        return this.getRelayMap().get(id);
+    @Override
+    public Component getComponent(Function function, int number) {
+        return this.getComponentMap().get(this.getIndex(function, number));
     }
 
     private transient Map<String, InputInterface> inputInterfaceMap;
@@ -156,8 +175,8 @@ public class CentralUnit {
         return this.outputInterfaceMap;
     }
 
-    private <T extends InterfaceSupport> Map<String, T> convertInterfacesToMap(List<T> interfaces) {
-        return Maps.uniqueIndex(interfaces, new Function<T, String>() {
+    private <T extends InterfaceSupport> Map<String, T> convertInterfacesToMap(Iterable<T> interfaces) {
+        return Maps.uniqueIndex(interfaces, new com.google.common.base.Function<T, String>() {
             @Override
             public String apply(T from) {
                 return from.getCompleteAutobusId();
@@ -174,29 +193,33 @@ public class CentralUnit {
         return this.roomMap;
     }
 
-    private Map<String, Room> convertRoomsToMap(List<Room> rooms) {
-        return Maps.uniqueIndex(rooms, new Function<Room, String>() {
+    private Map<String, Room> convertRoomsToMap(Iterable<Room> rooms) {
+        return Maps.uniqueIndex(rooms, new com.google.common.base.Function<Room, String>() {
             @Override
             public String apply(Room from) {
                 return from.getName();
             }
         });
     }
-    private transient Map<String, Relay> relayMap;
+    private transient Map<String, ComponentSupport> componentMap;
 
-    private Map<String, Relay> getRelayMap() {
-        if (this.relayMap == null) {
-            this.relayMap = this.convertRelaysToMap(this.getRelays());
+    private Map<String, ComponentSupport> getComponentMap() {
+        if (this.componentMap == null) {
+            this.componentMap = this.convertComponentsToMap(this.getComponents());
         }
-        return this.relayMap;
+        return this.componentMap;
     }
 
-    private Map<String, Relay> convertRelaysToMap(List<Relay> relays) {
-        return Maps.uniqueIndex(relays, new Function<Relay, String>() {
+    private Map<String, ComponentSupport> convertComponentsToMap(Iterable<ComponentSupport> components) {
+        return Maps.uniqueIndex(components, new com.google.common.base.Function<ComponentSupport, String>() {
             @Override
-            public String apply(Relay from) {
-                return from.getId();
+            public String apply(ComponentSupport from) {
+                return CentralUnit.this.getIndex(from.getComponentFunction(), from.getId());
             }
         });
+    }
+
+    private String getIndex(Function function, int id) {
+        return function + ":" + id;
     }
 }

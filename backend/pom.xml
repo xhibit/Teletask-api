@@ -19,7 +19,7 @@
     <modules>
         <module>config-spec</module>
         <module>config-json</module>
-        <!--<module>config-nbt-export</module>-->
+        <module>config-nbt-export</module>
         <module>client</module>
     </modules>
 </project>
