@@ -1,15 +1,20 @@
 package be.xhibit.teletask.webapp.rest;
 
+import be.xhibit.teletask.config.model.json.TDSClientConfig;
 import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.parser.FullNbtModelConsumerImpl;
+import be.xhibit.teletask.parser.PrintedFileVisitor;
 
 import javax.ws.rs.core.Application;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Defines the components of a JAX-RS application and supplies additional metadata.
  */
-public abstract class TeletaskApplication extends Application {
+public class TeletaskApplication extends Application {
 
     private final Set<Object> singletons = new HashSet<Object>();
 
@@ -38,5 +43,23 @@ public abstract class TeletaskApplication extends Application {
         return this.singletons;
     }
 
-    protected abstract ClientConfig getClientConfig();
+    protected ClientConfig getClientConfig() {
+        ClientConfig clientConfig = null;
+
+        String configFile = System.getProperty("configFile");
+
+        try (FileInputStream jsonData = new FileInputStream(configFile)) {
+            clientConfig = TDSClientConfig.read(jsonData);
+        } catch (Exception e) {
+            try (FileInputStream inputStream = new FileInputStream(configFile)) {
+                FullNbtModelConsumerImpl consumer = new FullNbtModelConsumerImpl();
+                PrintedFileVisitor.getInstance().visit(consumer, inputStream);
+                clientConfig = consumer.getCentralUnit();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return clientConfig;
+    }
 }

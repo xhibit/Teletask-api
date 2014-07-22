@@ -8,14 +8,15 @@ import be.xhibit.teletask.model.nbt.Relay;
 import be.xhibit.teletask.model.nbt.Room;
 import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.model.spec.Function;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-public class FullProprietaryModelConsumerImpl implements Consumer {
+public class FullNbtModelConsumerImpl implements Consumer {
     private final CentralUnit centralUnit;
 
-    public FullProprietaryModelConsumerImpl() {
+    public FullNbtModelConsumerImpl() {
         this.centralUnit = new CentralUnit();
     }
 
@@ -83,8 +84,13 @@ public class FullProprietaryModelConsumerImpl implements Consumer {
 
         inputInterface.getInputs().add(new Input(id, name, this.getComponent(shortActionType, shortActionId), this.getComponent(longActionType, longActionId)));
     }
+
     private Component getComponent(String actionType, String actionId) {
-        return this.getCentralUnit().getComponent(ACTION_MAPPING.get(actionType), Integer.valueOf(actionId));
+        Component component = null;
+        if (!Strings.isNullOrEmpty(actionType) && !Strings.isNullOrEmpty(actionId)) {
+            component = this.getCentralUnit().getComponent(ACTION_MAPPING.get(actionType), Integer.valueOf(actionId));
+        }
+        return component;
     }
 
     private static Map<String, Function> ACTION_MAPPING = ImmutableMap.<String, Function>builder()

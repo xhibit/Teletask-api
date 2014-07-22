@@ -1,6 +1,6 @@
 package be.xhibit.teletask.parser;
 
-public class InterestingProprietaryModelConsumerImpl extends FullProprietaryModelConsumerImpl {
+public class InterestingNbtModelConsumerImpl extends FullNbtModelConsumerImpl {
     @Override
     public void visitInput(String autobusId, String autobusType, String autobusNumber, String id, String name, String shortActionType, String shortActionId, String longActionType, String longActionId) {
 //        super.visitInput(autobusId, autobusType, autobusNumber, id, name, shortActionType, shortActionId, longActionType, longActionId);
