@@ -18,8 +18,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>be.xhibit</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>teletask-api-rest</artifactId>
+            <classifier>classes</classifier>
         </dependency>
     </dependencies>
 </project>
