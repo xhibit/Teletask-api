@@ -35,7 +35,7 @@ public abstract class MessageSupport {
             outputStream.flush();
 
             result = SendResult.SUCCESS;
-        } catch (IOException e){
+        } catch (Exception e){
             result = SendResult.FAILED;
         }
 
@@ -43,7 +43,7 @@ public abstract class MessageSupport {
     }
 
     private MessageComposer getMessageComposer() {
-        return null;
+        return COMPOSERS.get(this.getCentralUnitType());
     }
 
     public CentralUnitType getCentralUnitType() {

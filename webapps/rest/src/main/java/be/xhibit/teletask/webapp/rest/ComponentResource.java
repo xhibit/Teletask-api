@@ -135,7 +135,7 @@ public class ComponentResource {
      * @param state The state you want to the relay to switch to, either 0 (off) or 1 (on) .
      * @return JSON response confirming if the switch request was successful.
      */
-    @PUT
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/relay/{number}/state/{state}")
     public Response relay(@PathParam("number") int number, @PathParam("state") String state) {
