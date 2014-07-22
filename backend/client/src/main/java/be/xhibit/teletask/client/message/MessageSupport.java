@@ -5,7 +5,6 @@ import be.xhibit.teletask.client.message.v3_1.MicrosPlusMessageComposer;
 import be.xhibit.teletask.model.spec.CentralUnitType;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.MessageComposer;
 import com.google.common.collect.ImmutableMap;
 
 import java.io.IOException;

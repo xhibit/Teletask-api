@@ -7,7 +7,6 @@ import be.xhibit.teletask.client.message.LogMessage;
 import be.xhibit.teletask.client.message.SendResult;
 import be.xhibit.teletask.client.message.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfig;
-import be.xhibit.teletask.model.spec.MessageComposer;
 import be.xhibit.teletask.model.spec.State;
 import be.xhibit.teletask.model.spec.Function;
 import org.apache.logging.log4j.LogManager;

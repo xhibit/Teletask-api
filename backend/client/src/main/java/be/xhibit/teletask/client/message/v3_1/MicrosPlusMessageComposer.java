@@ -1,7 +1,7 @@
 package be.xhibit.teletask.client.message.v3_1;
 
 import be.xhibit.teletask.model.spec.Command;
-import be.xhibit.teletask.model.spec.MessageComposer;
+import be.xhibit.teletask.client.message.MessageComposer;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Bytes;
