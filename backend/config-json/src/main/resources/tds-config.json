@@ -1,6 +1,7 @@
 {
     "host": "hostname",
     "port": 4660,
+    "type": "TDS 10010: MICROS",
     "componentsTypes": {
         "RELAY": [
              {"number":  1, "description": "L01: bedroom 1"}

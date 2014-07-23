@@ -27,7 +27,6 @@ public class TDSClientConfig implements ClientConfig {
 
     private String host;
     private int port;
-    private boolean testMode;
     private Map<Function, List<TDSComponent>> componentsTypes;
     private List<Room> rooms;
 
@@ -58,14 +57,6 @@ public class TDSClientConfig implements ClientConfig {
 
     public void setPort(int port) {
         this.port = port;
-    }
-
-    public boolean isTestMode() {
-        return this.testMode;
-    }
-
-    public void setTestMode(boolean testMode) {
-        this.testMode = testMode;
     }
 
     public Map<Function, List<TDSComponent>> getComponentsTypes() {
@@ -162,7 +153,7 @@ public class TDSClientConfig implements ClientConfig {
 
         //convert json string to object
         clientConfig = objectMapper.readValue(jsonData, TDSClientConfig.class);
-        LOG.debug("Config loaded: TDS HOST: " + clientConfig.getHost() + ":" + clientConfig.getPort() + " - TESTMODE: " + clientConfig.isTestMode());
+        LOG.debug("Config loaded: TDS HOST: " + clientConfig.getHost() + ":" + clientConfig.getPort());
 
         // until a better Jackson ObjectMapper implementation, loop through all rooms and replace component number by actual object reference
         clientConfig.initRooms();
