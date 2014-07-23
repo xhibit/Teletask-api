@@ -5,7 +5,7 @@
     </Properties>
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%highlight{${pattern}}" />
+            <PatternLayout pattern="${pattern}" />
         </Console>
         <RollingFile name="teletask" fileName="${sys:logfile}" append="true" filePattern="${sys:logfile}-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="${pattern}" />
@@ -20,7 +20,10 @@
         <Root level="warn">
             <AppenderRef ref="console" />
         </Root>
-        <Logger name="be.xhibit.teletask" level="debug">
+        <Logger name="be.xhibit.teletask" level="debug" additivity="false">
+            <AppenderRef ref="teletask"/>
+        </Logger>
+        <Logger name="org.jboss.resteasy" level="debug" additivity="false">
             <AppenderRef ref="teletask"/>
         </Logger>
     </Loggers>
