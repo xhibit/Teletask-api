@@ -6,7 +6,7 @@ public class ByteUtilities {
     private ByteUtilities() {
     }
 
-    public static CharSequence bytesToHex(byte... bytes) {
+    public static String bytesToHex(byte... bytes) {
         char[] hexChars = new char[bytes.length * 3];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;

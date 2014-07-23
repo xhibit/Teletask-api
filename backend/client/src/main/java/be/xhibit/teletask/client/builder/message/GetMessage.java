@@ -1,10 +1,13 @@
 package be.xhibit.teletask.client.builder.message;
 
+import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
+import com.google.common.base.Joiner;
+import com.google.common.primitives.Bytes;
 
-public class GetMessage extends MessageSupport {
+public class GetMessage extends FunctionBasedMessageSupport {
     private final int number;
 
     public GetMessage(ClientConfig clientConfig, Function function, int number) {
@@ -14,7 +17,7 @@ public class GetMessage extends MessageSupport {
 
     @Override
     protected byte[] getPayload() {
-        return this.getMessageComposer().composeOutput(this.number);
+        return Bytes.concat(new byte[]{this.getFunction().getCode()}, MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).composeOutput(this.number));
     }
 
     @Override
@@ -24,6 +27,6 @@ public class GetMessage extends MessageSupport {
 
     @Override
     protected String getPayloadLogInfo() {
-        return this.formatOutput(this.number);
+        return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatOutput(this.number));
     }
 }

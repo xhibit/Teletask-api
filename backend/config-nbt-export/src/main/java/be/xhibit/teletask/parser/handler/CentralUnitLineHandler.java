@@ -40,7 +40,7 @@ public class CentralUnitLineHandler extends LineHandlerSupport {
                 case "Name": consumer.name(value); break;
                 case "Serial Number": consumer.serialNumber(value); break;
                 case "IP Address": consumer.ipAddress(value); break;
-                case "Port Number": consumer.portNumber(value); break;
+                case "Port Number": consumer.portNumber("55957"); break; //Cannot change port number, this is hardcoded
                 case "MAC Address": consumer.macAddress(value); break;
             }
         }

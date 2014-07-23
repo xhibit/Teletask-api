@@ -2,25 +2,20 @@ package be.xhibit.teletask.client.builder.message;
 
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.SendResult;
-import be.xhibit.teletask.client.builder.composer.MessageComposer;
-import be.xhibit.teletask.client.builder.composer.v2_8.MicrosMessageComposer;
-import be.xhibit.teletask.client.builder.composer.v3_1.MicrosPlusMessageComposer;
-import be.xhibit.teletask.model.spec.CentralUnitType;
+import be.xhibit.teletask.client.builder.composer.MessageHandler;
+import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
-import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 public abstract class MessageSupport {
@@ -29,51 +24,44 @@ public abstract class MessageSupport {
      */
     private static final Logger LOG = LoggerFactory.getLogger(MessageSupport.class);
 
-    private static final Map<CentralUnitType, MessageComposer> COMPOSERS = ImmutableMap.<CentralUnitType, MessageComposer>builder()
-            .put(CentralUnitType.MICROS, new MicrosMessageComposer())
-            .put(CentralUnitType.MICROS_PLUS, new MicrosPlusMessageComposer())
-            .build();
-
     private static final Pattern REMOVE_NAMES = Pattern.compile("[^\\|]");
     private static final Pattern INSERT_PLACEHOLDERS = Pattern.compile("\\|   ");
-    public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("00");
 
-    private final Function function;
     private final ClientConfig clientConfig;
 
-    protected MessageSupport(ClientConfig clientConfig, Function function) {
+    protected MessageSupport(ClientConfig clientConfig) {
         this.clientConfig = clientConfig;
-        this.function = function;
     }
 
     public SendResult send(OutputStream outputStream) {
-        byte[] message = this.getMessageComposer().compose(this.getCommand(), this.getFunction(), this.getPayload());
-
+        MessageHandler messageHandler = MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType());
         SendResult result;
-        try {
-            //Send data over socket
-            if (Boolean.getBoolean("production")) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Sending: {}", this.format(message));
-                }
-                outputStream.write(message);
-                outputStream.flush();
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Test mode send: {}", this.format(message));
-                }
-            }
+        if (messageHandler.getCommandConfig().containsKey(this.getCommand())) {
+            byte[] message = messageHandler.compose(this.getCommand(), this.getPayload());
 
-            result = SendResult.SUCCESS;
-        } catch (Exception e) {
-            result = SendResult.FAILED;
+            try {
+                //Send data over socket
+                if (Boolean.getBoolean("production")) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Sending: {}", this.getLogInfo(message));
+                    }
+                    outputStream.write(message);
+                    outputStream.flush();
+                } else {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Test mode send: {}", this.getLogInfo(message));
+                    }
+                }
+
+                result = SendResult.SUCCESS;
+            } catch (Exception e) {
+                result = SendResult.FAILED;
+            }
+        } else {
+            result = SendResult.IGNORED;
         }
 
         return result;
-    }
-
-    protected MessageComposer getMessageComposer() {
-        return COMPOSERS.get(this.getClientConfig().getCentralUnitType());
     }
 
     protected ClientConfig getClientConfig() {
@@ -89,11 +77,7 @@ public abstract class MessageSupport {
 
     protected abstract Command getCommand();
 
-    private Function getFunction() {
-        return this.function;
-    }
-
-    protected String format(byte[] message) {
+    public String getLogInfo(byte[] message) {
         List<String> hexParts = this.getHexParts(message);
 
         StringBuilder table = this.getHeader(hexParts);
@@ -103,7 +87,7 @@ public abstract class MessageSupport {
         table.append(System.lineSeparator()).append(hexLine);
         table.append(System.lineSeparator()).append(seperatorLine);
 
-        return System.lineSeparator() + "Command: " + this.getCommand() + ", Function: " + this.getFunction() + ", Payload: " + this.getPayloadLogInfo() + System.lineSeparator() + seperatorLine + System.lineSeparator() + table.toString();
+        return System.lineSeparator() + "Command: " + this.getCommand() + ", Payload: " + this.getPayloadLogInfo() + System.lineSeparator() + seperatorLine + System.lineSeparator() + table.toString();
     }
 
     protected abstract String getPayloadLogInfo();
@@ -142,14 +126,18 @@ public abstract class MessageSupport {
     }
 
     private String getMessageParamName(int index) {
-        return this.getMessageComposer().getCommandConfig().get(this.getCommand()).getParamNames().get(index);
+        return MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).getCommandConfig().get(this.getCommand()).getParamNames().get(index);
     }
 
     protected String formatState(State state) {
         return "State( " + state + " | " + state.getCode() + " | " + ByteUtilities.bytesToHex((byte) state.getCode()) + ")";
     }
 
+    protected String formatFunction(Function function) {
+        return "Function( " + function + " | " + function.getCode() + " | " + ByteUtilities.bytesToHex((byte) function.getCode()) + ")";
+    }
+
     protected String formatOutput(int number) {
-        return "Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageComposer().composeOutput(number)) + ")";
+        return "Output( " + number + " | " + ByteUtilities.bytesToHex(MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).composeOutput(number)) + ")";
     }
 }

@@ -2,7 +2,8 @@ package be.xhibit.teletask.client.builder;
 
 public enum SendResult {
     SUCCESS(1),
-    FAILED(0);
+    FAILED(0),
+    IGNORED(2);
 
     private final int code;
 

@@ -8,11 +8,11 @@ import be.xhibit.teletask.model.spec.State;
 import com.google.common.base.Joiner;
 import com.google.common.primitives.Bytes;
 
-public class SetMessage extends FunctionBasedMessageSupport {
+public class EventMessage extends FunctionBasedMessageSupport {
     private final int number;
     private final State state;
 
-    public SetMessage(ClientConfig clientConfig, Function function, int number, State state) {
+    public EventMessage(ClientConfig clientConfig, Function function, int number, State state) {
         super(clientConfig, function);
         this.number = number;
         this.state = state;
@@ -25,7 +25,7 @@ public class SetMessage extends FunctionBasedMessageSupport {
 
     @Override
     protected Command getCommand() {
-        return Command.SET;
+        return Command.EVENT;
     }
 
     @Override
