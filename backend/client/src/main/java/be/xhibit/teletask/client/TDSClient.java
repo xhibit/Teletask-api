@@ -193,9 +193,14 @@ public final class TDSClient {
         return new KeepAliveMessage(this.getConfig()).send(this.out);
     }
 
+    public State get(Function function, int number) {
+        return this.get(this.getConfig().getComponent(function, number));
+    }
+
     public State get(Component component) {
         component.setComponentState(null);
-        return this.getState(component, 0);
+        this.getStateFromCentralUnit(component.getComponentFunction(), component.getComponentNumber());
+        return this.getState(component);
     }
 
     public void close() {
@@ -226,21 +231,13 @@ public final class TDSClient {
         this.clientConfig = clientConfig;
     }
 
-    private State getState(Component component, int counter) {
-        State state = component.getComponentState();
-        if (state == null) {
-            if (counter < 10) {
-                this.getStateFromCentralUnit(component.getComponentFunction(), component.getComponentNumber());
-
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    LOG.error("Exception ({}) caught in getState: {}", e.getClass().getName(), e.getMessage(), e);
-                }
-
-                state = this.getState(component, ++counter);
-            } else {
-                throw new RuntimeException("Could not get state for '" + component.getComponentFunction() + "':'" + component.getComponentNumber() + "' in a timely fashion");
+    private State getState(Component component) {
+        State state = null;
+        while ((state = component.getComponentState()) == null) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                LOG.error("Exception ({}) caught in getState: {}", e.getClass().getName(), e.getMessage(), e);
             }
         }
         return state;
@@ -334,7 +331,7 @@ public final class TDSClient {
                                     LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
                                 }
                             }
-                            Thread.sleep(10);
+                            Thread.sleep(1); // Reduces CPU load
                         }
                     } catch (Exception ex) {
                         LOG.error("Exception in thread runner: {}", ex.getMessage());
