@@ -36,12 +36,12 @@ public class CentralUnitLineHandler extends LineHandlerSupport {
             String value = matcher.group(2);
 
             switch (property) {
-                case "Type": consumer.visitType(value); break;
-                case "Name": consumer.visitName(value); break;
-                case "Serial Number": consumer.visitSerialNumber(value); break;
-                case "IP Address": consumer.visitIpAddress(value); break;
-                case "Port Number": consumer.visitPortNumber(value); break;
-                case "MAC Address": consumer.visitMacAddress(value); break;
+                case "Type": consumer.type(value); break;
+                case "Name": consumer.name(value); break;
+                case "Serial Number": consumer.serialNumber(value); break;
+                case "IP Address": consumer.ipAddress(value); break;
+                case "Port Number": consumer.portNumber(value); break;
+                case "MAC Address": consumer.macAddress(value); break;
             }
         }
     }

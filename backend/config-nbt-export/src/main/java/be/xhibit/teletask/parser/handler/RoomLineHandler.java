@@ -26,6 +26,6 @@ public class RoomLineHandler extends LineHandlerSupport {
 
     @Override
     protected void handle(String startLine, Consumer consumer, ListIterator<String> iterator, String line, int counter) {
-        consumer.visitRoom(ID_FORMATTER.format(counter), line);
+        consumer.room(ID_FORMATTER.format(counter), line);
     }
 }

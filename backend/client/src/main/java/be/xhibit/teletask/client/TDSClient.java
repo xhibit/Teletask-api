@@ -1,16 +1,16 @@
 package be.xhibit.teletask.client;
 
-import be.xhibit.teletask.model.spec.CentralUnitType;
-import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.client.message.GetMessage;
 import be.xhibit.teletask.client.message.LogMessage;
 import be.xhibit.teletask.client.message.SendResult;
 import be.xhibit.teletask.client.message.SetMessage;
+import be.xhibit.teletask.model.spec.CentralUnitType;
 import be.xhibit.teletask.model.spec.ClientConfig;
-import be.xhibit.teletask.model.spec.State;
+import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.model.spec.Function;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import be.xhibit.teletask.model.spec.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -122,7 +122,10 @@ import java.util.regex.Pattern;
  * - You can send a keep alive to make sure that the central unit don't close the port because there is no activity
  */
 public final class TDSClient {
-    static final Logger LOG = LogManager.getLogger(TDSClient.class.getName());
+    /**
+     * Logger responsible for logging and debugging statements.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(TDSClient.class);
 
     private static final Pattern SPLIT_PATTERN_RESPONSE_ARRAY = Pattern.compile("2, 6, 8, ");
     private static final Pattern SPLIT_PATTERN_RELAYS = Pattern.compile(", ");
@@ -177,17 +180,13 @@ public final class TDSClient {
     }
 
     public SendResult set(Function function, int number, State state) {
-        SendResult result = new SetMessage(this.getCentralUnitType(), function, number, state).send(this.out);
+        SendResult result = new SetMessage(this.getConfig(), function, number, state).send(this.out);
 
         if (result == SendResult.SUCCESS) {
             this.setState(function, number, state);
         }
 
         return result;
-    }
-
-    private CentralUnitType getCentralUnitType() {
-        return this.getConfig().getCentralUnitType();
     }
 
     public State get(Component component) {
@@ -247,7 +246,7 @@ public final class TDSClient {
     }
 
     private void getStateFromCentralUnit(Function function, int number) {
-        new GetMessage(this.getCentralUnitType(), function, number).send(this.out);
+        new GetMessage(this.getConfig(), function, number).send(this.out);
     }
 
     private String getStateIndex(Function function, int number) {
@@ -327,7 +326,7 @@ public final class TDSClient {
     }
 
     private void sendLogEventMessage(Function function, State state) {
-        new LogMessage(this.getCentralUnitType(), function, state).send(this.out);
+        new LogMessage(this.getConfig(), function, state).send(this.out);
     }
 
     private static void readLogResponse(TDSClient client) throws Exception {

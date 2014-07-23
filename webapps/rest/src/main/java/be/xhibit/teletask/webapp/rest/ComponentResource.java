@@ -4,8 +4,9 @@ import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.model.spec.Function;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.google.common.primitives.Ints;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -19,7 +20,10 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 public class ComponentResource {
-    static final Logger LOG = LogManager.getLogger(ComponentResource.class.getName());
+    /**
+     * Logger responsible for logging and debugging statements.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(ComponentResource.class);
 
     /**
      * The TDSClient object, which makes the IP socket connection to the TDS hardware.
@@ -244,12 +248,6 @@ public class ComponentResource {
      * @return true or false
      */
     public static boolean isInteger(String stringValue) {
-        try {
-            Integer.parseInt(stringValue);
-        } catch(NumberFormatException e) {
-            return false;
-        }
-        // only got here if we didn't return false
-        return true;
+        return Ints.tryParse(stringValue) != null;
     }
 }

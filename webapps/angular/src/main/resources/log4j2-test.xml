@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Properties>
+        <Property name="pattern">%d{HH:mm:ss.SSS} %-5level %c{1}(%L) - %msg%n</Property>
+    </Properties>
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%highlight{${pattern}}" />
+        </Console>
+        <RollingFile name="teletask" fileName="${sys:logfile}" append="true" filePattern="${sys:logfile}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="warn">
+            <AppenderRef ref="console" />
+        </Root>
+        <Logger name="be.xhibit.teletask" level="debug">
+            <AppenderRef ref="teletask"/>
+        </Logger>
+    </Loggers>
+</Configuration>

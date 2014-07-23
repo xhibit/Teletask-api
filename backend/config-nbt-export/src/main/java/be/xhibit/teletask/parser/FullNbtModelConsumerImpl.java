@@ -10,10 +10,17 @@ import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 public class FullNbtModelConsumerImpl implements Consumer {
+    /**
+     * Logger responsible for logging and debugging statements.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(FullNbtModelConsumerImpl.class);
+
     private final CentralUnit centralUnit;
 
     public FullNbtModelConsumerImpl() {
@@ -21,57 +28,68 @@ public class FullNbtModelConsumerImpl implements Consumer {
     }
 
     @Override
-    public void visitPrincipalSite(String value) {
+    public void principalSite(String value) {
+        this.getLogger().debug("principalSite: {}", value);
         this.getCentralUnit().setPrincipalSite(value);
     }
 
     @Override
-    public void visitName(String value) {
+    public void name(String value) {
+        this.getLogger().debug("name: {}", value);
         this.getCentralUnit().setName(value);
     }
 
     @Override
-    public void visitType(String value) {
+    public void type(String value) {
+        this.getLogger().debug("type: {}", value);
         this.getCentralUnit().setType(value);
     }
 
     @Override
-    public void visitSerialNumber(String value) {
+    public void serialNumber(String value) {
+        this.getLogger().debug("serialNumber: {}", value);
         this.getCentralUnit().setSerialNumber(value);
     }
 
     @Override
-    public void visitIpAddress(String value) {
+    public void ipAddress(String value) {
+        this.getLogger().debug("ipAddress: {}", value);
         this.getCentralUnit().setHost(value);
     }
 
     @Override
-    public void visitPortNumber(String value) {
+    public void portNumber(String value) {
+        this.getLogger().debug("portNumber: {}", value);
         this.getCentralUnit().setPort(Integer.valueOf(value));
     }
 
     @Override
-    public void visitMacAddress(String value) {
+    public void macAddress(String value) {
+        this.getLogger().debug("macAddress: {}", value);
         this.getCentralUnit().setMacAddress(value);
     }
 
     @Override
-    public void visitRoom(String id, String name) {
+    public void room(String id, String name) {
+        this.getLogger().debug("room: {} - {}", id, name);
         this.getCentralUnit().getRooms().add(new Room(Integer.valueOf(id), name));
     }
 
     @Override
-    public void visitOutputInterface(String autobusId, String autobusType, String autobusNumber, String type, String name) {
+    public void outputInterface(String autobusId, String autobusType, String autobusNumber, String type, String name) {
+        this.getLogger().debug("outputInterface: {}:{}:{} {} - {}", autobusId, autobusType, autobusNumber, type, name);
         this.getCentralUnit().getOutputInterfaces().add(new OutputInterface(autobusId, autobusType, autobusNumber, type, name));
     }
 
     @Override
-    public void visitInputInterface(String autobusId, String autobusType, String autobusNumber, String name) {
+    public void inputInterface(String autobusId, String autobusType, String autobusNumber, String name) {
+        this.getLogger().debug("inputInterface: {}:{}:{} - {}", autobusId, autobusType, autobusNumber, name);
         this.getCentralUnit().getInputInterfaces().add(new InputInterface(autobusId, autobusType, autobusNumber, name));
     }
 
     @Override
-    public void visitRelay(String id, String roomName, String type, String description) {
+    public void relay(String id, String roomName, String type, String description) {
+        this.getLogger().debug("relay: {}:{} (Room {}) - {}", type, id, roomName, description);
         Room room = this.getCentralUnit().findRoom(roomName);
         Relay relay = new Relay(Integer.valueOf(id), room, type, description);
         room.getRelays().add(relay);
@@ -79,7 +97,8 @@ public class FullNbtModelConsumerImpl implements Consumer {
     }
 
     @Override
-    public void visitInput(String autobusId, String autobusType, String autobusNumber, String id, String name, String shortActionType, String shortActionId, String longActionType, String longActionId) {
+    public void input(String autobusId, String autobusType, String autobusNumber, String id, String name, String shortActionType, String shortActionId, String longActionType, String longActionId) {
+        this.getLogger().debug("input: {}:{}:{} - {} - {} [Short: {}:{}], [Long: {}:{}]", autobusId, autobusType, autobusNumber, id, name, shortActionType, shortActionId, longActionType, longActionId);
         InputInterface inputInterface = this.getCentralUnit().findInputInterface(autobusId, autobusType, autobusNumber);
 
         inputInterface.getInputs().add(new Input(id, name, this.getComponent(shortActionType, shortActionId), this.getComponent(longActionType, longActionId)));
@@ -99,5 +118,9 @@ public class FullNbtModelConsumerImpl implements Consumer {
 
     public CentralUnit getCentralUnit() {
         return this.centralUnit;
+    }
+
+    protected Logger getLogger() {
+        return LOG;
     }
 }
