@@ -15,7 +15,7 @@ public class LogMessage extends MessageSupport {
 
     @Override
     protected byte[] getPayload() {
-        return new byte[]{this.state.getCode()};
+        return new byte[]{(byte) this.state.getCode()};
     }
 
     @Override

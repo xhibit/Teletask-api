@@ -20,7 +20,7 @@ public class SetMessage extends MessageSupport {
 
     @Override
     protected byte[] getPayload() {
-        return Bytes.concat(this.getMessageComposer().composeOutput(this.number), new byte[]{this.state.getCode()});
+        return Bytes.concat(this.getMessageComposer().composeOutput(this.number), new byte[]{(byte) this.state.getCode()});
     }
 
     @Override
