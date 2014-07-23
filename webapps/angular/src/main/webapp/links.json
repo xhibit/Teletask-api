@@ -1,28 +1,1107 @@
 [
     {
-        "name": "Work",
-        "links": [
+        "principalSite": null,
+        "name": "Home Central",
+        "type": "TDS 10012: MICROS+",
+        "serialNumber": "260580615",
+        "host": "192.168.1.205",
+        "port": 55957,
+        "macAddress": "00:50:c2:6a:40:b5",
+        "rooms": [
             {
-                "name": "Google",
-                "url": "http://www.google.com"
+                "id": 1,
+                "name": "Keuken (KE01)",
+                "relays": [
+                    {
+                        "id": 16,
+                        "description": "L03 tot L04",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 1
+                    },
+                    {
+                        "id": 17,
+                        "description": "L01 tot L02",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 1
+                    },
+                    {
+                        "id": 18,
+                        "description": "L05",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 1
+                    }
+                ]
             },
             {
-                "name": "Yahoo",
-                "url": "http://www.yahoo.com"
-            }
-        ]
-    },
-    {
-        "name": "Personal",
-        "links": [
-            {
-                "name": "Gmail",
-                "url": "http://www.gmail.com"
+                "id": 2,
+                "name": "Zitkamer (ZK01)",
+                "relays": [
+                    {
+                        "id": 3,
+                        "description": "Ledjes Trap Boven",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": "ON",
+                        "roomId": 2
+                    },
+                    {
+                        "id": 23,
+                        "description": "L07",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 2
+                    }
+                ]
             },
             {
-                "name": "Facebook",
-                "url": "http://www.facebook.com"
+                "id": 3,
+                "name": "Eetkamer (EK01)",
+                "relays": [
+                    {
+                        "id": 13,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 3
+                    },
+                    {
+                        "id": 20,
+                        "description": "L02 tot L04",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 3
+                    }
+                ]
+            },
+            {
+                "id": 4,
+                "name": "Terras (TE01)",
+                "relays": [
+                    {
+                        "id": 22,
+                        "description": "L01 tot L02",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 4
+                    }
+                ]
+            },
+            {
+                "id": 5,
+                "name": "Berging Boven (BE01)",
+                "relays": [
+                    {
+                        "id": 2,
+                        "description": "L04",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 5
+                    },
+                    {
+                        "id": 4,
+                        "description": "L01 tot L03",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 5
+                    },
+                    {
+                        "id": 32,
+                        "description": "Kring K",
+                        "type": "Device",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 5
+                    }
+                ]
+            },
+            {
+                "id": 6,
+                "name": "Berging Trap (BE02)",
+                "relays": [
+                    {
+                        "id": 24,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 6
+                    }
+                ]
+            },
+            {
+                "id": 7,
+                "name": "Berging Vooraan (BE03)",
+                "relays": [
+                    {
+                        "id": 21,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 7
+                    }
+                ]
+            },
+            {
+                "id": 8,
+                "name": "Garage (GA01)",
+                "relays": [
+                    {
+                        "id": 19,
+                        "description": "L01 tot L06",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 8
+                    },
+                    {
+                        "id": 30,
+                        "description": "Garage Poort",
+                        "type": "Motor - power",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 8
+                    }
+                ]
+            },
+            {
+                "id": 9,
+                "name": "Slaapkamer SNG (SK01)",
+                "relays": [
+                    {
+                        "id": 1,
+                        "description": "L01 tot L05",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 9
+                    }
+                ]
+            },
+            {
+                "id": 10,
+                "name": "Kinderkamer 1 (SK02)",
+                "relays": [
+                    {
+                        "id": 11,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 10
+                    }
+                ]
+            },
+            {
+                "id": 11,
+                "name": "Kinderkamer 2 (SK03)",
+                "relays": [
+                    {
+                        "id": 12,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 11
+                    }
+                ]
+            },
+            {
+                "id": 12,
+                "name": "Inkomhal (IH01)",
+                "relays": [
+                    {
+                        "id": 6,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 12
+                    },
+                    {
+                        "id": 7,
+                        "description": "L02 tot L03",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 12
+                    }
+                ]
+            },
+            {
+                "id": 13,
+                "name": "Gang Boven (HA01)",
+                "relays": [
+                    {
+                        "id": 5,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 13
+                    },
+                    {
+                        "id": 9,
+                        "description": "L02 tot L04",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 13
+                    }
+                ]
+            },
+            {
+                "id": 14,
+                "name": "Toilet (WC01)",
+                "relays": [
+                    {
+                        "id": 15,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 14
+                    }
+                ]
+            },
+            {
+                "id": 15,
+                "name": "Badkamer (BK01)",
+                "relays": [
+                    {
+                        "id": 8,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 15
+                    },
+                    {
+                        "id": 10,
+                        "description": "L02 tot L04",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 15
+                    },
+                    {
+                        "id": 14,
+                        "description": "L05",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 15
+                    }
+                ]
+            },
+            {
+                "id": 16,
+                "name": "Bureau (BU01)",
+                "relays": []
+            },
+            {
+                "id": 17,
+                "name": "Globaal",
+                "relays": [
+                    {
+                        "id": 27,
+                        "description": "Ventilatie Stand 1",
+                        "type": "Heating/Cooling",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 17
+                    },
+                    {
+                        "id": 28,
+                        "description": "Ventilatie Stand 2",
+                        "type": "Heating/Cooling",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 17
+                    },
+                    {
+                        "id": 29,
+                        "description": "Ventilatie Stand 3",
+                        "type": "Heating/Cooling",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 17
+                    }
+                ]
+            },
+            {
+                "id": 18,
+                "name": "Boven",
+                "relays": []
+            },
+            {
+                "id": 19,
+                "name": "Gelijkvloers",
+                "relays": [
+                    {
+                        "id": 25,
+                        "description": "Kring A, B, D, E",
+                        "type": "Device",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 19
+                    }
+                ]
+            },
+            {
+                "id": 20,
+                "name": "Tuinhuis (TH01)",
+                "relays": [
+                    {
+                        "id": 26,
+                        "description": "L01",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 20
+                    },
+                    {
+                        "id": 31,
+                        "description": "L02",
+                        "type": "Light",
+                        "componentFunction": "RELAY",
+                        "componentState": null,
+                        "roomId": 20
+                    }
+                ]
             }
-        ]
+        ],
+        "outputInterfaces": [
+            {
+                "autobusId": "0",
+                "autobusType": "O",
+                "autobusNumber": "00",
+                "name": "MICROS OUTPUTS (1 - 8)",
+                "type": "SOU",
+                "completeAutobusId": "0-O00"
+            },
+            {
+                "autobusId": "0",
+                "autobusType": "O",
+                "autobusNumber": "01",
+                "name": "MICROS OUTPUTS (9 - 16)",
+                "type": "SOU",
+                "completeAutobusId": "0-O01"
+            },
+            {
+                "autobusId": "0",
+                "autobusType": "O",
+                "autobusNumber": "02",
+                "name": "MICROS OUTPUTS (17 - 24)",
+                "type": "SOU",
+                "completeAutobusId": "0-O02"
+            },
+            {
+                "autobusId": "0",
+                "autobusType": "O",
+                "autobusNumber": "07",
+                "name": "MICROS DIMMER OUTPUTS",
+                "type": "DIM",
+                "completeAutobusId": "0-O07"
+            },
+            {
+                "autobusId": "1",
+                "autobusType": "O",
+                "autobusNumber": "01",
+                "name": "Relais module (25 - 32)",
+                "type": "ROB",
+                "completeAutobusId": "1-O01"
+            },
+            {
+                "autobusId": "1",
+                "autobusType": "O",
+                "autobusNumber": "48",
+                "name": "Motor interface (1 - 4)",
+                "type": "MOB",
+                "completeAutobusId": "1-O48"
+            }
+        ],
+        "inputInterfaces": [
+            {
+                "autobusId": "0",
+                "autobusType": "I",
+                "autobusNumber": "00",
+                "name": "Remote control MASTER functions",
+                "inputs": [],
+                "completeAutobusId": "0-I00"
+            },
+            {
+                "autobusId": "0",
+                "autobusType": "I",
+                "autobusNumber": "01",
+                "name": "Input 1 to 8",
+                "inputs": [
+                    {
+                        "id": "1",
+                        "name": "Onderaan Trap (Links Boven)",
+                        "shortAction": {
+                            "id": 5,
+                            "description": "L01",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 13
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "2",
+                        "name": "Zitkamer Raam (Links Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "3",
+                        "name": "Onderaan Trap (Rechts Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "4",
+                        "name": "Zitkamer Raam (Rechts Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "5",
+                        "name": "Onderaan Trap (Rechts Onder)",
+                        "shortAction": {
+                            "id": 13,
+                            "description": "L01",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 3
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "6",
+                        "name": "Zitkamer Raam (Rechts Onder)",
+                        "shortAction": null,
+                        "longAction": {
+                            "id": 22,
+                            "description": "L01 tot L02",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 4
+                        }
+                    },
+                    {
+                        "id": "7",
+                        "name": "Onderaan Trap (Links Onder)",
+                        "shortAction": {
+                            "id": 16,
+                            "description": "L03 tot L04",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 1
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "8",
+                        "name": "Zitkamer Raam (Links Onder)",
+                        "shortAction": null,
+                        "longAction": {
+                            "id": 31,
+                            "description": "L02",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 20
+                        }
+                    }
+                ],
+                "completeAutobusId": "0-I01"
+            },
+            {
+                "autobusId": "0",
+                "autobusType": "I",
+                "autobusNumber": "02",
+                "name": "Input 9 to 16",
+                "inputs": [
+                    {
+                        "id": "1",
+                        "name": "Bureau (Links Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "2",
+                        "name": "Bureau (Rechts Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "3",
+                        "name": "Bureau (Rechts Onder)",
+                        "shortAction": {
+                            "id": 22,
+                            "description": "L01 tot L02",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 4
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "4",
+                        "name": "Bureau (Links Onder)",
+                        "shortAction": {
+                            "id": 26,
+                            "description": "L01",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 20
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "5",
+                        "name": "Kinderkamer 1 (Links Boven)",
+                        "shortAction": {
+                            "id": 11,
+                            "description": "L01",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 10
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "6",
+                        "name": "Kinderkamer 2 (Rechts Onder)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "7",
+                        "name": "Gang Boven Slaapkamer",
+                        "shortAction": {
+                            "id": 5,
+                            "description": "L01",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 13
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "8",
+                        "name": "Kinderkamer 1 (Rechts Onder)",
+                        "shortAction": null,
+                        "longAction": null
+                    }
+                ],
+                "completeAutobusId": "0-I02"
+            },
+            {
+                "autobusId": "0",
+                "autobusType": "I",
+                "autobusNumber": "03",
+                "name": "Input 17 to 24",
+                "inputs": [
+                    {
+                        "id": "1",
+                        "name": "Kinderkamer 1 (Rechts Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "2",
+                        "name": "Kinderkamer 1 (Links Onder)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "3",
+                        "name": "Kinderkamer 2 (Links Onder)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "4",
+                        "name": "Kinderkamer 2 (Links Boven)",
+                        "shortAction": {
+                            "id": 12,
+                            "description": "L01",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 11
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "5",
+                        "name": "Sofie (Links)",
+                        "shortAction": {
+                            "id": 32,
+                            "description": "Kring K",
+                            "type": "Device",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 5
+                        },
+                        "longAction": {
+                            "id": 32,
+                            "description": "Kring K",
+                            "type": "Device",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 5
+                        }
+                    },
+                    {
+                        "id": "6",
+                        "name": "Kinderkamer 2 (Rechts Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "7",
+                        "name": "Badkamer (Rechts Onder)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "8",
+                        "name": "Master Bedroom (Rechts)",
+                        "shortAction": {
+                            "id": 5,
+                            "description": "L01",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 13
+                        },
+                        "longAction": null
+                    }
+                ],
+                "completeAutobusId": "0-I03"
+            },
+            {
+                "autobusId": "0",
+                "autobusType": "I",
+                "autobusNumber": "04",
+                "name": "Input 25 to 32",
+                "inputs": [
+                    {
+                        "id": "1",
+                        "name": "Geroen (Rechts)",
+                        "shortAction": {
+                            "id": 32,
+                            "description": "Kring K",
+                            "type": "Device",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 5
+                        },
+                        "longAction": {
+                            "id": 32,
+                            "description": "Kring K",
+                            "type": "Device",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 5
+                        }
+                    },
+                    {
+                        "id": "2",
+                        "name": "Badkamer (Links Onder)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "3",
+                        "name": "Geroen (Links)",
+                        "shortAction": {
+                            "id": 1,
+                            "description": "L01 tot L05",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 9
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "4",
+                        "name": "Badkamer (Rechts Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "5",
+                        "name": "Sofie (Rechts)",
+                        "shortAction": {
+                            "id": 1,
+                            "description": "L01 tot L05",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 9
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "6",
+                        "name": "Gang Boven Trap",
+                        "shortAction": {
+                            "id": 5,
+                            "description": "L01",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 13
+                        },
+                        "longAction": null
+                    },
+                    {
+                        "id": "7",
+                        "name": "Badkamer (Links Boven)",
+                        "shortAction": null,
+                        "longAction": null
+                    },
+                    {
+                        "id": "8",
+                        "name": "Master Bedroom (Links)",
+                        "shortAction": {
+                            "id": 1,
+                            "description": "L01 tot L05",
+                            "type": "Light",
+                            "componentFunction": "RELAY",
+                            "componentState": null,
+                            "roomId": 9
+                        },
+                        "longAction": null
+                    }
+                ],
+                "completeAutobusId": "0-I04"
+            },
+            {
+                "autobusId": "0",
+                "autobusType": "I",
+                "autobusNumber": "05",
+                "name": "Analog Input 1 and 2",
+                "inputs": [],
+                "completeAutobusId": "0-I05"
+            },
+            {
+                "autobusId": "1",
+                "autobusType": "I",
+                "autobusNumber": "02",
+                "name": "Digital intput interface 16 Inputs (1-8)",
+                "inputs": [],
+                "completeAutobusId": "1-I02"
+            },
+            {
+                "autobusId": "1",
+                "autobusType": "I",
+                "autobusNumber": "03",
+                "name": "Digital input interface 16 Inputs (9-16)",
+                "inputs": [],
+                "completeAutobusId": "1-I03"
+            },
+            {
+                "autobusId": "2",
+                "autobusType": "I",
+                "autobusNumber": "88",
+                "name": "LATUS touch window (key 1-8)",
+                "inputs": [],
+                "completeAutobusId": "2-I88"
+            },
+            {
+                "autobusId": "2",
+                "autobusType": "I",
+                "autobusNumber": "89",
+                "name": "LATUS touch window (key 9-16)",
+                "inputs": [],
+                "completeAutobusId": "2-I89"
+            }
+        ],
+        "components": [
+            {
+                "id": 1,
+                "description": "L01 tot L05",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 9
+            },
+            {
+                "id": 2,
+                "description": "L04",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 5
+            },
+            {
+                "id": 3,
+                "description": "Ledjes Trap Boven",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": "ON",
+                "roomId": 2
+            },
+            {
+                "id": 4,
+                "description": "L01 tot L03",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 5
+            },
+            {
+                "id": 5,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 13
+            },
+            {
+                "id": 6,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 12
+            },
+            {
+                "id": 7,
+                "description": "L02 tot L03",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 12
+            },
+            {
+                "id": 8,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 15
+            },
+            {
+                "id": 9,
+                "description": "L02 tot L04",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 13
+            },
+            {
+                "id": 10,
+                "description": "L02 tot L04",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 15
+            },
+            {
+                "id": 11,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 10
+            },
+            {
+                "id": 12,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 11
+            },
+            {
+                "id": 13,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 3
+            },
+            {
+                "id": 14,
+                "description": "L05",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 15
+            },
+            {
+                "id": 15,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 14
+            },
+            {
+                "id": 16,
+                "description": "L03 tot L04",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 1
+            },
+            {
+                "id": 17,
+                "description": "L01 tot L02",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 1
+            },
+            {
+                "id": 18,
+                "description": "L05",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 1
+            },
+            {
+                "id": 19,
+                "description": "L01 tot L06",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 8
+            },
+            {
+                "id": 20,
+                "description": "L02 tot L04",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 3
+            },
+            {
+                "id": 21,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 7
+            },
+            {
+                "id": 22,
+                "description": "L01 tot L02",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 4
+            },
+            {
+                "id": 23,
+                "description": "L07",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 2
+            },
+            {
+                "id": 24,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 6
+            },
+            {
+                "id": 25,
+                "description": "Kring A, B, D, E",
+                "type": "Device",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 19
+            },
+            {
+                "id": 26,
+                "description": "L01",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 20
+            },
+            {
+                "id": 27,
+                "description": "Ventilatie Stand 1",
+                "type": "Heating/Cooling",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 17
+            },
+            {
+                "id": 28,
+                "description": "Ventilatie Stand 2",
+                "type": "Heating/Cooling",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 17
+            },
+            {
+                "id": 29,
+                "description": "Ventilatie Stand 3",
+                "type": "Heating/Cooling",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 17
+            },
+            {
+                "id": 30,
+                "description": "Garage Poort",
+                "type": "Motor - power",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 8
+            },
+            {
+                "id": 31,
+                "description": "L02",
+                "type": "Light",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 20
+            },
+            {
+                "id": 32,
+                "description": "Kring K",
+                "type": "Device",
+                "componentFunction": "RELAY",
+                "componentState": null,
+                "roomId": 5
+            }
+        ],
+        "centralUnitType": "MICROS_PLUS"
     }
 ]
