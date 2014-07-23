@@ -182,7 +182,7 @@ public final class TDSClient {
         SendResult result = new SetMessage(this.getConfig(), function, number, state).send(this.out);
 
         if (result == SendResult.SUCCESS) {
-            this.setState(function, number, state);
+            this.setState(function, number, this.getState(function, number));
         }
 
         return result;
@@ -221,17 +221,25 @@ public final class TDSClient {
     }
 
     private State getState(Function function, int number) {
+        return this.getState(0, function, number);
+    }
+
+    private State getState(int counter, Function function, int number) {
         State state = this.states.get(this.getStateIndex(function, number));
         if (state == null) {
-            this.getStateFromCentralUnit(function, number);
+            if (counter < 10) {
+                this.getStateFromCentralUnit(function, number);
 
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                LOG.error("Exception ({}) caught in getState: {}", e.getClass().getName(), e.getMessage(), e);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    LOG.error("Exception ({}) caught in getState: {}", e.getClass().getName(), e.getMessage(), e);
+                }
+
+                state = this.getState(++counter, function, number);
+            } else {
+                throw new RuntimeException("Could not get state for '" + function + "':'" + number + "' in a timely fashion");
             }
-
-            state = this.getState(function, number);
         }
         return state;
     }
@@ -260,7 +268,6 @@ public final class TDSClient {
     }
 
     private void createSocket(String host, int port) {
-
         // delay to wait for the first execution, should occur immediately at startup
         int timerDelay = 0;
         // time in milliseconds to wait between every execution: every 30 minutes
