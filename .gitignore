@@ -3,3 +3,4 @@
 target/
 *.iml
 *.war
+backend/config-json/src/main/resources/tds-config-bruno.json
