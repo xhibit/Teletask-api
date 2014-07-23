@@ -1,4 +1,4 @@
-package be.xhibit.teletask.client.message;
+package be.xhibit.teletask.client.builder;
 
 import com.google.common.collect.ImmutableMap;
 

@@ -1,7 +1,10 @@
-package be.xhibit.teletask.client.message;
+package be.xhibit.teletask.client.builder.message;
 
-import be.xhibit.teletask.client.message.v2_8.MicrosMessageComposer;
-import be.xhibit.teletask.client.message.v3_1.MicrosPlusMessageComposer;
+import be.xhibit.teletask.client.builder.ByteUtilities;
+import be.xhibit.teletask.client.builder.SendResult;
+import be.xhibit.teletask.client.builder.composer.MessageComposer;
+import be.xhibit.teletask.client.builder.composer.v2_8.MicrosMessageComposer;
+import be.xhibit.teletask.client.builder.composer.v3_1.MicrosPlusMessageComposer;
 import be.xhibit.teletask.model.spec.CentralUnitType;
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Command;
@@ -15,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

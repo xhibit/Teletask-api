@@ -1,11 +1,10 @@
-package be.xhibit.teletask.client.message;
+package be.xhibit.teletask.client.builder.message;
 
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
 import com.google.common.primitives.Bytes;
 
 public class SetMessage extends MessageSupport {

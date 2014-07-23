@@ -1,4 +1,4 @@
-package be.xhibit.teletask.client.message;
+package be.xhibit.teletask.client.builder;
 
 public class ByteUtilities {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
@@ -6,7 +6,7 @@ public class ByteUtilities {
     private ByteUtilities() {
     }
 
-    static CharSequence bytesToHex(byte... bytes) {
+    public static CharSequence bytesToHex(byte... bytes) {
         char[] hexChars = new char[bytes.length * 3];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;

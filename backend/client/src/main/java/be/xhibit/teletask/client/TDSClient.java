@@ -1,10 +1,9 @@
 package be.xhibit.teletask.client;
 
-import be.xhibit.teletask.client.message.GetMessage;
-import be.xhibit.teletask.client.message.LogMessage;
-import be.xhibit.teletask.client.message.SendResult;
-import be.xhibit.teletask.client.message.SetMessage;
-import be.xhibit.teletask.model.spec.CentralUnitType;
+import be.xhibit.teletask.client.builder.message.GetMessage;
+import be.xhibit.teletask.client.builder.message.LogMessage;
+import be.xhibit.teletask.client.builder.SendResult;
+import be.xhibit.teletask.client.builder.message.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.model.spec.Function;
@@ -194,7 +193,7 @@ public final class TDSClient {
     }
 
     public void close() {
-        LOG.debug("Disconnecting from " + this.socket.getInetAddress().getHostAddress());
+        LOG.debug("Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
 
         // close all log events to stop reporting
         this.sendLogEventMessages(State.OFF);
@@ -268,14 +267,14 @@ public final class TDSClient {
         int timerPeriod = 30 * 60 * 1000;
 
         // Connect method
-        LOG.debug("Connecting to " + host + ":" + port);
+        LOG.debug("Connecting to {}:{}", host, port);
 
         try {
             this.socket = new Socket(host, port);
             this.socket.setKeepAlive(true);
             this.socket.setSoTimeout(5000);
         } catch (IOException e) {
-            LOG.error("Problem connecting to host: " + host, e);
+            LOG.error("Problem connecting to host: {}", host, e);
             System.exit(1);
         }
 
@@ -285,7 +284,7 @@ public final class TDSClient {
             this.out = new DataOutputStream(this.socket.getOutputStream());
             this.in = new DataInputStream(this.socket.getInputStream());
         } catch (IOException e) {
-            LOG.error("Couldn't get I/O for " + "the connection to: " + host + ":" + port);
+            LOG.error("Couldn't get I/O for the connection to: {}:{}", host, port);
             System.exit(1);
         }
 
@@ -314,7 +313,7 @@ public final class TDSClient {
                                 Thread.sleep(readInterval); //pause for a defined period of time
                             }
                         } catch (Exception ex) {
-                            LOG.error("Exception in thread runner: " + ex.getMessage());
+                            LOG.error("Exception in thread runner: {}", ex.getMessage());
                         }
                     }
                 }
@@ -375,7 +374,7 @@ public final class TDSClient {
             }
 
         } catch (Exception ex) {
-            LOG.error("Exception reading response: " + ex);
+            LOG.error("Exception reading response: {}", ex);
 
         }
     }

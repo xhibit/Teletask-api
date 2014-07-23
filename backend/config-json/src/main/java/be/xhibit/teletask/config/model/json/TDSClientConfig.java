@@ -160,7 +160,7 @@ public class TDSClientConfig implements ClientConfig {
 
         //convert json string to object
         clientConfig = objectMapper.readValue(jsonData, TDSClientConfig.class);
-        LOG.debug("Config loaded: TDS HOST: " + clientConfig.getHost() + ":" + clientConfig.getPort() + " - TESTMODE: " + clientConfig.isTestMode());
+        LOG.debug("Config loaded: TDS HOST: {}:{} - TESTMODE: {}", clientConfig.getHost(), clientConfig.getPort(), clientConfig.isTestMode());
 
         // until a better Jackson ObjectMapper implementation, loop through all rooms and replace component number by actual object reference
         clientConfig.initRooms();
