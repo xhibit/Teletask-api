@@ -60,7 +60,6 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         ++counter; // This is the ErrorState, not used at this time
         int stateValue = eventData[++counter];
         State state = function.getState(stateValue == -1 ? 255 : stateValue);
-//        config.getComponent(Function.valueOf(function), ByteBuffer.wrap(output).getInt());
         EventMessage eventMessage = new EventMessage(client.getConfig(), function, number, state);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Handling event: {}", eventMessage.getLogInfo(eventData));
