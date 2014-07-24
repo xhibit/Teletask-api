@@ -30,6 +30,11 @@ public class InterestingNbtModelConsumerImpl extends FullNbtModelConsumerImpl {
     }
 
     @Override
+    public void localMood(String id, String roomName, String type, String description) {
+        super.localMood(id, roomName, type, description);
+    }
+
+    @Override
     public void room(String id, String name) {
         super.room(id, name);
     }

@@ -1,13 +1,13 @@
 package be.xhibit.teletask.config.model.json;
 
-import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 
 /**
  * This class represents a Teletask component, being either a: relay, motor, mood, ... basically anything which can be controlled.
  */
-public class TDSComponent implements Component {
+public class TDSComponent implements ComponentSpec {
     private String description;
     private int function;
     private int number;
@@ -34,6 +34,7 @@ public class TDSComponent implements Component {
         this.number = number;
     }
 
+    @Override
     public int getNumber() {
         return this.number;
     }
@@ -67,22 +68,17 @@ public class TDSComponent implements Component {
     }
 
     @Override
-    public State getComponentState() {
-        return this.getComponentFunction().getState(this.getState());
+    public State getStateValue() {
+        return this.getFunctionValue().getState(this.getState());
     }
 
     @Override
-    public void setComponentState(State state) {
+    public void setStateValue(State state) {
         this.setState(state.getCode());
     }
 
     @Override
-    public Function getComponentFunction() {
+    public Function getFunctionValue() {
         return Function.valueOf(this.getFunction());
-    }
-
-    @Override
-    public int getComponentNumber() {
-        return this.getNumber();
     }
 }

@@ -6,25 +6,25 @@
 
     <display-name>TeleTask HTML5 Frontend</display-name>
 
-    <context-param>
-        <param-name>resteasy.servlet.mapping.prefix</param-name>
-        <param-value>/api</param-value>
-    </context-param>
+    <!--<context-param>-->
+        <!--<param-name>resteasy.servlet.mapping.prefix</param-name>-->
+        <!--<param-value>/api</param-value>-->
+    <!--</context-param>-->
 
-    <servlet>
-        <servlet-name>resteasy-servlet</servlet-name>
-        <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
-        <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
-            <param-value>be.xhibit.teletask.webapp.rest.TeletaskApplication</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
+    <!--<servlet>-->
+        <!--<servlet-name>resteasy-servlet</servlet-name>-->
+        <!--<servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>-->
+        <!--<init-param>-->
+            <!--<param-name>javax.ws.rs.Application</param-name>-->
+            <!--<param-value>be.xhibit.teletask.webapp.rest.TeletaskApplication</param-value>-->
+        <!--</init-param>-->
+        <!--<load-on-startup>1</load-on-startup>-->
+    <!--</servlet>-->
 
-    <servlet-mapping>
-        <servlet-name>resteasy-servlet</servlet-name>
-        <url-pattern>/api/*</url-pattern>
-    </servlet-mapping>
+    <!--<servlet-mapping>-->
+        <!--<servlet-name>resteasy-servlet</servlet-name>-->
+        <!--<url-pattern>/api/*</url-pattern>-->
+    <!--</servlet-mapping>-->
 
     <session-config>
         <session-timeout>120</session-timeout>
