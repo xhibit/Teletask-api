@@ -1,6 +1,7 @@
 package be.xhibit.teletask.parser;
 
 import be.xhibit.teletask.model.nbt.CentralUnit;
+import be.xhibit.teletask.model.nbt.GeneralMood;
 import be.xhibit.teletask.model.nbt.Input;
 import be.xhibit.teletask.model.nbt.InputInterface;
 import be.xhibit.teletask.model.nbt.LocalMood;
@@ -105,6 +106,15 @@ public class FullNbtModelConsumerImpl implements Consumer {
         Motor motor = new Motor(Integer.valueOf(id), room, type, description);
         room.getMotors().add(motor);
         this.getCentralUnit().getComponents().add(motor);
+    }
+
+    @Override
+    public void generalMood(String id, String roomName, String type, String description) {
+        this.getLogger().debug("generalMood: {}:{} (Room {}) - {}", type, id, roomName, description);
+        Room room = this.getCentralUnit().findRoom(roomName);
+        GeneralMood generalMood = new GeneralMood(Integer.valueOf(id), room, type, description);
+        room.getGeneralMoods().add(generalMood);
+        this.getCentralUnit().getComponents().add(generalMood);
     }
 
     @Override

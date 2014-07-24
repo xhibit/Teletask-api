@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 public class CentralUnit implements ClientConfigSpec {
+    private static final Room NONE = new Room(-1, "No Room");
+
     private static final Map<String, CentralUnitType> CENTRAL_UNIT_TYPE_MAP = ImmutableMap.<String, CentralUnitType>builder()
             .put("TDS 10010: MICROS", CentralUnitType.MICROS)
             .put("TDS 10012: MICROS+", CentralUnitType.MICROS_PLUS)
@@ -95,9 +97,11 @@ public class CentralUnit implements ClientConfigSpec {
         this.macAddress = macAddress;
     }
 
+    @Override
     public List<Room> getRooms() {
         if (this.rooms == null) {
             this.setRooms(new ArrayList<Room>());
+            this.getRooms().add(NONE);
         }
         return this.rooms;
     }
@@ -149,7 +153,11 @@ public class CentralUnit implements ClientConfigSpec {
     }
 
     public Room findRoom(String name) {
-        return this.getRoomMap().get(name);
+        Room room = this.getRoomMap().get(name);
+        if (room == null) {
+            room = NONE;
+        }
+        return room;
     }
 
     @Override
