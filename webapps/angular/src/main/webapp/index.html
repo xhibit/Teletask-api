@@ -20,28 +20,28 @@
                 <h3 class="panel-title">{{room.name}}</h3>
             </div>
             <div class="panel-body">
-                <div ng-repeat="relay in room.relays">
-                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/toggle">{{relay.description}} - Toggle</a><br/>
-                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/on">{{relay.description}} - On</a><br/>
-                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/off">{{relay.description}} - Off</a><br/>
+                <div ng-repeat="component in room.relays">
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/toggle">{{component.description}} - Toggle</a><br/>
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/on">{{component.description}} - On</a><br/>
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/off">{{component.description}} - Off</a><br/>
                     <br/>
                 </div>
-                <div ng-repeat="localMood in room.localMoods">
-                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/toggle">{{localMood.description}} - Toggle</a><br/>
-                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/on">{{localMood.description}} - On</a><br/>
-                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/off">{{localMood.description}} - Off</a><br/>
+                <div ng-repeat="component in room.localMoods">
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/toggle">{{component.description}} - Toggle</a><br/>
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/on">{{component.description}} - On</a><br/>
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/off">{{component.description}} - Off</a><br/>
                     <br/>
                 </div>
-                <div ng-repeat="motor in room.motors">
-                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/up">{{motor.description}} - Up</a><br/>
-                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/down">{{motor.description}} - Down</a><br/>
-                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/stop">{{motor.description}} - Stop</a><br/>
+                <div ng-repeat="component in room.motors">
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/up">{{component.description}} - Up</a><br/>
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/down">{{component.description}} - Down</a><br/>
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/stop">{{component.description}} - Stop</a><br/>
                     <br/>
                 </div>
-                <div ng-repeat="generalMood in room.generalMoods">
-                    <a href="{{baseUrl}}/mood/general/{{generalMood.number}}/state/toggle">{{generalMood.description}} - Toggle</a><br/>
-                    <a href="{{baseUrl}}/mood/general/{{generalMood.number}}/state/on">{{generalMood.description}} - On</a><br/>
-                    <a href="{{baseUrl}}/mood/general/{{generalMood.number}}/state/off">{{generalMood.description}} - Off</a><br/>
+                <div ng-repeat="component in room.generalMoods">
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/toggle">{{component.description}} - Toggle</a><br/>
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/on">{{component.description}} - On</a><br/>
+                    <a href="{{baseUrl}}/component/{{component.function}}/{{component.number}}/state/off">{{component.description}} - Off</a><br/>
                     <br/>
                 </div>
             </div>
