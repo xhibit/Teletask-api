@@ -28,4 +28,6 @@ public interface Consumer {
     void localMood(String id, String roomName, String type, String description);
 
     void motor(String id, String roomName, String type, String description);
+
+    void generalMood(String id, String roomName, String type, String description);
 }

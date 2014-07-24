@@ -35,6 +35,12 @@
                     <a href="{{baseUrl}}/motor/{{motor.number}}/state/stop">{{motor.description}} - Stop</a><br/>
                     <br/>
                 </div>
+                <div ng-repeat="generalMood in room.generalMoods">
+                    <a href="{{baseUrl}}/mood/general/{{generalMood.number}}/state/toggle">{{generalMood.description}} - Toggle</a><br/>
+                    <a href="{{baseUrl}}/mood/general/{{generalMood.number}}/state/on">{{generalMood.description}} - On</a><br/>
+                    <a href="{{baseUrl}}/mood/general/{{generalMood.number}}/state/off">{{generalMood.description}} - Off</a><br/>
+                    <br/>
+                </div>
             </div>
         </div>
     </div>

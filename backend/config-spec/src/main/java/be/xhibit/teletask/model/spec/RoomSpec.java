@@ -14,5 +14,7 @@ public interface RoomSpec {
 
     List<? extends ComponentSpec> getLocalMoods();
 
+    List<? extends ComponentSpec> getGeneralMoods();
+
     List<? extends ComponentSpec> getMotors();
 }
