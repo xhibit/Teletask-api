@@ -2,14 +2,17 @@
 
 (function () {
     /* Controllers */
-    var app = angular.module('homies-rooms', []);
-    app.controller('RoomsController', ['$http', function ($http) {
+    var app = angular.module('homies-controller', []);
+    app.controller('ConfigController', ['$http', function ($http) {
+        var url = 'http://localhost:7776';
+//        var url = 'http://stewie.griffin.lan:7070/teletask';
+
         var controller = this;
 
-        var rooms = [];
+        var config = [];
 
-        $http.get('http://stewie.griffin.lan:7070/teletask/api/config').success(function (data, status, headers, config) {
-            controller.rooms = data.rooms;
+        $http.get(url + '/api/config').success(function (data, status, headers, config) {
+            controller.config = data;
         });
     }])
     ;
