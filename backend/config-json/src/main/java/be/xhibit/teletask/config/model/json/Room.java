@@ -57,6 +57,11 @@ public class Room implements RoomSpec {
     }
 
     @Override
+    public List<? extends ComponentSpec> getGeneralMoods() {
+        return this.getComponents().get(Function.GENMOOD);
+    }
+
+    @Override
     public List<? extends ComponentSpec> getLocalMoods() {
         return this.getComponents().get(Function.LOCMOOD);
     }

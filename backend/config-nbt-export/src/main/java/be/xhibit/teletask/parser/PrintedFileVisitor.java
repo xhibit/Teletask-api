@@ -1,6 +1,7 @@
 package be.xhibit.teletask.parser;
 
 import be.xhibit.teletask.parser.handler.CentralUnitLineHandler;
+import be.xhibit.teletask.parser.handler.GeneralMoodLineHandler;
 import be.xhibit.teletask.parser.handler.InputLineHandler;
 import be.xhibit.teletask.parser.handler.InputInterfaceLineHandler;
 import be.xhibit.teletask.parser.handler.LocalMoodLineHandler;
@@ -38,6 +39,7 @@ public class PrintedFileVisitor {
             .put(RelayLineHandler.getInstance().getStartPattern(), RelayLineHandler.getInstance())
             .put(LocalMoodLineHandler.getInstance().getStartPattern(), LocalMoodLineHandler.getInstance())
             .put(MotorLineHandler.getInstance().getStartPattern(), MotorLineHandler.getInstance())
+            .put(GeneralMoodLineHandler.getInstance().getStartPattern(), GeneralMoodLineHandler.getInstance())
             .build();
 
     private PrintedFileVisitor() {

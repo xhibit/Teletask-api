@@ -234,6 +234,24 @@ public class ComponentResource {
         return Response.status(200).entity(response).build();
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/component/{function}/{number}")
+    public Response component(@PathParam("function") String function, @PathParam("number") int number) {
+        APIResponse response = new APIResponse("success", this.client.getConfig().getComponent(Function.valueOf(function.toUpperCase()), number));
+        return Response.status(200).entity(response).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/component/{function}/{number}/state/{state}")
+    public Response component(@PathParam("function") String function, @PathParam("number") int number, @PathParam("state") String state) {
+        Function functionEnum = Function.valueOf(function.toUpperCase());
+        this.set(functionEnum, number, state);
+
+        return this.buildResponse(number, functionEnum);
+    }
+
     private void set(Function function, int number, String state) {
         this.client.set(function, number, State.valueOf(state.toUpperCase()));
     }
