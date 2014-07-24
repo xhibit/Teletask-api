@@ -6,7 +6,7 @@ import be.xhibit.teletask.model.nbt.InputInterface;
 import be.xhibit.teletask.model.nbt.OutputInterface;
 import be.xhibit.teletask.model.nbt.Relay;
 import be.xhibit.teletask.model.nbt.Room;
-import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -104,8 +104,8 @@ public class FullNbtModelConsumerImpl implements Consumer {
         inputInterface.getInputs().add(new Input(id, name, this.getComponent(shortActionType, shortActionId), this.getComponent(longActionType, longActionId)));
     }
 
-    private Component getComponent(String actionType, String actionId) {
-        Component component = null;
+    private ComponentSpec getComponent(String actionType, String actionId) {
+        ComponentSpec component = null;
         if (!Strings.isNullOrEmpty(actionType) && !Strings.isNullOrEmpty(actionId)) {
             component = this.getCentralUnit().getComponent(ACTION_MAPPING.get(actionType), Integer.valueOf(actionId));
         }

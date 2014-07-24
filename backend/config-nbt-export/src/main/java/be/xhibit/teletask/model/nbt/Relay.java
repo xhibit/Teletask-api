@@ -9,7 +9,7 @@ public class Relay extends ComponentSupport {
     }
 
     @Override
-    public Function getComponentFunction() {
+    public Function getFunctionValue() {
         return Function.RELAY;
     }
 }

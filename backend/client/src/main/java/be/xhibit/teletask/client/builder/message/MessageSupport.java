@@ -4,7 +4,7 @@ import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
-import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
@@ -27,9 +27,9 @@ public abstract class MessageSupport {
     private static final Pattern REMOVE_NAMES = Pattern.compile("[^\\|]");
     private static final Pattern INSERT_PLACEHOLDERS = Pattern.compile("\\|   ");
 
-    private final ClientConfig clientConfig;
+    private final ClientConfigSpec clientConfig;
 
-    protected MessageSupport(ClientConfig clientConfig) {
+    protected MessageSupport(ClientConfigSpec clientConfig) {
         this.clientConfig = clientConfig;
     }
 
@@ -64,7 +64,7 @@ public abstract class MessageSupport {
         return result;
     }
 
-    protected ClientConfig getClientConfig() {
+    protected ClientConfigSpec getClientConfig() {
         return this.clientConfig;
     }
 

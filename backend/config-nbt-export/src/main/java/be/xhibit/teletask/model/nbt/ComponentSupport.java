@@ -1,10 +1,10 @@
 package be.xhibit.teletask.model.nbt;
 
-import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.State;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public abstract class ComponentSupport implements Component {
+public abstract class ComponentSupport implements ComponentSpec {
     protected final int id;
     protected final Room room;
     protected final String description;
@@ -19,12 +19,12 @@ public abstract class ComponentSupport implements Component {
     }
 
     @Override
-    public State getComponentState() {
+    public State getStateValue() {
         return this.state;
     }
 
     @Override
-    public void setComponentState(State state) {
+    public void setStateValue(State state) {
         this.state = state;
     }
 
@@ -33,8 +33,7 @@ public abstract class ComponentSupport implements Component {
     }
 
     @Override
-    @JsonIgnore
-    public int getComponentNumber() {
+    public int getNumber() {
         return this.getId();
     }
 

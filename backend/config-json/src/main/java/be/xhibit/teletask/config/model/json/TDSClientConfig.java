@@ -1,7 +1,7 @@
 package be.xhibit.teletask.config.model.json;
 
 import be.xhibit.teletask.model.spec.CentralUnitType;
-import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import java.util.Set;
  * POJO representation of the TDS config JSON file.
  */
 //@JsonIgnoreProperties(ignoreUnknown = true)
-public class TDSClientConfig implements ClientConfig {
+public class TDSClientConfig implements ClientConfigSpec {
     /**
      * Logger responsible for logging and debugging statements.
      */

@@ -1,7 +1,7 @@
 package be.xhibit.teletask.webapp.rest;
 
 import be.xhibit.teletask.config.model.json.TDSClientConfig;
-import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.parser.FullNbtModelConsumerImpl;
 import be.xhibit.teletask.parser.PrintedFileVisitor;
 import com.google.common.base.Preconditions;
@@ -50,8 +50,8 @@ public class TeletaskApplication extends Application {
         return this.singletons;
     }
 
-    protected ClientConfig getClientConfig() {
-        ClientConfig clientConfig = null;
+    protected ClientConfigSpec getClientConfig() {
+        ClientConfigSpec clientConfig = null;
 
         String configFile = System.getProperty("configFile");
 

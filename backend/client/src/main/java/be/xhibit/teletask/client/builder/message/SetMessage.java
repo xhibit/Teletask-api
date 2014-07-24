@@ -1,7 +1,7 @@
 package be.xhibit.teletask.client.builder.message;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
-import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
@@ -12,7 +12,7 @@ public class SetMessage extends FunctionBasedMessageSupport {
     private final int number;
     private final State state;
 
-    public SetMessage(ClientConfig clientConfig, Function function, int number, State state) {
+    public SetMessage(ClientConfigSpec clientConfig, Function function, int number, State state) {
         super(clientConfig, function);
         this.number = number;
         this.state = state;

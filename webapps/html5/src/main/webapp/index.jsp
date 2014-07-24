@@ -4,7 +4,7 @@
 <%@ page import="be.xhibit.teletask.config.model.json.TDSComponent" %>
 <%@ page import="java.util.List" %>
 <%@ page import="be.xhibit.teletask.config.model.json.Room" %>
-<%@ page import="be.xhibit.teletask.model.spec.ClientConfig" %>
+<%@ page import="be.xhibit.teletask.model.spec.ClientConfigSpec" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%--

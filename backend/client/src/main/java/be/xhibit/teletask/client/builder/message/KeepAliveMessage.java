@@ -1,10 +1,10 @@
 package be.xhibit.teletask.client.builder.message;
 
-import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 
 public class KeepAliveMessage extends MessageSupport {
-    public KeepAliveMessage(ClientConfig clientConfig) {
+    public KeepAliveMessage(ClientConfigSpec clientConfig) {
         super(clientConfig);
     }
 
