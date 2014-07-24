@@ -4,6 +4,7 @@ import be.xhibit.teletask.model.nbt.CentralUnit;
 import be.xhibit.teletask.model.nbt.Input;
 import be.xhibit.teletask.model.nbt.InputInterface;
 import be.xhibit.teletask.model.nbt.LocalMood;
+import be.xhibit.teletask.model.nbt.Motor;
 import be.xhibit.teletask.model.nbt.OutputInterface;
 import be.xhibit.teletask.model.nbt.Relay;
 import be.xhibit.teletask.model.nbt.Room;
@@ -95,6 +96,15 @@ public class FullNbtModelConsumerImpl implements Consumer {
         Relay relay = new Relay(Integer.valueOf(id), room, type, description);
         room.getRelays().add(relay);
         this.getCentralUnit().getComponents().add(relay);
+    }
+
+    @Override
+    public void motor(String id, String roomName, String type, String description) {
+        this.getLogger().debug("motor: {}:{} (Room {}) - {}", type, id, roomName, description);
+        Room room = this.getCentralUnit().findRoom(roomName);
+        Motor motor = new Motor(Integer.valueOf(id), room, type, description);
+        room.getMotors().add(motor);
+        this.getCentralUnit().getComponents().add(motor);
     }
 
     @Override

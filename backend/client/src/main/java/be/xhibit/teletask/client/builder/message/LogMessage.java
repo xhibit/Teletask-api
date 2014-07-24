@@ -6,17 +6,14 @@ import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.base.Joiner;
 
-public class LogMessage extends FunctionBasedMessageSupport {
-    private final State state;
-
+public class LogMessage extends FunctionStateBasedMessageSupport {
     public LogMessage(ClientConfigSpec ClientConfig, Function function, State state) {
-        super(ClientConfig, function);
-        this.state = state;
+        super(ClientConfig, function, state);
     }
 
     @Override
     protected byte[] getPayload() {
-        return new byte[]{this.getFunction().getCode(), (byte) this.state.getCode()};
+        return new byte[]{(byte) this.getMessageHandler().getFunctionConfig(this.getFunction()).getNumber(), (byte) this.getMessageHandler().getStateConfig(this.getState()).getNumber()};
     }
 
     @Override
@@ -26,6 +23,7 @@ public class LogMessage extends FunctionBasedMessageSupport {
 
     @Override
     protected String getPayloadLogInfo() {
-        return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatState(this.state));
+        return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatState(this.getState()));
     }
+
 }

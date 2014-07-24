@@ -100,7 +100,7 @@ public class TDSClientConfig implements ClientConfigSpec {
         //components.get()  ///TODO: refactor: access by index not OK, should be based on number, therefore iterate, or store as HashMap.
         for (TDSComponent component : components) {
             if (component.getNumber() == number) {
-                component.setFunction(function.getCode());
+                component.setFunction(function);
                 returnValue = component;
                 break;
             }

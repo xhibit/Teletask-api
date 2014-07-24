@@ -40,6 +40,11 @@ public class InterestingNbtModelConsumerImpl extends FullNbtModelConsumerImpl {
     }
 
     @Override
+    public void motor(String id, String roomName, String type, String description) {
+        super.motor(id, roomName, type, description);
+    }
+
+    @Override
     public void macAddress(String value) {
         super.macAddress(value);
     }

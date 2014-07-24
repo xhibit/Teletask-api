@@ -26,6 +26,11 @@
                 <div ng-repeat="localMood in room.localMoods">
                     <a href="http://localhost:7776/api/mood/local/{{localMood.number}}/state/toggle">{{localMood.description}}</a><br/>
                 </div>
+                <div ng-repeat="motor in room.motors">
+                    <a href="http://localhost:7776/api/motor/{{motor.number}}/state/up">{{motor.description}} - Up</a><br/>
+                    <a href="http://localhost:7776/api/motor/{{motor.number}}/state/down">{{motor.description}} - Down</a><br/>
+                    <a href="http://localhost:7776/api/motor/{{motor.number}}/state/stop">{{motor.description}} - Stop</a><br/>
+                </div>
             </div>
         </div>
     </div>

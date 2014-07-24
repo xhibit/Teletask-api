@@ -9,9 +9,9 @@ import be.xhibit.teletask.model.spec.State;
  */
 public class TDSComponent implements ComponentSpec {
     private String description;
-    private int function;
+    private Function function;
     private int number;
-    private int state;
+    private State state;
 
     /**
      * Default constructor.
@@ -19,7 +19,7 @@ public class TDSComponent implements ComponentSpec {
      */
     public TDSComponent() {
         this.description = "";
-        this.state = 0;
+        this.state = State.OFF;
     }
 
     /**
@@ -28,7 +28,7 @@ public class TDSComponent implements ComponentSpec {
      * @param state The current status of the component, for example 0 indicating off for a "relay".
      * @param number The component number you wish to manipulate.
      */
-    public TDSComponent(int function, int state, int number) {
+    public TDSComponent(Function function, State state, int number) {
         this.function = function;
         this.state = state;
         this.number = number;
@@ -43,42 +43,31 @@ public class TDSComponent implements ComponentSpec {
         this.number = number;
     }
 
-    public int getState() {
+    @Override
+    public State getState() {
         return this.state;
     }
 
-    public void setState(int state) {
+    @Override
+    public void setState(State state) {
         this.state = state;
     }
 
-    public int getFunction() {
+    @Override
+    public Function getFunction() {
         return this.function;
     }
 
-    public void setFunction(int function) {
+    public void setFunction(Function function) {
         this.function = function;
     }
 
+    @Override
     public String getDescription() {
         return this.description;
     }
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @Override
-    public State getStateValue() {
-        return this.getFunctionValue().getState(this.getState());
-    }
-
-    @Override
-    public void setStateValue(State state) {
-        this.setState(state.getCode());
-    }
-
-    @Override
-    public Function getFunctionValue() {
-        return Function.valueOf(this.getFunction());
     }
 }

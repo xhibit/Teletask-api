@@ -8,7 +8,7 @@ public class Motor extends ComponentSupport {
     }
 
     @Override
-    public Function getFunctionValue() {
+    public Function getFunction() {
         return Function.MOTOR;
     }
 }
