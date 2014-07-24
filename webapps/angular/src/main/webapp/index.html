@@ -2,7 +2,7 @@
 <html ng-app="homies">
 <head lang="en">
     <meta charset="UTF-8">
-    <title></title>
+    <title>Teletask Controller</title>
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/bootstrap-theme.css">
 </head>
@@ -18,7 +18,7 @@
                 <h3 class="panel-title">{{room.name}}</h3>
             </div>
             <div class="panel-body">
-                <div ng-repeat="component in room.relays" class="list-group">
+                <div ng-repeat="component in room.relays" class="list-group" >
                    <a class="list-group-item list-group-item-info" ng-click="configController.changeState(component, 'toggle')">{{component.description}} - Toggle</a>
                    <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, 'on')">{{component.description}} - On</a>
                    <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'off')">{{component.description}} - Off</a>
