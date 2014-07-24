@@ -17,7 +17,7 @@ public class GetMessage extends FunctionBasedMessageSupport {
 
     @Override
     protected byte[] getPayload() {
-        return Bytes.concat(new byte[]{this.getFunction().getCode()}, MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).composeOutput(this.number));
+        return Bytes.concat(new byte[]{(byte) this.getMessageHandler().getFunctionConfig(this.getFunction()).getNumber()}, MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).composeOutput(this.number));
     }
 
     @Override

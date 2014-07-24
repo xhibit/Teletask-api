@@ -19,12 +19,12 @@ public abstract class ComponentSupport implements ComponentSpec {
     }
 
     @Override
-    public State getStateValue() {
+    public State getState() {
         return this.state;
     }
 
     @Override
-    public void setStateValue(State state) {
+    public void setState(State state) {
         this.state = state;
     }
 
@@ -46,6 +46,7 @@ public abstract class ComponentSupport implements ComponentSpec {
         return this.getRoom().getId();
     }
 
+    @Override
     public String getDescription() {
         return this.description;
     }

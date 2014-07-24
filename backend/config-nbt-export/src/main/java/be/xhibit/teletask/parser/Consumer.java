@@ -26,4 +26,6 @@ public interface Consumer {
     void input(String autobusId, String autobusType, String autobusNumber, String id, String name, String shortActionType, String shortActionId, String longActionType, String longActionId);
 
     void localMood(String id, String roomName, String type, String description);
+
+    void motor(String id, String roomName, String type, String description);
 }

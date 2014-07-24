@@ -4,6 +4,7 @@ import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
+import be.xhibit.teletask.model.spec.State;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -118,7 +119,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/motor/{number}")
     public Response motor(@PathParam("number") int number) {
-        return this.getComponentState(number, Function.MTRUPDOWN);
+        return this.getComponentState(number, Function.MOTOR);
     }
 
 
@@ -131,7 +132,7 @@ public class ComponentResource {
 
         // component always holds the correct state, so no need to call client.getRelayState(number)
         ComponentSpec component = this.client.getConfig().getComponent(function, number);
-        component.setStateValue(this.client.get(component));
+        component.setState(this.client.get(component));
         APIResponse response = new APIResponse("success", component);
         return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
     }
@@ -167,9 +168,9 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/motor/{number}/state/{state}")
     public Response motor(@PathParam("number") int number, @PathParam("state") String state) {
-        this.set(Function.MTRUPDOWN, number, state);
+        this.set(Function.MOTOR, number, state);
 
-        return this.buildResponse(number, Function.MTRUPDOWN);
+        return this.buildResponse(number, Function.MOTOR);
     }
 
     /**
@@ -234,7 +235,7 @@ public class ComponentResource {
     }
 
     private void set(Function function, int number, String state) {
-        this.client.set(function, number, function.getState("1".equals(state) ? "255" : state));
+        this.client.set(function, number, State.valueOf(state.toUpperCase()));
     }
 
     /**

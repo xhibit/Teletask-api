@@ -171,7 +171,7 @@ public final class TDSClient {
 // ################################################ PUBLIC API FUNCTIONS
 
     public SendResult set(ComponentSpec component, State state) {
-        Function function = component.getFunctionValue();
+        Function function = component.getFunction();
         int number = component.getNumber();
 
         return this.set(function, number, state);
@@ -196,8 +196,8 @@ public final class TDSClient {
     }
 
     public State get(ComponentSpec component) {
-        component.setStateValue(null);
-        this.getStateFromCentralUnit(component.getFunctionValue(), component.getNumber());
+        component.setState(null);
+        this.getStateFromCentralUnit(component.getFunction(), component.getNumber());
         return this.getState(component);
     }
 
@@ -231,7 +231,7 @@ public final class TDSClient {
 
     private State getState(ComponentSpec component) {
         State state = null;
-        while ((state = component.getStateValue()) == null) {
+        while ((state = component.getState()) == null) {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -244,7 +244,7 @@ public final class TDSClient {
     public void setState(Function function, int number, State state) {
         ComponentSpec component = this.getConfig().getComponent(function, number);
         if (component != null) {
-            component.setStateValue(state);
+            component.setState(state);
         }
     }
 
@@ -260,7 +260,7 @@ public final class TDSClient {
         this.sendLogEventMessage(Function.RELAY, state);
         this.sendLogEventMessage(Function.LOCMOOD, state);
         this.sendLogEventMessage(Function.GENMOOD, state);
-        this.sendLogEventMessage(Function.MTRUPDOWN, state);
+        this.sendLogEventMessage(Function.MOTOR, state);
     }
 
     private void start() {
@@ -301,7 +301,7 @@ public final class TDSClient {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                TDSClient.this.sendLogEventMessages(State.EVENT);
+                TDSClient.this.sendLogEventMessages(State.ON);
             }
         }, timerDelay, timerPeriod);
 

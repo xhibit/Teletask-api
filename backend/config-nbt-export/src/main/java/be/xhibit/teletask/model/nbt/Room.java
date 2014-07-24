@@ -10,6 +10,7 @@ public class Room implements RoomSpec {
     private final String name;
     private List<Relay> relays;
     private List<LocalMood> localMoods;
+    private List<Motor> motors;
 
     public Room(int id, String name) {
         this.id = id;
@@ -40,6 +41,18 @@ public class Room implements RoomSpec {
             this.setLocalMoods(new ArrayList<LocalMood>());
         }
         return this.localMoods;
+    }
+
+    @Override
+    public List<Motor> getMotors() {
+        if (this.motors == null) {
+            this.setMotors(new ArrayList<Motor>());
+        }
+        return this.motors;
+    }
+
+    private void setMotors(List<Motor> motors) {
+        this.motors = motors;
     }
 
     private void setLocalMoods(List<LocalMood> localMoods) {

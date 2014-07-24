@@ -214,7 +214,7 @@ public class CentralUnit implements ClientConfigSpec {
         return Maps.uniqueIndex(components, new com.google.common.base.Function<ComponentSupport, String>() {
             @Override
             public String apply(ComponentSupport from) {
-                return CentralUnit.this.getIndex(from.getFunctionValue(), from.getId());
+                return CentralUnit.this.getIndex(from.getFunction(), from.getId());
             }
         });
     }
