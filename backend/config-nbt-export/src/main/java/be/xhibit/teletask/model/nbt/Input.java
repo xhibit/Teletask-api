@@ -1,14 +1,14 @@
 package be.xhibit.teletask.model.nbt;
 
-import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 
 public class Input {
     private final String id;
     private final String name;
-    private final Component shortAction;
-    private final Component longAction;
+    private final ComponentSpec shortAction;
+    private final ComponentSpec longAction;
 
-    public Input(String id, String name, Component shortAction, Component longAction) {
+    public Input(String id, String name, ComponentSpec shortAction, ComponentSpec longAction) {
         this.id = id;
         this.name = name;
         this.shortAction = shortAction;
@@ -23,11 +23,11 @@ public class Input {
         return this.name;
     }
 
-    public Component getShortAction() {
+    public ComponentSpec getShortAction() {
         return this.shortAction;
     }
 
-    public Component getLongAction() {
+    public ComponentSpec getLongAction() {
         return this.longAction;
     }
 }

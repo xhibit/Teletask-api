@@ -1,17 +1,17 @@
 package be.xhibit.teletask.config.model.json;
 
-import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 
 /**
  * This class represents a Teletask component, being either a: relay, motor, mood, ... basically anything which can be controlled.
  */
-public class TDSComponent implements Component {
+public class TDSComponent implements ComponentSpec {
     private String description;
-    private int function;
+    private Function function;
     private int number;
-    private int state;
+    private State state;
 
     /**
      * Default constructor.
@@ -19,7 +19,7 @@ public class TDSComponent implements Component {
      */
     public TDSComponent() {
         this.description = "";
-        this.state = 0;
+        this.state = State.OFF;
     }
 
     /**
@@ -28,12 +28,13 @@ public class TDSComponent implements Component {
      * @param state The current status of the component, for example 0 indicating off for a "relay".
      * @param number The component number you wish to manipulate.
      */
-    public TDSComponent(int function, int state, int number) {
+    public TDSComponent(Function function, State state, int number) {
         this.function = function;
         this.state = state;
         this.number = number;
     }
 
+    @Override
     public int getNumber() {
         return this.number;
     }
@@ -42,47 +43,31 @@ public class TDSComponent implements Component {
         this.number = number;
     }
 
-    public int getState() {
+    @Override
+    public State getState() {
         return this.state;
     }
 
-    public void setState(int state) {
+    @Override
+    public void setState(State state) {
         this.state = state;
     }
 
-    public int getFunction() {
+    @Override
+    public Function getFunction() {
         return this.function;
     }
 
-    public void setFunction(int function) {
+    public void setFunction(Function function) {
         this.function = function;
     }
 
+    @Override
     public String getDescription() {
         return this.description;
     }
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @Override
-    public State getComponentState() {
-        return this.getComponentFunction().getState(this.getState());
-    }
-
-    @Override
-    public void setComponentState(State state) {
-        this.setState(state.getCode());
-    }
-
-    @Override
-    public Function getComponentFunction() {
-        return Function.valueOf(this.getFunction());
-    }
-
-    @Override
-    public int getComponentNumber() {
-        return this.getNumber();
     }
 }

@@ -15,12 +15,4 @@
     <packaging>war</packaging>
     <name>Teletask API - AngularJS Interface</name>
     <description>The AngularJS interface code for working with teletask central unit</description>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>teletask-api-rest</artifactId>
-            <classifier>classes</classifier>
-        </dependency>
-    </dependencies>
 </project>

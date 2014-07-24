@@ -4,7 +4,7 @@ import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
-import be.xhibit.teletask.model.spec.ClientConfig;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
@@ -27,44 +27,52 @@ public abstract class MessageSupport {
     private static final Pattern REMOVE_NAMES = Pattern.compile("[^\\|]");
     private static final Pattern INSERT_PLACEHOLDERS = Pattern.compile("\\|   ");
 
-    private final ClientConfig clientConfig;
+    private final ClientConfigSpec clientConfig;
 
-    protected MessageSupport(ClientConfig clientConfig) {
+    protected MessageSupport(ClientConfigSpec clientConfig) {
         this.clientConfig = clientConfig;
     }
 
     public SendResult send(OutputStream outputStream) {
-        MessageHandler messageHandler = MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType());
+        MessageHandler messageHandler = this.getMessageHandler();
         SendResult result;
-        if (messageHandler.getCommandConfig().containsKey(this.getCommand())) {
-            byte[] message = messageHandler.compose(this.getCommand(), this.getPayload());
+        if (this.isValid()) {
+            if (messageHandler.knowsCommand(this.getCommand())) {
+                byte[] message = messageHandler.compose(this.getCommand(), this.getPayload());
 
-            try {
-                //Send data over socket
-                if (Boolean.getBoolean("production")) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Sending: {}", this.getLogInfo(message));
+                try {
+                    //Send data over socket
+                    if (Boolean.getBoolean("production")) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Sending: {}", this.getLogInfo(message));
+                        }
+                        outputStream.write(message);
+                        outputStream.flush();
+                    } else {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Test mode send: {}", this.getLogInfo(message));
+                        }
                     }
-                    outputStream.write(message);
-                    outputStream.flush();
-                } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Test mode send: {}", this.getLogInfo(message));
-                    }
+
+                    result = SendResult.SUCCESS;
+                } catch (Exception e) {
+                    result = SendResult.FAILED;
                 }
-
-                result = SendResult.SUCCESS;
-            } catch (Exception e) {
-                result = SendResult.FAILED;
+            } else {
+                result = SendResult.UNKNOW_COMMAND;
             }
         } else {
-            result = SendResult.IGNORED;
+            result = SendResult.INVALID;
         }
 
         return result;
     }
 
-    protected ClientConfig getClientConfig() {
+    protected boolean isValid() {
+        return true;
+    }
+
+    protected ClientConfigSpec getClientConfig() {
         return this.clientConfig;
     }
 
@@ -126,18 +134,22 @@ public abstract class MessageSupport {
     }
 
     private String getMessageParamName(int index) {
-        return MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).getCommandConfig().get(this.getCommand()).getParamNames().get(index);
+        return this.getMessageHandler().getCommandConfig(this.getCommand()).getParamNames().get(index);
     }
 
     protected String formatState(State state) {
-        return "State( " + state + " | " + state.getCode() + " | " + ByteUtilities.bytesToHex((byte) state.getCode()) + ")";
+        return "State( " + state + " | " + (state == null ? null : this.getMessageHandler().getStateConfig(state).getNumber()) + " | " + (state == null ? null : ByteUtilities.bytesToHex((byte) this.getMessageHandler().getStateConfig(state).getNumber())) + ")";
+    }
+
+    protected MessageHandler getMessageHandler() {
+        return MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType());
     }
 
     protected String formatFunction(Function function) {
-        return "Function( " + function + " | " + function.getCode() + " | " + ByteUtilities.bytesToHex((byte) function.getCode()) + ")";
+        return "Function( " + function + " | " + this.getMessageHandler().getFunctionConfig(function).getNumber() + " | " + ByteUtilities.bytesToHex((byte) this.getMessageHandler().getFunctionConfig(function).getNumber()) + ")";
     }
 
     protected String formatOutput(int number) {
-        return "Output( " + number + " | " + ByteUtilities.bytesToHex(MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).composeOutput(number)) + ")";
+        return "Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)) + ")";
     }
 }

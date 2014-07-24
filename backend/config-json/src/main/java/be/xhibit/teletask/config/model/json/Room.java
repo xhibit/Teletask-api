@@ -1,20 +1,24 @@
 package be.xhibit.teletask.config.model.json;
 
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
+import be.xhibit.teletask.model.spec.RoomSpec;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * POJO representation of a Room.  Holds all components which are controllable in that specific room.
  */
-public class Room {
+public class Room implements RoomSpec {
     private int id;
     private int level;
     private String name;
-    private HashMap<Function, List<TDSComponent>> components;
-    private HashMap<Function, List<Integer>> componentTypes;
+    private Map<Function, List<TDSComponent>> components;
+    private Map<Function, List<Integer>> componentTypes;
 
+    @Override
     public int getId() {
         return this.id;
     }
@@ -31,6 +35,7 @@ public class Room {
         this.level = level;
     }
 
+    @Override
     public String getName() {
         return this.name;
     }
@@ -39,22 +44,37 @@ public class Room {
         this.name = name;
     }
 
-    public HashMap<Function, List<TDSComponent>> getComponents() {
+    @Override
+    public List<? extends ComponentSpec> getRelays() {
+        return this.getComponents().get(Function.RELAY);
+    }
+
+    public Map<Function, List<TDSComponent>> getComponents() {
         if (this.components == null) {
             this.components = new HashMap<>();
         }
         return this.components;
     }
 
-    public void setComponents(HashMap<Function, List<TDSComponent>> components) {
+    @Override
+    public List<? extends ComponentSpec> getLocalMoods() {
+        return this.getComponents().get(Function.LOCMOOD);
+    }
+
+    @Override
+    public List<? extends ComponentSpec> getMotors() {
+        return this.getComponents().get(Function.MOTOR);
+    }
+
+    public void setComponents(Map<Function, List<TDSComponent>> components) {
         this.components = components;
     }
 
-    public HashMap<Function, List<Integer>> getComponentTypes() {
+    public Map<Function, List<Integer>> getComponentTypes() {
         return this.componentTypes;
     }
 
-    public void setComponentTypes(HashMap<Function, List<Integer>> componentTypes) {
+    public void setComponentTypes(Map<Function, List<Integer>> componentTypes) {
         this.componentTypes = componentTypes;
     }
 }

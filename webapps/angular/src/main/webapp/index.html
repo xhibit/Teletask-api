@@ -5,20 +5,38 @@
     <title></title>
 
 </head>
-<body ng-controller="RoomsController as roomsController">
+<body ng-controller="ConfigController as configController">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.16/angular.js"></script>
 <script src="js/app.js"></script>
 <script src="js/controllers.js"></script>
+<!--<script src="js/services.js"></script>-->
+<!--<script src="js/filters.js"></script>-->
+<!--<script src="js/directives.js"></script>-->
 
 <div class="row-fluid">
-    <div class="col-md-4" ng-repeat="room in roomsController.rooms">
+    <div class="col-md-4" ng-repeat="room in configController.config.rooms">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">{{room.name}}</h3>
             </div>
             <div class="panel-body">
                 <div ng-repeat="relay in room.relays">
-                    <a href="http://stewie.griffin.lan:7070/teletask/api/relay/{{relay.id}}/state/toggle">{{relay.description}}</a><br/>
+                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/toggle">{{relay.description}} - Toggle</a><br/>
+                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/on">{{relay.description}} - On</a><br/>
+                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/off">{{relay.description}} - Off</a><br/>
+                    <br/>
+                </div>
+                <div ng-repeat="localMood in room.localMoods">
+                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/toggle">{{localMood.description}} - Toggle</a><br/>
+                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/on">{{localMood.description}} - On</a><br/>
+                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/off">{{localMood.description}} - Off</a><br/>
+                    <br/>
+                </div>
+                <div ng-repeat="motor in room.motors">
+                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/up">{{motor.description}} - Up</a><br/>
+                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/down">{{motor.description}} - Down</a><br/>
+                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/stop">{{motor.description}} - Stop</a><br/>
+                    <br/>
                 </div>
             </div>
         </div>

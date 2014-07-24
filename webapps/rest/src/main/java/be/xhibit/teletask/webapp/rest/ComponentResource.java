@@ -1,9 +1,13 @@
 package be.xhibit.teletask.webapp.rest;
 
 import be.xhibit.teletask.client.TDSClient;
-import be.xhibit.teletask.model.spec.ClientConfig;
-import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
+import be.xhibit.teletask.model.spec.State;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.primitives.Ints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +24,8 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 public class ComponentResource {
+    private static final ObjectWriter WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
+
     /**
      * Logger responsible for logging and debugging statements.
      */
@@ -37,7 +43,7 @@ public class ComponentResource {
      *
      * @param clientConfig The configuration
      */
-    public ComponentResource(ClientConfig clientConfig) {
+    public ComponentResource(ClientConfigSpec clientConfig) {
         this.client = TDSClient.getInstance(clientConfig);
     }
 
@@ -51,9 +57,9 @@ public class ComponentResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/config")
-    public Response config() {
-        ClientConfig config = this.client.getConfig();
-        return Response.status(200).entity(config).header("Access-Control-Allow-Origin", "*").build();
+    public Response config() throws JsonProcessingException {
+        ClientConfigSpec config = this.client.getConfig();
+        return Response.status(200).entity(WRITER.writeValueAsString(config)).header("Access-Control-Allow-Origin", "*").build();
     }
 
     /**
@@ -113,7 +119,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/motor/{number}")
     public Response motor(@PathParam("number") int number) {
-        return this.getComponentState(number, Function.MTRUPDOWN);
+        return this.getComponentState(number, Function.MOTOR);
     }
 
 
@@ -125,8 +131,8 @@ public class ComponentResource {
         //APIResponse response = new APIResponse("success", component);
 
         // component always holds the correct state, so no need to call client.getRelayState(number)
-        Component component = this.client.getConfig().getComponent(function, number);
-        component.setComponentState(this.client.get(component));
+        ComponentSpec component = this.client.getConfig().getComponent(function, number);
+        component.setState(this.client.get(component));
         APIResponse response = new APIResponse("success", component);
         return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
     }
@@ -162,9 +168,9 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/motor/{number}/state/{state}")
     public Response motor(@PathParam("number") int number, @PathParam("state") String state) {
-        this.set(Function.MTRUPDOWN, number, state);
+        this.set(Function.MOTOR, number, state);
 
-        return this.buildResponse(number, Function.MTRUPDOWN);
+        return this.buildResponse(number, Function.MOTOR);
     }
 
     /**
@@ -229,7 +235,7 @@ public class ComponentResource {
     }
 
     private void set(Function function, int number, String state) {
-        this.client.set(function, number, function.getState("1".equals(state) ? "255" : state));
+        this.client.set(function, number, State.valueOf(state.toUpperCase()));
     }
 
     /**
@@ -239,7 +245,7 @@ public class ComponentResource {
      * @return A JSON REST response.
      */
     private Response buildResponse(int number, Function function) {
-        Component component = this.client.getConfig().getComponent(function, number);
+        ComponentSpec component = this.client.getConfig().getComponent(function, number);
         APIResponse apiResponse = new APIResponse("success", component);
         return Response.status(200).entity(apiResponse).header("Access-Control-Allow-Origin", "*").build();
     }

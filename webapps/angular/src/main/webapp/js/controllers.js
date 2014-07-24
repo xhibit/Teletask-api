@@ -2,14 +2,14 @@
 
 (function () {
     /* Controllers */
-    var app = angular.module('homies-rooms', []);
-    app.controller('RoomsController', ['$http', function ($http) {
+    var app = angular.module('homies-controller', []);
+    app.controller('ConfigController', ['$rootScope', '$http', function ($rootScope, $http) {
         var controller = this;
 
-        var rooms = [];
+        var config = [];
 
-        $http.get('http://stewie.griffin.lan:7070/teletask/api/config').success(function (data, status, headers, config) {
-            controller.rooms = data.rooms;
+        $http.get($rootScope.baseUrl + '/config').success(function (data, status, headers, config) {
+            controller.config = data;
         });
     }])
     ;

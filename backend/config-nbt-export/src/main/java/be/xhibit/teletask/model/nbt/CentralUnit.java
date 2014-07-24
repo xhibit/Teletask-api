@@ -1,8 +1,8 @@
 package be.xhibit.teletask.model.nbt;
 
 import be.xhibit.teletask.model.spec.CentralUnitType;
-import be.xhibit.teletask.model.spec.ClientConfig;
-import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class CentralUnit implements ClientConfig {
+public class CentralUnit implements ClientConfigSpec {
     private static final Map<String, CentralUnitType> CENTRAL_UNIT_TYPE_MAP = ImmutableMap.<String, CentralUnitType>builder()
             .put("TDS 10010: MICROS", CentralUnitType.MICROS)
             .put("TDS 10012: MICROS+", CentralUnitType.MICROS_PLUS)
@@ -153,7 +153,7 @@ public class CentralUnit implements ClientConfig {
     }
 
     @Override
-    public Component getComponent(Function function, int number) {
+    public ComponentSpec getComponent(Function function, int number) {
         return this.getComponentMap().get(this.getIndex(function, number));
     }
 
@@ -204,7 +204,7 @@ public class CentralUnit implements ClientConfig {
     private transient Map<String, ComponentSupport> componentMap;
 
     private Map<String, ComponentSupport> getComponentMap() {
-        if (this.componentMap == null) {
+        if (this.componentMap == null || this.componentMap.size() != this.getComponents().size()) {
             this.componentMap = this.convertComponentsToMap(this.getComponents());
         }
         return this.componentMap;
@@ -214,7 +214,7 @@ public class CentralUnit implements ClientConfig {
         return Maps.uniqueIndex(components, new com.google.common.base.Function<ComponentSupport, String>() {
             @Override
             public String apply(ComponentSupport from) {
-                return CentralUnit.this.getIndex(from.getComponentFunction(), from.getId());
+                return CentralUnit.this.getIndex(from.getFunction(), from.getId());
             }
         });
     }

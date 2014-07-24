@@ -8,8 +8,8 @@ import be.xhibit.teletask.client.builder.message.GetMessage;
 import be.xhibit.teletask.client.builder.message.KeepAliveMessage;
 import be.xhibit.teletask.client.builder.message.LogMessage;
 import be.xhibit.teletask.client.builder.message.SetMessage;
-import be.xhibit.teletask.model.spec.ClientConfig;
-import be.xhibit.teletask.model.spec.Component;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import org.slf4j.Logger;
@@ -19,12 +19,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -135,7 +133,7 @@ public final class TDSClient {
     private DataOutputStream out;
     private DataInputStream in;
 
-    private ClientConfig clientConfig;
+    private ClientConfigSpec clientConfig;
 
     private boolean readTDSEvents = true;
 
@@ -145,7 +143,7 @@ public final class TDSClient {
      * Default constructor.  Responsible for reading the client config (JSON).
      * Singleton class.  Private constructor to prevent new instance creations.
      */
-    private TDSClient(ClientConfig clientConfig) {
+    private TDSClient(ClientConfigSpec clientConfig) {
         this.configure(clientConfig);
     }
 
@@ -154,7 +152,7 @@ public final class TDSClient {
      *
      * @return a new or existing TDSClient instance.
      */
-    public static synchronized TDSClient getInstance(ClientConfig clientConfig) {
+    public static synchronized TDSClient getInstance(ClientConfigSpec clientConfig) {
         String index = clientConfig.getHost() + ":" + clientConfig.getPort();
         TDSClient client = CLIENTS.get(index);
 
@@ -172,9 +170,9 @@ public final class TDSClient {
 
 // ################################################ PUBLIC API FUNCTIONS
 
-    public SendResult set(Component component, State state) {
-        Function function = component.getComponentFunction();
-        int number = component.getComponentNumber();
+    public SendResult set(ComponentSpec component, State state) {
+        Function function = component.getFunction();
+        int number = component.getNumber();
 
         return this.set(function, number, state);
     }
@@ -197,9 +195,9 @@ public final class TDSClient {
         return this.get(this.getConfig().getComponent(function, number));
     }
 
-    public State get(Component component) {
-        component.setComponentState(null);
-        this.getStateFromCentralUnit(component.getComponentFunction(), component.getComponentNumber());
+    public State get(ComponentSpec component) {
+        component.setState(null);
+        this.getStateFromCentralUnit(component.getFunction(), component.getNumber());
         return this.getState(component);
     }
 
@@ -221,19 +219,19 @@ public final class TDSClient {
         LOG.debug("Disconnected successfully");
     }
 
-    public ClientConfig getConfig() {
+    public ClientConfigSpec getConfig() {
         return this.clientConfig;
     }
 
     // ################################################ PRIVATE API FUNCTIONS
 
-    private void configure(ClientConfig clientConfig) {
+    private void configure(ClientConfigSpec clientConfig) {
         this.clientConfig = clientConfig;
     }
 
-    private State getState(Component component) {
+    private State getState(ComponentSpec component) {
         State state = null;
-        while ((state = component.getComponentState()) == null) {
+        while ((state = component.getState()) == null) {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException e) {
@@ -244,9 +242,9 @@ public final class TDSClient {
     }
 
     public void setState(Function function, int number, State state) {
-        Component component = this.getConfig().getComponent(function, number);
+        ComponentSpec component = this.getConfig().getComponent(function, number);
         if (component != null) {
-            component.setComponentState(state);
+            component.setState(state);
         }
     }
 
@@ -262,7 +260,7 @@ public final class TDSClient {
         this.sendLogEventMessage(Function.RELAY, state);
         this.sendLogEventMessage(Function.LOCMOOD, state);
         this.sendLogEventMessage(Function.GENMOOD, state);
-        this.sendLogEventMessage(Function.MTRUPDOWN, state);
+        this.sendLogEventMessage(Function.MOTOR, state);
     }
 
     private void start() {
@@ -303,7 +301,7 @@ public final class TDSClient {
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                TDSClient.this.sendLogEventMessages(State.EVENT);
+                TDSClient.this.sendLogEventMessages(State.ON);
             }
         }, timerDelay, timerPeriod);
 
