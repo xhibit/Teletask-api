@@ -3,10 +3,9 @@ package be.xhibit.teletask.config.model.json;
 import be.xhibit.teletask.model.spec.CentralUnitType;
 import be.xhibit.teletask.model.spec.ClientConfig;
 import be.xhibit.teletask.model.spec.Function;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,12 +20,13 @@ import java.util.Set;
 //@JsonIgnoreProperties(ignoreUnknown = true)
 public class TDSClientConfig implements ClientConfig {
     /**
-     * LOG responsible for logging and debugging statements.
+     * Logger responsible for logging and debugging statements.
      */
-    static final Logger LOG = LogManager.getLogger(TDSClientConfig.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(TDSClientConfig.class);
 
     private String host;
     private int port;
+    private boolean testMode;
     private Map<Function, List<TDSComponent>> componentsTypes;
     private List<Room> rooms;
 
@@ -57,6 +57,14 @@ public class TDSClientConfig implements ClientConfig {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public boolean isTestMode() {
+        return this.testMode;
+    }
+
+    public void setTestMode(boolean testMode) {
+        this.testMode = testMode;
     }
 
     public Map<Function, List<TDSComponent>> getComponentsTypes() {
@@ -140,7 +148,6 @@ public class TDSClientConfig implements ClientConfig {
 
     public static TDSClientConfig read(InputStream jsonData) throws IOException {
         TDSClientConfig clientConfig = null;
-        LOG.debug("##### TDSClient initialization - START");
         //TODO: find better way to load the config
         // Should we load and parse the config to POJO from a URL using JAX-RS?
         // This way the config can be loaded from webroot as a simple resource, or from any location.
@@ -153,7 +160,7 @@ public class TDSClientConfig implements ClientConfig {
 
         //convert json string to object
         clientConfig = objectMapper.readValue(jsonData, TDSClientConfig.class);
-        LOG.debug("Config loaded: TDS HOST: " + clientConfig.getHost() + ":" + clientConfig.getPort());
+        LOG.debug("Config loaded: TDS HOST: {}:{} - TESTMODE: {}", clientConfig.getHost(), clientConfig.getPort(), clientConfig.isTestMode());
 
         // until a better Jackson ObjectMapper implementation, loop through all rooms and replace component number by actual object reference
         clientConfig.initRooms();
