@@ -30,7 +30,7 @@ public class OutputInterfaceLineHandler extends InterfaceLineHandlerSupport {
 
     @Override
     protected void handle(Consumer consumer, Matcher matcher) {
-        consumer.visitOutputInterface(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
+        consumer.outputInterface(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4), matcher.group(5));
     }
 }
 

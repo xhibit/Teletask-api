@@ -31,6 +31,6 @@ public class InputInterfaceLineHandler extends InterfaceLineHandlerSupport {
 
     @Override
     protected void handle(Consumer consumer, Matcher matcher) {
-        consumer.visitInputInterface(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4));
+        consumer.inputInterface(matcher.group(1), matcher.group(2), matcher.group(3), matcher.group(4));
     }
 }

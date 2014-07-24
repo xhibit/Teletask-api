@@ -44,7 +44,7 @@ public class InputLineHandler extends LineHandlerSupport {
                 Action shortAction = this.getAction(iterator.next());
                 Action longAction = this.getAction(iterator.next());
 
-                consumer.visitInput(autobusId, autobusType, autobusNumber, id, name, shortAction.getType(), shortAction.getId(), longAction.getType(), longAction.getId());
+                consumer.input(autobusId, autobusType, autobusNumber, id, name, shortAction.getType(), shortAction.getId(), longAction.getType(), longAction.getId());
             }
 
         }

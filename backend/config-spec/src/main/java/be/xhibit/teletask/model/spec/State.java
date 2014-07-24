@@ -5,15 +5,16 @@ public enum State {
     OFF(0),
     EVENT(1),
     UP(255),
+    TOGGLE(103),
     DOWN(0);
 
-    private final byte code;
+    private final int code;
 
     State(int code) {
-        this.code = (byte) code;
+        this.code = code;
     }
 
-    public byte getCode() {
+    public int getCode() {
         return this.code;
     }
 }

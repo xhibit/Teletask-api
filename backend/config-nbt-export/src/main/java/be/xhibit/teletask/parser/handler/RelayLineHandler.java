@@ -29,7 +29,7 @@ public class RelayLineHandler extends LineHandlerSupport {
     protected void handle(String startLine, Consumer consumer, ListIterator<String> iterator, String line, int counter) {
         Matcher matcher = RELAY_PATTERN.matcher(line);
         if (matcher.find()) {
-            consumer.visitRelay(matcher.group(1), matcher.group(2).trim(), matcher.group(3).trim(), matcher.group(4).trim());
+            consumer.relay(matcher.group(1), matcher.group(2).trim(), matcher.group(3).trim(), matcher.group(4).trim());
         }
     }
 }

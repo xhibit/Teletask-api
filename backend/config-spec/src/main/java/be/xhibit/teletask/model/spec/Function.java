@@ -20,20 +20,20 @@ import java.util.Map;
  * COND = 60; //control or get the status of a Condition
  */
 public enum Function {
-    RELAY(1, "relay", State.ON, State.OFF),
-    DIMMER(2, "dimmer", State.ON, State.OFF),
-    MOTOR(6, "motor on/off", State.ON, State.OFF),
-    LOCMOOD(8, "local mood", State.ON, State.OFF),
-    TIMEDMOOD(9, "timed mood", State.ON, State.OFF),
-    GENMOOD(10, "general mood", State.ON, State.OFF),
-    FLAG(15, "flag", State.ON, State.OFF),
-    GETSENSVAL(25, "sensor value", State.ON, State.OFF),
+    RELAY(1, "relay", State.ON, State.OFF, State.TOGGLE),
+    DIMMER(2, "dimmer", State.ON, State.OFF, State.TOGGLE),
+    MOTOR(6, "motor on/off", State.ON, State.OFF, State.TOGGLE),
+    LOCMOOD(8, "local mood", State.ON, State.OFF, State.TOGGLE),
+    TIMEDMOOD(9, "timed mood", State.ON, State.OFF, State.TOGGLE),
+    GENMOOD(10, "general mood", State.ON, State.OFF, State.TOGGLE),
+    FLAG(15, "flag", State.ON, State.OFF, State.TOGGLE),
+    GETSENSVAL(25, "sensor value", State.ON, State.OFF, State.TOGGLE),
     MTRUPDOWN(55, "motor up/down", State.UP, State.DOWN),
-    COND(60, "condition", State.ON, State.OFF);
+    COND(60, "condition", State.ON, State.OFF, State.TOGGLE);
 
     private final byte code;
     private final String descr;
-    private Map<Byte, State> states = new HashMap<>();
+    private final Map<Integer, State> states = new HashMap<>();
 
     Function(int code, String descr, State... states) {
         this.code = (byte) code;
@@ -52,12 +52,12 @@ public enum Function {
     }
 
     public State getState(int code) {
-        return this.states.get((byte) code);
+        return this.states.get(code);
     }
 
     public State getState(String code) {
         Integer stateCode = Ints.tryParse(code);
-        return stateCode == null ? State.valueOf(code.toUpperCase()) : this.states.get((byte) stateCode.intValue());
+        return stateCode == null ? State.valueOf(code.toUpperCase()) : this.states.get(stateCode);
     }
 
     private static final Map<Integer, Function> map = new HashMap<Integer, Function>();

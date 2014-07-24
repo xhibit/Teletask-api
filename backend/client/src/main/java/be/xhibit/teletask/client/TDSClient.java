@@ -1,16 +1,19 @@
 package be.xhibit.teletask.client;
 
-import be.xhibit.teletask.model.spec.CentralUnitType;
-import be.xhibit.teletask.model.spec.Component;
-import be.xhibit.teletask.client.message.GetMessage;
-import be.xhibit.teletask.client.message.LogMessage;
-import be.xhibit.teletask.client.message.SendResult;
-import be.xhibit.teletask.client.message.SetMessage;
+import be.xhibit.teletask.client.builder.ByteUtilities;
+import be.xhibit.teletask.client.builder.SendResult;
+import be.xhibit.teletask.client.builder.composer.MessageHandler;
+import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
+import be.xhibit.teletask.client.builder.message.GetMessage;
+import be.xhibit.teletask.client.builder.message.KeepAliveMessage;
+import be.xhibit.teletask.client.builder.message.LogMessage;
+import be.xhibit.teletask.client.builder.message.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfig;
-import be.xhibit.teletask.model.spec.State;
+import be.xhibit.teletask.model.spec.Component;
 import be.xhibit.teletask.model.spec.Function;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import be.xhibit.teletask.model.spec.State;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -52,7 +55,7 @@ import java.util.regex.Pattern;
  * - 1 = Communication not opened
  * - 2 = No Answer
  * <p/>
- * All commands and messages in both directions will use the same frame format:
+ * All commands and messages in both directions will use the same frame getLogInfo:
  * STX (02h) + Length + Command Number + Parameter 1 + ... + Parameter n + ChkSm
  * <p/>
  * The length does not include the ChkSm-byte. The ChkSm is calculated on Command Number + Command Parameters + Length + STX.
@@ -122,10 +125,10 @@ import java.util.regex.Pattern;
  * - You can send a keep alive to make sure that the central unit don't close the port because there is no activity
  */
 public final class TDSClient {
-    static final Logger LOG = LogManager.getLogger(TDSClient.class.getName());
-
-    private static final Pattern SPLIT_PATTERN_RESPONSE_ARRAY = Pattern.compile("2, 6, 8, ");
-    private static final Pattern SPLIT_PATTERN_RELAYS = Pattern.compile(", ");
+    /**
+     * Logger responsible for logging and debugging statements.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(TDSClient.class);
 
     private Socket socket;
 
@@ -134,9 +137,7 @@ public final class TDSClient {
 
     private ClientConfig clientConfig;
 
-    private final Map<String, State> states = new HashMap<>();
-
-    private boolean readTDSEvents = false;
+    private boolean readTDSEvents = true;
 
     private static final Map<String, TDSClient> CLIENTS = new HashMap<>();
 
@@ -164,6 +165,8 @@ public final class TDSClient {
             client.configure(clientConfig);
         }
 
+        client.start();
+
         return client;
     }
 
@@ -177,25 +180,31 @@ public final class TDSClient {
     }
 
     public SendResult set(Function function, int number, State state) {
-        SendResult result = new SetMessage(this.getCentralUnitType(), function, number, state).send(this.out);
+        SendResult result = new SetMessage(this.getConfig(), function, number, state).send(this.out);
 
         if (result == SendResult.SUCCESS) {
-            this.setState(function, number, state);
+            this.setState(function, number, this.get(this.getConfig().getComponent(function, number)));
         }
 
         return result;
     }
 
-    private CentralUnitType getCentralUnitType() {
-        return this.getConfig().getCentralUnitType();
+    public SendResult keepAlive() {
+        return new KeepAliveMessage(this.getConfig()).send(this.out);
+    }
+
+    public State get(Function function, int number) {
+        return this.get(this.getConfig().getComponent(function, number));
     }
 
     public State get(Component component) {
-        return this.getState(component.getComponentFunction(), component.getComponentNumber());
+        component.setComponentState(null);
+        this.getStateFromCentralUnit(component.getComponentFunction(), component.getComponentNumber());
+        return this.getState(component);
     }
 
     public void close() {
-        LOG.debug("Disconnecting from " + this.socket.getInetAddress().getHostAddress());
+        LOG.debug("Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
 
         // close all log events to stop reporting
         this.sendLogEventMessages(State.OFF);
@@ -222,24 +231,19 @@ public final class TDSClient {
         this.clientConfig = clientConfig;
     }
 
-    private State getState(Function function, int number) {
-        State state = this.states.get(this.getStateIndex(function, number));
-        if (state == null) {
-            this.getStateFromCentralUnit(function, number);
-
+    private State getState(Component component) {
+        State state = null;
+        while ((state = component.getComponentState()) == null) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 LOG.error("Exception ({}) caught in getState: {}", e.getClass().getName(), e.getMessage(), e);
             }
-
-            state = this.getState(function, number);
         }
         return state;
     }
 
-    private void setState(Function function, int number, State state) {
-        this.states.put(this.getStateIndex(function, number), state);
+    public void setState(Function function, int number, State state) {
         Component component = this.getConfig().getComponent(function, number);
         if (component != null) {
             component.setComponentState(state);
@@ -247,7 +251,7 @@ public final class TDSClient {
     }
 
     private void getStateFromCentralUnit(Function function, int number) {
-        new GetMessage(this.getCentralUnitType(), function, number).send(this.out);
+        new GetMessage(this.getConfig(), function, number).send(this.out);
     }
 
     private String getStateIndex(Function function, int number) {
@@ -261,7 +265,9 @@ public final class TDSClient {
         this.sendLogEventMessage(Function.MTRUPDOWN, state);
     }
 
-    private void createSocket(String host, int port) {
+    private void start() {
+        String host = this.getConfig().getHost();
+        int port = this.getConfig().getPort();
 
         // delay to wait for the first execution, should occur immediately at startup
         int timerDelay = 0;
@@ -269,14 +275,14 @@ public final class TDSClient {
         int timerPeriod = 30 * 60 * 1000;
 
         // Connect method
-        LOG.debug("Connecting to " + host + ":" + port);
+        LOG.debug("Connecting to {}:{}", host, port);
 
         try {
             this.socket = new Socket(host, port);
             this.socket.setKeepAlive(true);
             this.socket.setSoTimeout(5000);
         } catch (IOException e) {
-            LOG.error("Problem connecting to host: " + host, e);
+            LOG.error("Problem connecting to host: {}", host, e);
             System.exit(1);
         }
 
@@ -286,37 +292,49 @@ public final class TDSClient {
             this.out = new DataOutputStream(this.socket.getOutputStream());
             this.in = new DataInputStream(this.socket.getInputStream());
         } catch (IOException e) {
-            LOG.error("Couldn't get I/O for " + "the connection to: " + host + ":" + port);
+            LOG.error("Couldn't get I/O for the connection to: {}:{}", host, port);
             System.exit(1);
         }
+
+        final MessageHandler messageHandler = MessageHandlerFactory.getMessageHandler(this.getConfig().getCentralUnitType());
 
         // open the log event(s), run periodically to keep the connection to the server open
         //readTDSEvents = true;
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
-                // open event channel for reporting back state changes
                 TDSClient.this.sendLogEventMessages(State.EVENT);
             }
         }, timerDelay, timerPeriod);
 
+        Timer keepAlive = new Timer();
+        keepAlive.schedule(new TimerTask() {
+            public void run() {
+                TDSClient.this.keepAlive();
+            }
+        }, 0, 60 * 1000);
+
         // read the TDS output for log messages every XXX milliseconds
-        final int readInterval = 500;
         try {
             new Thread() {
                 @Override
                 public void run() {
-                    synchronized (TDSClient.this.socket) {
-                        try {
-                            //LOG.debug("readTDSEvents: " +readTDSEvents);
-
-                            while (TDSClient.this.readTDSEvents) {
-                                readLogResponse(TDSClient.this);
-                                Thread.sleep(readInterval); //pause for a defined period of time
+                    try {
+                        while (TDSClient.this.readTDSEvents) {
+                            int available = TDSClient.this.in.available();
+                            if (available > 0) {
+                                byte[] data = new byte[available];
+                                TDSClient.this.in.readFully(data);
+                                try {
+                                    TDSClient.this.readLogResponse(messageHandler, data);
+                                } catch (Exception e) {
+                                    LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
+                                }
                             }
-                        } catch (Exception ex) {
-                            LOG.error("Exception in thread runner: " + ex.getMessage());
+                            Thread.sleep(1); // Reduces CPU load
                         }
+                    } catch (Exception ex) {
+                        LOG.error("Exception in thread runner: {}", ex.getMessage());
                     }
                 }
             }.start();
@@ -327,81 +345,32 @@ public final class TDSClient {
     }
 
     private void sendLogEventMessage(Function function, State state) {
-        new LogMessage(this.getCentralUnitType(), function, state).send(this.out);
+        new LogMessage(this.getConfig(), function, state).send(this.out);
     }
 
-    private static void readLogResponse(TDSClient client) throws Exception {
-        DataInputStream in = client.in;
-        try {
-            byte[] data = new byte[in.available()];
-            //not sure to read what length, because sometimes an acknowledge byte is sent back (actually after every GET or SET command)
-            //therefore rule below no good, better to parse for fixed value "2,6,8" as a response for a RELAYS state switch: 2 following items are always relays + state.
-            //byte [] data = new byte[7];
-
-            //NOTE: should the blocking of acknowledge byte below work, then reading per 7 bytes is best option!  Always a block of 7 bytes corresponds to 1 relays state!
-            in.readFully(data);
-
-            String response = byteToString(data);
-            if (response != null && !"".equals(response)) {
-                //LOG.debug("RECEIVED socket data: " + response);
-
-                // Other than the Acknowledge byte, the Response is 7 bits: first three always seems to be "2, 6, 8" so we'll use that to split the responses
-                // 4th bit is variable: the FUNCTION ID
-                // 5th bit is number (output,  relay, motor, ...)
-                // 6th bit is state (0-255 for dimmer) and 0 (off) or -1 (on) for relay etc
-                // 7th bit: unsure, no use?
-
-                String[] responseArray = SPLIT_PATTERN_RESPONSE_ARRAY.split(response);
-                if (responseArray.length > 0) {
-                    for (String element : responseArray) {
-                        if (element != null && !"".equals(element) && element.contains(",")) {
-                            //LOG.debug("\t - relays element part: " +element);
-                            String[] relaysArray = SPLIT_PATTERN_RELAYS.split(element);
-                            if (relaysArray.length >= 3) {
-                                Integer functionCode = Integer.valueOf(relaysArray[0]);
-                                Integer number = Integer.valueOf(relaysArray[1]);
-                                Integer state = Integer.valueOf(relaysArray[2]);
-                                if (state == -1) {
-                                    state = 1; // -1 means ON, better to use 1.
-                                }
-
-                                // update the component state
-                                Function function = Function.valueOf(functionCode);
-                                client.setState(function, number, function.getState(state));
-                            }
-                        }
-                    }
+    private void readLogResponse(MessageHandler messageHandler, byte[] data) throws Exception {
+        LOG.debug("Raw bytes {}", ByteUtilities.bytesToHex(data));
+        for (int i = 0; i < data.length; i++) {
+            byte b = data[i];
+            if (b == messageHandler.getStart()) {
+                byte eventLength = data[++i];
+                int eventLimit = i + eventLength - 1;
+                byte[] event = new byte[eventLength + 1]; // +1 for checksum
+                event[0] = b;
+                event[1] = eventLength;
+                int counter = 1;
+                for (; i <= eventLimit; i++) {
+                    int teller = counter++;
+                    event[teller] = data[i];
                 }
-
-            }
-
-        } catch (Exception ex) {
-            LOG.error("Exception reading response: " + ex);
-
-        }
-    }
-
-    /**
-     * Utility method for converting a byte array into a HEX string for representation in debugging.
-     *
-     * @param bytes The byte[]
-     * @return A string representation of the byte[]
-     */
-    private static String byteToString(byte[] bytes) {
-        String bytesAsString = Arrays.toString(bytes);
-        bytesAsString = bytesAsString.replace("[", "");
-        bytesAsString = bytesAsString.replace("]", "");
-        bytesAsString = bytesAsString.trim();
-
-        if (!"".equals(bytesAsString)) {
-            // if starts with acknowledge byte, remove and return without this byte
-            if (bytesAsString.startsWith("10, ")) {
-                //LOG.debug("Acknowledge byte received (no longer expected here), skipped in output: " +bytesAsString);
-                bytesAsString = bytesAsString.substring(4, bytesAsString.length() - 1);
+                LOG.debug("Event bytes sent to handler: {}", ByteUtilities.bytesToHex(event));
+                try {
+                    messageHandler.handleEvent(this, event);
+                } catch (Exception e) {
+                    LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
+                }
             }
         }
-
-        return bytesAsString;
     }
 
     /**
