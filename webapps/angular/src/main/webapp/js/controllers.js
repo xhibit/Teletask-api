@@ -15,6 +15,5 @@
         this.changeState = function(component, newState){
             $http.get($rootScope.baseUrl + '/component/' + component.function + '/' + component.number + '/state/' + newState);
         };
-    }])
-    ;
+    }]);
 })();
