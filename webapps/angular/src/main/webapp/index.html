@@ -21,15 +21,22 @@
             </div>
             <div class="panel-body">
                 <div ng-repeat="relay in room.relays">
-                    <a href="http://stewie.griffin.lan:7070/teletask/api/relay/{{relay.number}}/state/toggle">{{relay.description}}</a><br/>
+                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/toggle">{{relay.description}} - Toggle</a><br/>
+                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/on">{{relay.description}} - On</a><br/>
+                    <a href="{{baseUrl}}/relay/{{relay.number}}/state/off">{{relay.description}} - Off</a><br/>
+                    <br/>
                 </div>
                 <div ng-repeat="localMood in room.localMoods">
-                    <a href="http://stewie.griffin.lan:7070/teletask/api/mood/local/{{localMood.number}}/state/toggle">{{localMood.description}}</a><br/>
+                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/toggle">{{localMood.description}} - Toggle</a><br/>
+                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/on">{{localMood.description}} - On</a><br/>
+                    <a href="{{baseUrl}}/mood/local/{{localMood.number}}/state/off">{{localMood.description}} - Off</a><br/>
+                    <br/>
                 </div>
                 <div ng-repeat="motor in room.motors">
-                    <a href="http://stewie.griffin.lan:7070/teletask/api/motor/{{motor.number}}/state/up">{{motor.description}} - Up</a><br/>
-                    <a href="http://stewie.griffin.lan:7070/teletask/api/motor/{{motor.number}}/state/down">{{motor.description}} - Down</a><br/>
-                    <a href="http://stewie.griffin.lan:7070/teletask/api/motor/{{motor.number}}/state/stop">{{motor.description}} - Stop</a><br/>
+                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/up">{{motor.description}} - Up</a><br/>
+                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/down">{{motor.description}} - Down</a><br/>
+                    <a href="{{baseUrl}}/motor/{{motor.number}}/state/stop">{{motor.description}} - Stop</a><br/>
+                    <br/>
                 </div>
             </div>
         </div>
