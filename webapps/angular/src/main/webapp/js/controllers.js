@@ -4,8 +4,8 @@
     /* Controllers */
     var app = angular.module('homies-controller', []);
     app.controller('ConfigController', ['$http', function ($http) {
-        var url = 'http://localhost:7776';
-//        var url = 'http://stewie.griffin.lan:7070/teletask';
+//        var url = 'http://localhost:7776';
+        var url = 'http://stewie.griffin.lan:7070/teletask';
 
         var controller = this;
 
