@@ -3,6 +3,7 @@ package be.xhibit.teletask.parser;
 import be.xhibit.teletask.model.nbt.CentralUnit;
 import be.xhibit.teletask.model.nbt.Input;
 import be.xhibit.teletask.model.nbt.InputInterface;
+import be.xhibit.teletask.model.nbt.LocalMood;
 import be.xhibit.teletask.model.nbt.OutputInterface;
 import be.xhibit.teletask.model.nbt.Relay;
 import be.xhibit.teletask.model.nbt.Room;
@@ -104,6 +105,15 @@ public class FullNbtModelConsumerImpl implements Consumer {
         inputInterface.getInputs().add(new Input(id, name, this.getComponent(shortActionType, shortActionId), this.getComponent(longActionType, longActionId)));
     }
 
+    @Override
+    public void localMood(String id, String roomName, String type, String description) {
+        this.getLogger().debug("localMood: {}:{} (Room {}) - {}", type, id, roomName, description);
+        Room room = this.getCentralUnit().findRoom(roomName);
+        LocalMood localMood = new LocalMood(Integer.valueOf(id), room, type, description);
+        room.getLocalMoods().add(localMood);
+        this.getCentralUnit().getComponents().add(localMood);
+    }
+
     private ComponentSpec getComponent(String actionType, String actionId) {
         ComponentSpec component = null;
         if (!Strings.isNullOrEmpty(actionType) && !Strings.isNullOrEmpty(actionId)) {
@@ -112,8 +122,9 @@ public class FullNbtModelConsumerImpl implements Consumer {
         return component;
     }
 
-    private static Map<String, Function> ACTION_MAPPING = ImmutableMap.<String, Function>builder()
+    private static final Map<String, Function> ACTION_MAPPING = ImmutableMap.<String, Function>builder()
             .put("REL", Function.RELAY)
+            .put("LMD", Function.LOCMOOD)
             .build();
 
     public CentralUnit getCentralUnit() {

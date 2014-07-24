@@ -204,7 +204,7 @@ public class CentralUnit implements ClientConfigSpec {
     private transient Map<String, ComponentSupport> componentMap;
 
     private Map<String, ComponentSupport> getComponentMap() {
-        if (this.componentMap == null) {
+        if (this.componentMap == null || this.componentMap.size() != this.getComponents().size()) {
             this.componentMap = this.convertComponentsToMap(this.getComponents());
         }
         return this.componentMap;

@@ -56,6 +56,11 @@ public class Room implements RoomSpec {
         return this.components;
     }
 
+    @Override
+    public List<? extends ComponentSpec> getLocalMoods() {
+        return this.getComponents().get(Function.LOCMOOD);
+    }
+
     public void setComponents(Map<Function, List<TDSComponent>> components) {
         this.components = components;
     }

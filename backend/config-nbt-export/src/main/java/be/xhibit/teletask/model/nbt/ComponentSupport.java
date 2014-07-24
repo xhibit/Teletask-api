@@ -11,7 +11,7 @@ public abstract class ComponentSupport implements ComponentSpec {
     protected final String type;
     private State state;
 
-    public ComponentSupport(int id, Room room, String description, String type) {
+    public ComponentSupport(int id, Room room, String type, String description) {
         this.id = id;
         this.room = room;
         this.description = description;
@@ -52,5 +52,13 @@ public abstract class ComponentSupport implements ComponentSpec {
 
     public String getType() {
         return this.type;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{" +
+                "id=" + this.id +
+                ", description='" + this.description + '\'' +
+                '}';
     }
 }

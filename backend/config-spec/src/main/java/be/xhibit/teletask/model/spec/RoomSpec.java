@@ -11,4 +11,6 @@ public interface RoomSpec {
     String getName();
 
     List<? extends ComponentSpec> getRelays();
+
+    List<? extends ComponentSpec> getLocalMoods();
 }

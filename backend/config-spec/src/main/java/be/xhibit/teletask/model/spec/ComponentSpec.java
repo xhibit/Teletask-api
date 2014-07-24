@@ -11,4 +11,6 @@ public interface ComponentSpec {
     Function getFunctionValue();
 
     int getNumber();
+
+    String getDescription();
 }
