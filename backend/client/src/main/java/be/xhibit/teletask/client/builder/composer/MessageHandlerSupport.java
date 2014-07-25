@@ -117,6 +117,11 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     }
 
     @Override
+    public String getOutputLogHeaderName(int index) {
+        return "Output";
+    }
+
+    @Override
     public Function getFunction(int function) {
         return this.getFunctionMap().get(function);
     }

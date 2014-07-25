@@ -2,6 +2,7 @@ package be.xhibit.teletask.config.model.json;
 
 import be.xhibit.teletask.model.spec.CentralUnitType;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -107,6 +108,11 @@ public class TDSClientConfig implements ClientConfigSpec {
         }
 
         return returnValue;
+    }
+
+    @Override
+    public List<? extends ComponentSpec> getComponents(Function function) {
+        return this.componentsTypes.get(function);
     }
 
     public List<Room> getRooms(int level) {

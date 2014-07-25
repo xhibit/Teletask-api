@@ -5,5 +5,6 @@ public enum Command {
     GET,
     LOG,
     EVENT,
-    KEEP_ALIVE;
+    KEEP_ALIVE,
+    GROUPGET;
 }

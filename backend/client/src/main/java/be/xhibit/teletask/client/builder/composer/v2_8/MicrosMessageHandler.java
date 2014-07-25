@@ -6,6 +6,8 @@ import be.xhibit.teletask.client.builder.FunctionConfig;
 import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.EventMessage;
+import be.xhibit.teletask.client.builder.message.GetMessage;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
@@ -13,6 +15,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MicrosMessageHandler extends MessageHandlerSupport {
     /**
@@ -22,10 +27,10 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
     public MicrosMessageHandler() {
         super(ImmutableMap.<Command, CommandConfig>builder()
-                        .put(Command.SET, new CommandConfig(1, "Fnc", "Outp", "Sate"))
-                        .put(Command.GET, new CommandConfig(2, "Fnc", "Outp"))
+                        .put(Command.SET, new CommandConfig(1, "Fnc", "Output", "State"))
+                        .put(Command.GET, new CommandConfig(2, "Fnc", "Output"))
                         .put(Command.LOG, new CommandConfig(3, "Fnc", "Sate"))
-                        .put(Command.EVENT, new CommandConfig(8, "Fnc", "Outp", "Sate"))
+                        .put(Command.EVENT, new CommandConfig(8, "Fnc", "Output", "State"))
                         .build(),
                 ImmutableMap.<State, StateConfig>builder()
                         .put(State.ON, new StateConfig(255))
@@ -59,8 +64,13 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public byte[] composeOutput(int number) {
-        return new byte[]{(byte) number};
+    public byte[] composeOutput(int... numbers) {
+        byte[] outputs = new byte[numbers.length];
+        for (int i = 0; i < numbers.length; i++) {
+            outputs[i] = (byte) numbers[i];
+
+        }
+        return outputs;
     }
 
     @Override
@@ -76,6 +86,15 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
             LOG.debug("Handling event: {}", eventMessage.getLogInfo(eventData));
         }
         client.setState(function, number, state);
+    }
+
+    @Override
+    public List<GetMessage> getGroupGetMessages(ClientConfigSpec config, Function function, int... numbers) {
+        List<GetMessage> messages = new ArrayList<>();
+        for (int number : numbers) {
+            messages.add(new GetMessage(config, function, number));
+        }
+        return messages;
     }
 
     @Override

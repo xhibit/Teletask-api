@@ -1,5 +1,6 @@
 package be.xhibit.teletask.model.spec;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.List;
@@ -11,6 +12,9 @@ public interface ClientConfigSpec {
     int getPort();
 
     ComponentSpec getComponent(Function function, int number);
+
+    @JsonIgnore
+    List<? extends ComponentSpec> getComponents(Function function);
 
     CentralUnitType getCentralUnitType();
 

@@ -4,10 +4,16 @@ import be.xhibit.teletask.model.spec.CentralUnitType;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +39,7 @@ public class CentralUnit implements ClientConfigSpec {
     private List<InputInterface> inputInterfaces;
 
     private List<ComponentSupport> components;
+    private Map<Function, List<ComponentSupport>> componentsByFunction;
 
     public String getPrincipalSite() {
         return this.principalSite;
@@ -163,6 +170,33 @@ public class CentralUnit implements ClientConfigSpec {
     @Override
     public ComponentSpec getComponent(Function function, int number) {
         return this.getComponentMap().get(this.getIndex(function, number));
+    }
+
+    @Override
+    public List<ComponentSupport> getComponents(final Function function) {
+        Map<Function, List<ComponentSupport>> map = this.getComponentsByFunction();
+        List<ComponentSupport> componentSupports = map.get(function);
+        if (componentSupports == null) {
+            componentSupports =  ImmutableList.copyOf(Iterables.filter(this.getComponents(), new Predicate<ComponentSupport>() {
+                @Override
+                public boolean apply(ComponentSupport input) {
+                    return input.getFunction() == function;
+                }
+            }));
+            map.put(function, componentSupports);
+        }
+        return componentSupports;
+    }
+
+    public Map<Function, List<ComponentSupport>> getComponentsByFunction() {
+        if (this.componentsByFunction == null) {
+            this.setComponentsByFunction(new HashMap<Function, List<ComponentSupport>>());
+        }
+        return this.componentsByFunction;
+    }
+
+    private void setComponentsByFunction(Map<Function, List<ComponentSupport>> componentsByFunction) {
+        this.componentsByFunction = componentsByFunction;
     }
 
     private transient Map<String, InputInterface> inputInterfaceMap;

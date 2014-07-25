@@ -6,6 +6,9 @@ import be.xhibit.teletask.client.builder.FunctionConfig;
 import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.EventMessage;
+import be.xhibit.teletask.client.builder.message.GetMessage;
+import be.xhibit.teletask.client.builder.message.GroupGetMessage;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
@@ -15,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
 
 public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     /**
@@ -24,10 +29,11 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
 
     public MicrosPlusMessageHandler() {
         super(ImmutableMap.<Command, CommandConfig>builder()
-                        .put(Command.SET, new CommandConfig(7, "Central Unit", "Fnc", "Outp1", "Outp2", "Sate"))
-                        .put(Command.GET, new CommandConfig(6, "Central Unit", "Fnc", "Outp1", "Outp2"))
-                        .put(Command.LOG, new CommandConfig(3, "Central Unit", "Fnc", "Sate"))
-                        .put(Command.EVENT, new CommandConfig(16, "Central Unit", "Fnc", "Outp1", "Outp2", "Err State", "Sate"))
+                        .put(Command.SET, new CommandConfig(7, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "State"))
+                        .put(Command.GET, new CommandConfig(6, "Central Unit", "Fnc", "Output Part 1", "Output Part 2"))
+                        .put(Command.GROUPGET, new CommandConfig(9, "Central Unit", "Fnc", "Output Part 1", "Output Part 2"))
+                        .put(Command.LOG, new CommandConfig(3, "Central Unit", "Fnc", "State"))
+                        .put(Command.EVENT, new CommandConfig(16, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "Err State", "State"))
                         .put(Command.KEEP_ALIVE, new CommandConfig(11))
                         .build(),
                 ImmutableMap.<State, StateConfig>builder()
@@ -64,8 +70,14 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public byte[] composeOutput(int number) {
-        return ByteBuffer.allocate(2).putShort((short) number).array();
+    public byte[] composeOutput(int... numbers) {
+        byte[] outputs = new byte[numbers.length * 2];
+        for (int i = 0; i < numbers.length; i++) {
+            byte[] bytes = ByteBuffer.allocate(2).putShort((short) numbers[i]).array();
+            outputs[i*2] = bytes[0];
+            outputs[(i*2) + 1] = bytes[1];
+        }
+        return outputs;
     }
 
     @Override
@@ -88,5 +100,15 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     @Override
     protected Logger getLogger() {
         return LOG;
+    }
+
+    @Override
+    public String getOutputLogHeaderName(int index) {
+        return "Output Part " + (((index + 1) % 2) + 1);
+    }
+
+    @Override
+    public List<GroupGetMessage> getGroupGetMessages(ClientConfigSpec config, Function function, int... numbers) {
+        return Arrays.asList(new GroupGetMessage(config, function, numbers));
     }
 }

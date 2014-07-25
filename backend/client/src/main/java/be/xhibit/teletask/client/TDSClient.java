@@ -12,6 +12,8 @@ import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +22,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -187,6 +192,38 @@ public final class TDSClient {
         return result;
     }
 
+    public SendResult groupGet(Function function, int... numbers) {
+        MessageHandler messageHandler = MessageHandlerFactory.getMessageHandler(this.getConfig().getCentralUnitType());
+
+        SendResult result = SendResult.SUCCESS;
+
+        List<? extends GetMessage> messages = messageHandler.getGroupGetMessages(this.getConfig(), function, numbers);
+        for (GetMessage message : messages) {
+            SendResult sendResult = message.send(this.out);
+            if (result == SendResult.SUCCESS && sendResult != SendResult.SUCCESS) {
+                result = SendResult.PARTIAL_SUCCESS;
+            }
+        }
+
+        return result;
+    }
+
+    public void groupGet() {
+        for (Function function : Function.values()) {
+            this.groupGet(function);
+        }
+    }
+
+    private void groupGet(Function function) {
+        this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
+            @Override
+            public Integer apply(ComponentSpec input) {
+                return input.getNumber();
+            }
+        })));
+    }
+
+
     public SendResult keepAlive() {
         return new KeepAliveMessage(this.getConfig()).send(this.out);
     }
@@ -312,6 +349,10 @@ public final class TDSClient {
             }
         }, 0, 60 * 1000);
 
+//        ExecutorService executorService = Executors.newSingleThreadExecutor();
+//        executorService.
+
+
         // read the TDS output for log messages every XXX milliseconds
         try {
             new Thread() {
@@ -340,6 +381,8 @@ public final class TDSClient {
         } catch (Exception ex) {
             ex.getStackTrace();
         }
+
+        this.groupGet();
     }
 
     private void sendLogEventMessage(Function function, State state) {

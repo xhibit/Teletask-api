@@ -8,12 +8,14 @@ import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -95,7 +97,7 @@ public abstract class MessageSupport {
         table.append(System.lineSeparator()).append(hexLine);
         table.append(System.lineSeparator()).append(seperatorLine);
 
-        return System.lineSeparator() + "Command: " + this.getCommand() + ", Payload: " + this.getPayloadLogInfo() + System.lineSeparator() + seperatorLine + System.lineSeparator() + table.toString();
+        return System.lineSeparator() + "Command: " + this.getCommand() + ", Payload: " + this.getPayloadLogInfo() + System.lineSeparator() + "Raw Bytes: " + ByteUtilities.bytesToHex(message) + System.lineSeparator() + seperatorLine + System.lineSeparator() + table.toString();
     }
 
     protected abstract String getPayloadLogInfo();
@@ -116,11 +118,11 @@ public abstract class MessageSupport {
         StringBuilder builder = new StringBuilder(500);
         builder.append("| STX | Length | Command | ");
         for (int i = 1; i <= parts.size() - 4; i++) {
-            String paramName = this.getMessageParamName(i);
-            if (paramName == null) {
-                paramName = "Parameter " + i;
+            String logHeaderName = this.getLogHeaderName(i);
+            if (logHeaderName == null) {
+                logHeaderName = "Parameter " + i;
             }
-            builder.append(paramName).append(" | ");
+            builder.append(logHeaderName).append(" | ");
         }
         builder.append("ChkSm |");
         return builder;
@@ -133,12 +135,16 @@ public abstract class MessageSupport {
                 .splitToList(ByteUtilities.bytesToHex(message));
     }
 
-    private String getMessageParamName(int index) {
+    protected String getLogHeaderName(int index) {
         return this.getMessageHandler().getCommandConfig(this.getCommand()).getParamNames().get(index);
     }
 
-    protected String formatState(State state) {
-        return "State( " + state + " | " + (state == null ? null : this.getMessageHandler().getStateConfig(state).getNumber()) + " | " + (state == null ? null : ByteUtilities.bytesToHex((byte) this.getMessageHandler().getStateConfig(state).getNumber())) + ")";
+    protected String formatState(State... states) {
+        Collection<String> log = new ArrayList<>();
+        for (State state : states) {
+            log.add("State( " + state + " | " + (state == null ? null : this.getMessageHandler().getStateConfig(state).getNumber()) + " | " + (state == null ? null : ByteUtilities.bytesToHex((byte) this.getMessageHandler().getStateConfig(state).getNumber())) + ")");
+        }
+        return Joiner.on(", ").join(log);
     }
 
     protected MessageHandler getMessageHandler() {
@@ -149,7 +155,11 @@ public abstract class MessageSupport {
         return "Function( " + function + " | " + this.getMessageHandler().getFunctionConfig(function).getNumber() + " | " + ByteUtilities.bytesToHex((byte) this.getMessageHandler().getFunctionConfig(function).getNumber()) + ")";
     }
 
-    protected String formatOutput(int number) {
-        return "Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)) + ")";
+    protected String formatOutput(int... numbers) {
+        Collection<String> outputs = new ArrayList<>();
+        for (int number : numbers) {
+            outputs.add("Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)) + ")");
+        }
+        return Joiner.on(", ").join(outputs);
     }
 }
