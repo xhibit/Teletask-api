@@ -11,7 +11,7 @@ public class TeletaskApplication extends Application {
     private final Set<Object> singletons = new HashSet<Object>();
 
     public TeletaskApplication() {
-        this.singletons.add(new ComponentResource(TeletaskHttpServletDispatcher.getClient()));
+        this.singletons.add(new ComponentResource());
     }
 
     /**
