@@ -16,7 +16,7 @@ public class GroupGetMessage extends GetMessageSupport<List<ComponentSpec>> {
     }
 
     @Override
-    protected Command getCommand() {
+    public Command getCommand() {
         return Command.GROUPGET;
     }
 

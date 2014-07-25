@@ -11,7 +11,7 @@ public abstract class FunctionBasedMessageSupport<R> extends MessageSupport<R> {
         this.function = function;
     }
 
-    protected Function getFunction() {
+    public Function getFunction() {
         return this.function;
     }
 }

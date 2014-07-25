@@ -18,7 +18,7 @@ public class KeepAliveMessage extends MessageSupport<SendResult> {
     }
 
     @Override
-    protected Command getCommand() {
+    public Command getCommand() {
         return Command.KEEP_ALIVE;
     }
 

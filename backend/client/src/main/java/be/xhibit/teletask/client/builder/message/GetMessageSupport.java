@@ -1,9 +1,7 @@
 package be.xhibit.teletask.client.builder.message;
 
-import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
-import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.base.Joiner;
 import com.google.common.primitives.Bytes;
@@ -16,7 +14,7 @@ public abstract class GetMessageSupport<R> extends FunctionBasedMessageSupport<R
         this.numbers = numbers;
     }
 
-    protected int[] getNumbers() {
+    public int[] getNumbers() {
         return this.numbers;
     }
 
@@ -26,12 +24,17 @@ public abstract class GetMessageSupport<R> extends FunctionBasedMessageSupport<R
     }
 
     @Override
-    protected Command getCommand() {
+    public Command getCommand() {
         return Command.GET;
     }
 
     @Override
     protected String getPayloadLogInfo() {
         return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatOutput(this.getNumbers()));
+    }
+
+    @Override
+    protected int getExpectedResultCount() {
+        return 1 + this.getNumbers().length;
     }
 }

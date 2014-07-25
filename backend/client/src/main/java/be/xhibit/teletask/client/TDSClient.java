@@ -301,9 +301,11 @@ public final class TDSClient {
 
         this.connect(host, port);
 
+        this.sendLogEventMessages(State.ON);
+
 //        this.startEventListener();
 
-        this.groupGet();
+//        this.groupGet();
 
         this.startKeepAlive();
     }

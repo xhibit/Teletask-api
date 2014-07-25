@@ -229,7 +229,7 @@ public class ComponentResource {
             function = Function.LOCMOOD;
         }
 
-        APIResponse response = new APIResponse("success", this.client.getConfig().getComponent(function, number));
+        APIResponse response = new APIResponse("success", this.client.get(function, number));
         return Response.status(200).entity(response).build();
     }
 
@@ -237,7 +237,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/component/{function}/{number}")
     public Response component(@PathParam("function") String function, @PathParam("number") int number) {
-        APIResponse response = new APIResponse("success", this.client.getConfig().getComponent(Function.valueOf(function.toUpperCase()), number));
+        APIResponse response = new APIResponse("success", this.client.get(Function.valueOf(function.toUpperCase()), number));
         return Response.status(200).entity(response).build();
     }
 
@@ -262,7 +262,7 @@ public class ComponentResource {
      * @return A JSON REST response.
      */
     private Response buildResponse(int number, Function function) {
-        ComponentSpec component = this.client.getConfig().getComponent(function, number);
+        ComponentSpec component = this.client.get(function, number);
         APIResponse apiResponse = new APIResponse("success", component);
         return Response.status(200).entity(apiResponse).header("Access-Control-Allow-Origin", "*").build();
     }

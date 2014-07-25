@@ -6,6 +6,7 @@ import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Joiner;
 import com.google.common.primitives.Bytes;
 
@@ -31,6 +32,7 @@ public class EventMessage extends FunctionBasedMessageSupport<SendResult> {
         return this.number;
     }
 
+    @JsonIgnore
     public byte[] getRawBytes() {
         return this.rawBytes;
     }

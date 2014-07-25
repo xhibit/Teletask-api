@@ -12,9 +12,13 @@ import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,23 +65,26 @@ public abstract class MessageSupport<R> {
                             LOG.debug("Test mode send: {}", this.getLogInfo(message));
                         }
                     }
-                    Thread.sleep(100);
-                    int available = inputStream.available();
-                    byte[] data = new byte[0];
-                    while (available > 0) {
-                        byte[] read = new byte[available];
-                        inputStream.read(read, 0, available);
-                        data = Bytes.concat(data, read);
-                        available = inputStream.available();
+
+                    List<ServerResponse> responses = new ArrayList<>();
+
+                    byte[] overflow = new byte[0];
+                    long startTime = System.currentTimeMillis();
+                    while (responses.size() != this.getExpectedResultCount()) {
+                        if ((System.currentTimeMillis() - startTime) > 5000) {
+                            throw new RuntimeException("Did not receive data in a timely fashion. This means either: \n\t- You sent wrong data to the server and hence did not get an acknowledge.\n\t- Or you requested information from the server that was not available to the server");
+                        }
+                        int available = inputStream.available();
+                        if (available > 0) {
+                            byte[] read = new byte[available];
+                            inputStream.read(read, 0, available);
+                            byte[] data = Bytes.concat(overflow, read);
+                            overflow = this.extractResponses(responses, data);
+                        }
+                        Thread.sleep(10);
                     }
 
-                    response = this.createResponse(this.extractResponses(data));
-
-//                    if (LOG.isDebugEnabled()) {
-//                        LOG.debug("Handling event: {}", eventMessage.getLogInfo(eventData));
-//                    }
-
-
+                    response = this.createResponse(responses);
                 } catch (Exception e) {
                     LOG.error("Exception ({}) caught in send: {}", e.getClass().getName(), e.getMessage(), e);
                 }
@@ -85,41 +92,49 @@ public abstract class MessageSupport<R> {
                 LOG.warn("Message handler '{}' does not know of command '{}'", this.getMessageHandler().getClass().getSimpleName(), this.getCommand());
             }
         } else {
-            LOG.warn("Invalid request");
+            LOG.warn("Invalid request: {}", this);
         }
 
         return response;
     }
 
+    protected int getExpectedResultCount() {
+        return 1;
+    }
+
     protected abstract R createResponse(List<ServerResponse> serverResponses);
 
-    private List<ServerResponse> extractResponses(byte[] data) throws Exception {
+    private byte[] extractResponses(List<ServerResponse> responses, byte[] data) throws Exception {
         LOG.debug("Raw bytes {}", ByteUtilities.bytesToHex(data));
-        List<ServerResponse> responses = new ArrayList<>();
+        byte[] overflow = new byte[0];
         for (int i = 0; i < data.length; i++) {
             byte b = data[i];
+            LOG.debug("Processing: {}", ByteUtilities.bytesToHex(b));
             if (b == this.getMessageHandler().getStxValue()) {
-                byte eventLength = data[++i];
-                int eventLimit = i + eventLength - 1;
-                byte[] event = new byte[eventLength + 1]; // +1 for checksum
-                event[0] = b;
-                event[1] = eventLength;
-                int counter = 1;
-                for (; i <= eventLimit; i++) {
-                    int teller = counter++;
-                    event[teller] = data[i];
-                }
-                LOG.debug("Event bytes sent to handler: {}", ByteUtilities.bytesToHex(event));
-                try {
-                    responses.add(new EventMessageServerResponse(this.getMessageHandler().parseEvent(this.getClientConfig(), event)));
-                } catch (Exception e) {
-                    LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
+                int eventLengthInclChkSum = data[i+1] + 1; // +1 for checksum
+                byte[] event = new byte[eventLengthInclChkSum];
+
+                if (i + eventLengthInclChkSum > data.length) {
+                    overflow = new byte[data.length - i];
+                    System.arraycopy(data, i, event, 0, data.length - i);
+                    i = data.length-1;
+                } else {
+                    System.arraycopy(data, i, event, 0, eventLengthInclChkSum);
+
+                    i += eventLengthInclChkSum-1;
+
+                    LOG.debug("Event bytes part: {}", ByteUtilities.bytesToHex(event));
+                    try {
+                        responses.add(new EventMessageServerResponse(this.getMessageHandler().parseEvent(this.getClientConfig(), event)));
+                    } catch (Exception e) {
+                        LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
+                    }
                 }
             } else if (b == this.getMessageHandler().getAcknowledgeValue()) {
                 responses.add(new AcknowledgeServerResponse());
             }
         }
-        return responses;
+        return overflow;
     }
 
     protected boolean isValid() {
@@ -216,7 +231,7 @@ public abstract class MessageSupport<R> {
     }
 
     protected SendResult expectSingleAcknowledge(List<ServerResponse> serverResponses) {
-        SendResult result = SendResult.FAILED;
+        SendResult result = null;
         if (serverResponses.size() == 1 && serverResponses.get(0) instanceof AcknowledgeServerResponse) {
             result = SendResult.SUCCESS;
         } else {
@@ -225,12 +240,14 @@ public abstract class MessageSupport<R> {
         return result;
     }
 
-    protected ComponentSpec expectSingleEventMessage(List<ServerResponse> serverResponses) {
-        ComponentSpec result = null;
-        if (serverResponses.size() == 1 && serverResponses.get(0) instanceof EventMessageServerResponse) {
-            result = this.convert((EventMessageServerResponse) serverResponses.get(0));
-        }
-        return result;
+    protected ComponentSpec expectSingleEventMessage(Iterable<ServerResponse> serverResponses) {
+        EventMessageServerResponse serverResponse = (EventMessageServerResponse) Iterables.find(serverResponses, new Predicate<ServerResponse>() {
+            @Override
+            public boolean apply(ServerResponse input) {
+                return input instanceof EventMessageServerResponse;
+            }
+        });
+        return this.convert(serverResponse);
     }
 
     protected ComponentSpec convert(EventMessageServerResponse serverResponse) {
@@ -241,5 +258,19 @@ public abstract class MessageSupport<R> {
         ComponentSpec component = this.getClientConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber());
         component.setState(eventMessage.getState());
         return component;
+    }
+
+    public String getMessageClass() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writer().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            LOG.error("Exception ({}) caught in toString: {}", e.getClass().getName(), e.getMessage());
+        }
+        return super.toString();
     }
 }
