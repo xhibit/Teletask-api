@@ -7,7 +7,7 @@
              {"number":  1, "description": "L01: bedroom 1"}
             ,{"number":  2, "description": "L02: kitchen"}
         ],
-        "MTRUPDOWN": [
+        "MOTOR": [
              {"number": 0,  "description": "Screen cinema"}
             ,{"number": 1, "description": "Screen Office"}
             ,{"number": 2, "description": "Screen Livingroom"}

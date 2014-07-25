@@ -1,10 +1,6 @@
 <%@ page import="be.xhibit.teletask.client.TDSClient" %>
 <%@ page import="be.xhibit.teletask.config.model.json.TDSClientConfig" %>
 <%@ page import="be.xhibit.teletask.model.spec.Function" %>
-<%@ page import="be.xhibit.teletask.config.model.json.TDSComponent" %>
-<%@ page import="java.util.List" %>
-<%@ page import="be.xhibit.teletask.config.model.json.Room" %>
-<%@ page import="be.xhibit.teletask.model.spec.ClientConfigSpec" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%--
@@ -29,8 +25,8 @@
     <script>
         $(document).ready(function () {
             //TODO: define URL globally: must match the SERVER's IP in order to work for AJAX call!!!
-            var base_url = 'http://192.168.1.10:8080/teletask/api/';
-            //var base_url = 'http://localhost:8080/teletask/api/';
+            //var base_url = 'http://192.168.1.10:8080/teletask/api/';
+            var base_url = 'http://localhost:8080/teletask/api/';
 
             $(document).bind("mobileinit", function() {
                 $.mobile.page.prototype.options.addBackBtn = true;
@@ -54,10 +50,10 @@
 
             /**
              * SWITCH RELAY STATE
-             * URI: PUT <base_url>/relay/{number}/state/{0/1}
+             * URI: PUT <base_url>/relay/{number}/state/{off/on}
              *
              * SWITCH MOTOR STATE
-             * URI: PUT <base_url>/motor/{number}/state/{0/1}
+             * URI: PUT <base_url>/motor/{number}/state/{down/up}
              */
             $( ".stateSwitch" ).bind( "change", function(event) {
 
@@ -66,10 +62,10 @@
                 var stateValue;
                 if (componentType === "relay") {
                     // relay needs to send 1 for "on"
-                    stateValue = $(this).is(':checked') ? 1 : 0;
+                    stateValue = $(this).is(':checked') ? "on" : "off";
                 } else if (componentType === "motor") {
                     // motor needs to send 0 for "down"
-                    stateValue = $(this).is(':checked') ? 0 : 1;
+                    stateValue = $(this).is(':checked') ? "up" : "down";
                 }
 
                 var url = base_url +componentType +"/" +componentValue +"/state/" +stateValue
@@ -134,7 +130,7 @@
         request.setAttribute("tds_relays", tdsConfig.getComponentsTypes().get(Function.RELAY));
         request.setAttribute("tds_locmoods", tdsConfig.getComponentsTypes().get(Function.LOCMOOD));
         request.setAttribute("tds_genmoods", tdsConfig.getComponentsTypes().get(Function.GENMOOD));
-        request.setAttribute("tds_screens", tdsConfig.getComponentsTypes().get(Function.MTRUPDOWN));
+        request.setAttribute("tds_screens", tdsConfig.getComponentsTypes().get(Function.MOTOR));
         request.setAttribute("tds_rooms", tdsConfig.getRooms());
     %>
 
