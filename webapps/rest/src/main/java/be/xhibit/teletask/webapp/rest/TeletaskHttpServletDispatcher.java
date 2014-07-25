@@ -28,8 +28,9 @@ public class TeletaskHttpServletDispatcher extends HttpServletDispatcher {
     @Override
     public void init(ServletConfig servletConfig) throws ServletException {
         super.init(servletConfig);
-
-        client = TDSClient.getInstance(this.getClientConfig());
+        if (client == null) {
+            client = TDSClient.getInstance(this.getClientConfig());
+        }
     }
 
     @Override
