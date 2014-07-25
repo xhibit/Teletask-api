@@ -13,7 +13,7 @@ public class GetMessage extends GetMessageSupport<ComponentSpec> {
     }
 
     @Override
-    protected ComponentSpec createResponse(List<ServerResponse> serverResponses) {
+    protected ComponentSpec convertResponse(List<ServerResponse> serverResponses) {
         return this.expectSingleEventMessage(serverResponses);
     }
 }

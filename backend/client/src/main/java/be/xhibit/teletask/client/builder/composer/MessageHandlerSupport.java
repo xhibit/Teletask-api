@@ -42,7 +42,7 @@ public abstract class MessageHandlerSupport implements MessageHandler {
         return builder.toString();
     }
 
-    protected byte[] getMessageWithChecksum(byte[] messageBytes) {
+    protected byte[] addCheckSum(byte[] messageBytes) {
         // ChkSm: Command Number + Command Parameters + Length + STX
         byte checkSumByte = 0;
         for (byte messageByte : messageBytes) {

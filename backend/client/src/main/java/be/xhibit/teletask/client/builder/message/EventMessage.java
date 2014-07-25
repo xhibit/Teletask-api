@@ -53,7 +53,7 @@ public class EventMessage extends FunctionBasedMessageSupport<SendResult> {
     }
 
     @Override
-    protected SendResult createResponse(List<ServerResponse> serverResponses) {
+    protected SendResult convertResponse(List<ServerResponse> serverResponses) {
         return this.expectSingleAcknowledge(serverResponses);
     }
 }

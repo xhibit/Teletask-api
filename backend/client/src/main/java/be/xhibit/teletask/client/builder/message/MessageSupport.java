@@ -19,7 +19,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
-import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,14 +69,27 @@ public abstract class MessageSupport<R> {
         return response;
     }
 
+    private R receive(InputStream inputStream) throws Exception {
+        return MessageUtilities.receive(inputStream, this.getClientConfig(), this.getMessageHandler(), new MessageUtilities.StopCondition() {
+            @Override
+            public boolean isComplete(List<ServerResponse> responses, byte[] overflow) {
+                return responses.size() == MessageSupport.this.getExpectedResultCount();
+            }
+        }, new MessageUtilities.ResponseConverter<R>() {
+            @Override
+            public R convert(List<ServerResponse> responses) {
+                return MessageSupport.this.convertResponse(responses);
+            }
+        });
+    }
+
     private void send(OutputStream outputStream, byte[] message) throws IOException {
         //Send data over socket
         if (Boolean.getBoolean("production")) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Sending: {}", this.getLogInfo(message));
             }
-            outputStream.write(message);
-            outputStream.flush();
+            MessageUtilities.send(outputStream, message);
         } else {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Test mode send: {}", this.getLogInfo(message));
@@ -85,68 +97,11 @@ public abstract class MessageSupport<R> {
         }
     }
 
-    private R receive(InputStream inputStream) throws Exception {
-        List<ServerResponse> responses = new ArrayList<>();
-
-        byte[] overflow = new byte[0];
-        long startTime = System.currentTimeMillis();
-        while (responses.size() != this.getExpectedResultCount()) {
-            if ((System.currentTimeMillis() - startTime) > 5000) {
-                throw new RuntimeException("Did not receive data in a timely fashion. This means either: \n\t- You sent wrong data to the server and hence did not get an acknowledge.\n\t- Or you requested information from the server that was not available to the server");
-            }
-            int available = inputStream.available();
-            if (available > 0) {
-                byte[] read = new byte[available];
-                inputStream.read(read, 0, available);
-                byte[] data = Bytes.concat(overflow, read);
-                overflow = this.extractResponses(responses, data);
-            }
-            Thread.sleep(10);
-        }
-
-        return this.createResponse(responses);
-    }
-
     protected int getExpectedResultCount() {
         return 1;
     }
 
-    protected abstract R createResponse(List<ServerResponse> serverResponses);
-
-    private byte[] extractResponses(Collection<ServerResponse> responses, byte[] data) throws Exception {
-        LOG.debug("Raw bytes {}", ByteUtilities.bytesToHex(data));
-        byte[] overflow = new byte[0];
-        for (int i = 0; i < data.length; i++) {
-            byte b = data[i];
-            LOG.debug("Processing: {}", ByteUtilities.bytesToHex(b));
-            if (b == this.getMessageHandler().getStxValue()) {
-                int eventLengthInclChkSum = data[i+1] + 1; // +1 for checksum
-                byte[] event = new byte[eventLengthInclChkSum];
-
-                if (i + eventLengthInclChkSum > data.length) {
-                    overflow = new byte[data.length - i];
-                    System.arraycopy(data, i, event, 0, data.length - i);
-                    i = data.length-1;
-
-                    LOG.debug("Overflowing: {}", ByteUtilities.bytesToHex(overflow));
-                } else {
-                    System.arraycopy(data, i, event, 0, eventLengthInclChkSum);
-
-                    i += eventLengthInclChkSum-1;
-
-                    LOG.debug("Event bytes part: {}", ByteUtilities.bytesToHex(event));
-                    try {
-                        responses.add(new EventMessageServerResponse(this.getMessageHandler().parseEvent(this.getClientConfig(), event)));
-                    } catch (Exception e) {
-                        LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
-                    }
-                }
-            } else if (b == this.getMessageHandler().getAcknowledgeValue()) {
-                responses.add(new AcknowledgeServerResponse());
-            }
-        }
-        return overflow;
-    }
+    protected abstract R convertResponse(List<ServerResponse> serverResponses);
 
     protected boolean isValid() {
         return true;

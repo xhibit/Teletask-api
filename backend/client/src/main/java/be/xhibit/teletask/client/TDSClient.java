@@ -1,6 +1,8 @@
 package be.xhibit.teletask.client;
 
 import be.xhibit.teletask.client.builder.ByteUtilities;
+import be.xhibit.teletask.client.builder.message.MessageUtilities;
+import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
@@ -22,10 +24,10 @@ import org.slf4j.LoggerFactory;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
@@ -138,15 +140,12 @@ public final class TDSClient {
     private static final Logger LOG = LoggerFactory.getLogger(TDSClient.class);
 
     private Socket socket;
+    private OutputStream outputStream;
+    private InputStream inputStream;
 
-    private DataOutputStream out;
-    private DataInputStream in;
+    private final ClientConfigSpec config;
 
-    private ClientConfigSpec clientConfig;
-
-    private boolean readTDSEvents = true;
-
-    private static final Map<String, TDSClient> CLIENTS = new HashMap<>();
+    private static TDSClient instance = null;
 
     private final ExecutorService executorService;
 
@@ -154,8 +153,8 @@ public final class TDSClient {
      * Default constructor.  Responsible for reading the client config (JSON).
      * Singleton class.  Private constructor to prevent new instance creations.
      */
-    private TDSClient(ClientConfigSpec clientConfig) {
-        this.configure(clientConfig);
+    private TDSClient(ClientConfigSpec config) {
+        this.config = config;
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
@@ -165,19 +164,12 @@ public final class TDSClient {
      * @return a new or existing TDSClient instance.
      */
     public static synchronized TDSClient getInstance(ClientConfigSpec clientConfig) {
-        String index = clientConfig.getHost() + ":" + clientConfig.getPort();
-        TDSClient client = CLIENTS.get(index);
-
-        if (client == null) {
-            client = new TDSClient(clientConfig);
-            CLIENTS.put(index, client);
-        } else {
-            client.configure(clientConfig);
+        if (instance == null) {
+            instance = new TDSClient(clientConfig);
+            instance.start();
         }
 
-        client.start();
-
-        return client;
+        return instance;
     }
 
 // ################################################ PUBLIC API FUNCTIONS
@@ -193,7 +185,7 @@ public final class TDSClient {
     public List<ComponentSpec> groupGet(Function function, int... numbers) {
         List<ComponentSpec> componentSpecs = null;
         try {
-            componentSpecs = this.getMessageHandler().getGroupGetStrategy().execute(this.getConfig(), this.out, this.in, function, numbers);
+            componentSpecs = this.getMessageHandler().getGroupGetStrategy().execute(this.getConfig(), this.getOutputStream(), this.getInputStream(), function, numbers);
         } catch (Exception e) {
             LOG.error("Exception ({}) caught in groupGet: {}", e.getClass().getName(), e.getMessage(), e);
         }
@@ -223,13 +215,11 @@ public final class TDSClient {
         return this.execute(new GetMessage(this.getConfig(), component.getFunction(), component.getNumber()));
     }
 
-    public void close() {
+    public void stop() {
         LOG.debug("Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
 
         // close all log events to stop reporting
         this.sendLogEventMessages(State.OFF);
-
-        this.readTDSEvents = false;
 
         this.stopExecutorService();
         this.closeInputStream();
@@ -243,23 +233,23 @@ public final class TDSClient {
         try {
             this.socket.close();
         } catch (IOException e) {
-            LOG.error("Exception ({}) caught in close: {}", e.getClass().getName(), e.getMessage(), e);
+            LOG.error("Exception ({}) caught in stop: {}", e.getClass().getName(), e.getMessage(), e);
         }
     }
 
     private void closeOutputStream() {
         try {
-            this.out.close();
+            this.getOutputStream().close();
         } catch (IOException e) {
-            LOG.error("Exception ({}) caught in close: {}", e.getClass().getName(), e.getMessage(), e);
+            LOG.error("Exception ({}) caught in stop: {}", e.getClass().getName(), e.getMessage(), e);
         }
     }
 
     private void closeInputStream() {
         try {
-            this.in.close();
+            this.getInputStream().close();
         } catch (IOException e) {
-            LOG.error("Exception ({}) caught in close: {}", e.getClass().getName(), e.getMessage(), e);
+            LOG.error("Exception ({}) caught in stop: {}", e.getClass().getName(), e.getMessage(), e);
         }
     }
 
@@ -268,12 +258,12 @@ public final class TDSClient {
             this.getExecutorService().shutdown();
             this.getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            LOG.error("Exception ({}) caught in close: {}", e.getClass().getName(), e.getMessage(), e);
+            LOG.error("Exception ({}) caught in stop: {}", e.getClass().getName(), e.getMessage(), e);
         }
     }
 
     public ClientConfigSpec getConfig() {
-        return this.clientConfig;
+        return this.config;
     }
 
     // ################################################ PRIVATE API FUNCTIONS
@@ -281,15 +271,11 @@ public final class TDSClient {
     private <R> R execute(MessageSupport<R> message) {
         R sendResult = null;
         try {
-            sendResult = this.getExecutorService().submit(MessageExecutor.of(message, this.out, this.in)).get();
+            sendResult = this.getExecutorService().submit(MessageExecutor.of(message, this.getOutputStream(), this.getInputStream())).get();
         } catch (InterruptedException | ExecutionException e) {
             LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
         }
         return sendResult;
-    }
-
-    private void configure(ClientConfigSpec clientConfig) {
-        this.clientConfig = clientConfig;
     }
 
     private void sendLogEventMessages(State state) {
@@ -297,6 +283,7 @@ public final class TDSClient {
         this.sendLogEventMessage(Function.LOCMOOD, state);
         this.sendLogEventMessage(Function.GENMOOD, state);
         this.sendLogEventMessage(Function.MOTOR, state);
+        this.sendLogEventMessage(Function.DIMMER, state);
     }
 
     private void start() {
@@ -307,42 +294,40 @@ public final class TDSClient {
 
         this.sendLogEventMessages(State.ON);
 
-//        this.startEventListener();
+        this.startEventListener();
 
-        this.groupGet();
+//        this.groupGet();
 
         this.startKeepAlive();
     }
 
     private void startEventListener() {
-        final MessageHandler messageHandler = this.getMessageHandler();
-        try {
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        while (TDSClient.this.readTDSEvents) {
-                            int available = TDSClient.this.in.available();
-                            if (available > 0) {
-                                byte[] data = new byte[available];
-                                TDSClient.this.in.readFully(data);
-                                try {
-                                    TDSClient.this.readLogResponse(messageHandler, data);
-                                } catch (Exception e) {
-                                    LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                TDSClient.this.getExecutorService().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            MessageUtilities.receive(TDSClient.this.getInputStream(), TDSClient.this.getConfig(), TDSClient.this.getMessageHandler(), new MessageUtilities.StopCondition() {
+                                @Override
+                                public boolean isComplete(List<ServerResponse> responses, byte[] overflow) {
+                                    return overflow != null && overflow.length == 0;
                                 }
-                            }
-                            Thread.sleep(1); // Reduces CPU load
+                            }, new MessageUtilities.ResponseConverter<Object>() {
+                                @Override
+                                public Object convert(List<ServerResponse> responses) {
+                                    return null;
+                                }
+                            });
+                        } catch (Exception e) {
+                            LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
                         }
-                    } catch (Exception ex) {
-                        LOG.error("Exception in thread runner: {}", ex.getMessage());
                     }
-                }
-            }.start();
-
-        } catch (Exception ex) {
-            ex.getStackTrace();
-        }
+                });
+            }
+        }, 0, 20);
     }
 
     private void connect(String host, int port) {
@@ -361,8 +346,8 @@ public final class TDSClient {
         LOG.debug("Successfully Connected");
 
         try {
-            this.out = new DataOutputStream(this.socket.getOutputStream());
-            this.in = new DataInputStream(this.socket.getInputStream());
+            this.outputStream = this.socket.getOutputStream();
+            this.inputStream = this.socket.getInputStream();
         } catch (IOException e) {
             LOG.error("Couldn't get I/O for the connection to: {}:{}", host, port);
             System.exit(1);
@@ -376,7 +361,7 @@ public final class TDSClient {
             @Override
             public void run() {
                 try {
-                    keepAliveStrategy.execute(TDSClient.this.getConfig(), TDSClient.this.out, TDSClient.this.in);
+                    keepAliveStrategy.execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream());
                 } catch (Exception e) {
                     LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
                 }
@@ -430,5 +415,13 @@ public final class TDSClient {
 
     private ExecutorService getExecutorService() {
         return this.executorService;
+    }
+
+    public OutputStream getOutputStream() {
+        return this.outputStream;
+    }
+
+    public InputStream getInputStream() {
+        return this.inputStream;
     }
 }

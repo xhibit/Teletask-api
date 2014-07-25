@@ -28,7 +28,7 @@ public class KeepAliveMessage extends MessageSupport<SendResult> {
     }
 
     @Override
-    protected SendResult createResponse(List<ServerResponse> serverResponses) {
+    protected SendResult convertResponse(List<ServerResponse> serverResponses) {
         return this.expectSingleAcknowledge(serverResponses);
     }
 }

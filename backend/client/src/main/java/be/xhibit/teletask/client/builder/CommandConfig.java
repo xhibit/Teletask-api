@@ -6,8 +6,9 @@ import java.util.Map;
 
 public class CommandConfig extends ConfigSupport {
     private final Map<Integer, String> paramNames;
+    private final boolean needsCentralUnitParameter;
 
-    public CommandConfig(int number, String... paramNames) {
+    public CommandConfig(int number, boolean needsCentralUnitParameter, String... paramNames) {
         super(number);
 
         ImmutableMap.Builder<Integer, String> builder = ImmutableMap.builder();
@@ -17,9 +18,14 @@ public class CommandConfig extends ConfigSupport {
         }
 
         this.paramNames = builder.build();
+        this.needsCentralUnitParameter = needsCentralUnitParameter;
     }
 
     public Map<Integer, String> getParamNames() {
         return this.paramNames;
+    }
+
+    public boolean needsCentralUnitParameter() {
+        return this.needsCentralUnitParameter;
     }
 }

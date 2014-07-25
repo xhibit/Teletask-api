@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
 
 public class MicrosPlusMessageHandler extends MessageHandlerSupport {
@@ -36,12 +35,12 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
 
     public MicrosPlusMessageHandler() {
         super(ImmutableMap.<Command, CommandConfig>builder()
-                        .put(Command.SET, new CommandConfig(7, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "State"))
-                        .put(Command.GET, new CommandConfig(6, "Central Unit", "Fnc", "Output Part 1", "Output Part 2"))
-                        .put(Command.GROUPGET, new CommandConfig(9, "Central Unit", "Fnc", "Output Part 1", "Output Part 2"))
-                        .put(Command.LOG, new CommandConfig(3, "Central Unit", "Fnc", "State"))
-                        .put(Command.EVENT, new CommandConfig(16, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "Err State", "State"))
-                        .put(Command.KEEP_ALIVE, new CommandConfig(11))
+                        .put(Command.SET, new CommandConfig(7, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "State"))
+                        .put(Command.GET, new CommandConfig(6, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2"))
+                        .put(Command.GROUPGET, new CommandConfig(9, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2"))
+                        .put(Command.LOG, new CommandConfig(3, false, "Fnc", "State"))
+                        .put(Command.EVENT, new CommandConfig(16, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "Err State", "State"))
+                        .put(Command.KEEP_ALIVE, new CommandConfig(11, true))
                         .build(),
                 ImmutableMap.<State, StateConfig>builder()
                         .put(State.ON, new StateConfig(255))
@@ -66,14 +65,22 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
 
     @Override
     public byte[] compose(Command command, byte[] payload) {
-        int msgStx = this.getStxValue();                                       // STX: is this value always fixed 02h?
-        int msgLength = 4 + payload.length;                                 // Length: the length of the command without checksum
+        boolean cuParam = this.getCommandConfig(command).needsCentralUnitParameter();
+
+        int msgStx = this.getStxValue();                                    // STX: is this value always fixed 02h?
+        int msgLength = (cuParam ? 4 : 3) + payload.length;                                 // Length: the length of the command without checksum
         int msgCommand = this.getCommandConfig(command).getNumber();        // Command Number
         int msgCentralUnit = 1;                                             // Now we only support 1 central unit per
 
-        byte[] messageBytes = Bytes.concat(new byte[]{(byte) msgStx, (byte) msgLength, (byte) msgCommand, (byte) msgCentralUnit}, payload);
+        byte[] begin = {(byte) msgStx, (byte) msgLength, (byte) msgCommand};
+        byte[] messageBytes = null;
+        if (cuParam) {
+            messageBytes = Bytes.concat(begin, new byte[]{(byte) msgCentralUnit}, payload);
+        } else {
+            messageBytes = Bytes.concat(begin, payload);
+        }
 
-        return this.getMessageWithChecksum(messageBytes);
+        return this.addCheckSum(messageBytes);
     }
 
     @Override
@@ -81,8 +88,8 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         byte[] outputs = new byte[numbers.length * 2];
         for (int i = 0; i < numbers.length; i++) {
             byte[] bytes = ByteBuffer.allocate(2).putShort((short) numbers[i]).array();
-            outputs[i*2] = bytes[0];
-            outputs[(i*2) + 1] = bytes[1];
+            outputs[i * 2] = bytes[0];
+            outputs[(i * 2) + 1] = bytes[1];
         }
         return outputs;
     }

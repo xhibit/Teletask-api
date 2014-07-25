@@ -37,7 +37,7 @@ public class TeletaskHttpServletDispatcher extends HttpServletDispatcher {
     public void destroy() {
         super.destroy();
 
-        client.close();
+        client.stop();
     }
 
     public static TDSClient getClient() {

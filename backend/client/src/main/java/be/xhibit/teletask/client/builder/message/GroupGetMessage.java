@@ -27,7 +27,7 @@ public class GroupGetMessage extends GetMessageSupport<List<ComponentSpec>> {
     }
 
     @Override
-    protected List<ComponentSpec> createResponse(List<ServerResponse> serverResponses) {
+    protected List<ComponentSpec> convertResponse(List<ServerResponse> serverResponses) {
         List<ComponentSpec> componentSpecs = new ArrayList<>();
         for (ServerResponse serverResponse : serverResponses) {
             if (serverResponse instanceof EventMessageServerResponse) {

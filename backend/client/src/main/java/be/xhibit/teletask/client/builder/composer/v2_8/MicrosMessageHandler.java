@@ -35,10 +35,10 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
     public MicrosMessageHandler() {
         super(ImmutableMap.<Command, CommandConfig>builder()
-                        .put(Command.SET, new CommandConfig(1, "Fnc", "Output", "State"))
-                        .put(Command.GET, new CommandConfig(2, "Fnc", "Output"))
-                        .put(Command.LOG, new CommandConfig(3, "Fnc", "Sate"))
-                        .put(Command.EVENT, new CommandConfig(8, "Fnc", "Output", "State"))
+                        .put(Command.SET, new CommandConfig(1, false, "Fnc", "Output", "State"))
+                        .put(Command.GET, new CommandConfig(2, false, "Fnc", "Output"))
+                        .put(Command.LOG, new CommandConfig(3, false, "Fnc", "Sate"))
+                        .put(Command.EVENT, new CommandConfig(8, false, "Fnc", "Output", "State"))
                         .build(),
                 ImmutableMap.<State, StateConfig>builder()
                         .put(State.ON, new StateConfig(255))
@@ -68,7 +68,7 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
         byte[] messageBytes = Bytes.concat(new byte[]{(byte) msgStx, (byte) msgLength, (byte) msgCommand}, payload);
 
-        return this.getMessageWithChecksum(messageBytes);
+        return this.addCheckSum(messageBytes);
     }
 
     @Override

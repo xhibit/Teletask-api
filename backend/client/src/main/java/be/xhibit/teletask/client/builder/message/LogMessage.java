@@ -31,7 +31,7 @@ public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     }
 
     @Override
-    protected SendResult createResponse(List<ServerResponse> serverResponses) {
+    protected SendResult convertResponse(List<ServerResponse> serverResponses) {
         return this.expectSingleAcknowledge(serverResponses);
     }
 
