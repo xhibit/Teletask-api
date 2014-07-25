@@ -6,7 +6,6 @@ import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
 import be.xhibit.teletask.client.builder.message.GetMessage;
-import be.xhibit.teletask.client.builder.message.GetMessageSupport;
 import be.xhibit.teletask.client.builder.message.LogMessage;
 import be.xhibit.teletask.client.builder.message.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.MessageSupport;
@@ -32,6 +31,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -229,16 +229,47 @@ public final class TDSClient {
         // close all log events to stop reporting
         this.sendLogEventMessages(State.OFF);
 
-        try {
-            this.readTDSEvents = false;
-            this.in.close();
-            this.out.close();
-            this.socket.close();
-            System.exit(0);
-        } catch (IOException e) {
-            LOG.error("Error disconnecting from host\n", e);
-        }
+        this.readTDSEvents = false;
+
+        this.stopExecutorService();
+        this.closeInputStream();
+        this.closeOutputStream();
+        this.closeSocket();
+
         LOG.debug("Disconnected successfully");
+    }
+
+    private void closeSocket() {
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            LOG.error("Exception ({}) caught in close: {}", e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private void closeOutputStream() {
+        try {
+            this.out.close();
+        } catch (IOException e) {
+            LOG.error("Exception ({}) caught in close: {}", e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private void closeInputStream() {
+        try {
+            this.in.close();
+        } catch (IOException e) {
+            LOG.error("Exception ({}) caught in close: {}", e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private void stopExecutorService() {
+        try {
+            this.getExecutorService().shutdown();
+            this.getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            LOG.error("Exception ({}) caught in close: {}", e.getClass().getName(), e.getMessage(), e);
+        }
     }
 
     public ClientConfigSpec getConfig() {
@@ -261,33 +292,6 @@ public final class TDSClient {
         this.clientConfig = clientConfig;
     }
 
-//    private State getState(ComponentSpec component) {
-//        State state = null;
-//        while ((state = component.getState()) == null) {
-//            try {
-//                Thread.sleep(1);
-//            } catch (InterruptedException e) {
-//                LOG.error("Exception ({}) caught in getState: {}", e.getClass().getName(), e.getMessage(), e);
-//            }
-//        }
-//        return state;
-//    }
-//
-//    public void setState(Function function, int number, State state) {
-//        ComponentSpec component = this.getConfig().getComponent(function, number);
-//        if (component != null) {
-//            component.setState(state);
-//        }
-//    }
-
-//    private void getStateFromCentralUnit(Function function, int number) {
-//        this.execute(new GetMessage(this.getConfig(), function, number));
-//    }
-
-//    private String getStateIndex(Function function, int number) {
-//        return function + ":" + number;
-//    }
-
     private void sendLogEventMessages(State state) {
         this.sendLogEventMessage(Function.RELAY, state);
         this.sendLogEventMessage(Function.LOCMOOD, state);
@@ -305,7 +309,7 @@ public final class TDSClient {
 
 //        this.startEventListener();
 
-//        this.groupGet();
+        this.groupGet();
 
         this.startKeepAlive();
     }

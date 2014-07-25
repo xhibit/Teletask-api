@@ -34,10 +34,10 @@ public class ComponentResource {
     /**
      * Constructs a new resource using the given client config.
      *
-     * @param clientConfig The configuration
+     * @param client The client
      */
-    public ComponentResource(ClientConfigSpec clientConfig) {
-        this.client = TDSClient.getInstance(clientConfig);
+    public ComponentResource(TDSClient client) {
+        this.client = client;
     }
 
     /**

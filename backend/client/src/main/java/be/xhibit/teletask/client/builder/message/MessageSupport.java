@@ -23,6 +23,7 @@ import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -45,7 +46,7 @@ public abstract class MessageSupport<R> {
         this.clientConfig = clientConfig;
     }
 
-    protected R send(OutputStream outputStream, InputStream inputStream) {
+    protected R execute(OutputStream outputStream, InputStream inputStream) {
         R response = null;
         MessageHandler messageHandler = this.getMessageHandler();
         if (this.isValid()) {
@@ -53,40 +54,11 @@ public abstract class MessageSupport<R> {
                 byte[] message = messageHandler.compose(this.getCommand(), this.getPayload());
 
                 try {
-                    //Send data over socket
-                    if (Boolean.getBoolean("production")) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Sending: {}", this.getLogInfo(message));
-                        }
-                        outputStream.write(message);
-                        outputStream.flush();
-                    } else {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Test mode send: {}", this.getLogInfo(message));
-                        }
-                    }
+                    this.send(outputStream, message);
 
-                    List<ServerResponse> responses = new ArrayList<>();
-
-                    byte[] overflow = new byte[0];
-                    long startTime = System.currentTimeMillis();
-                    while (responses.size() != this.getExpectedResultCount()) {
-                        if ((System.currentTimeMillis() - startTime) > 5000) {
-                            throw new RuntimeException("Did not receive data in a timely fashion. This means either: \n\t- You sent wrong data to the server and hence did not get an acknowledge.\n\t- Or you requested information from the server that was not available to the server");
-                        }
-                        int available = inputStream.available();
-                        if (available > 0) {
-                            byte[] read = new byte[available];
-                            inputStream.read(read, 0, available);
-                            byte[] data = Bytes.concat(overflow, read);
-                            overflow = this.extractResponses(responses, data);
-                        }
-                        Thread.sleep(10);
-                    }
-
-                    response = this.createResponse(responses);
+                    response = this.receive(inputStream);
                 } catch (Exception e) {
-                    LOG.error("Exception ({}) caught in send: {}", e.getClass().getName(), e.getMessage(), e);
+                    LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
                 }
             } else {
                 LOG.warn("Message handler '{}' does not know of command '{}'", this.getMessageHandler().getClass().getSimpleName(), this.getCommand());
@@ -98,13 +70,50 @@ public abstract class MessageSupport<R> {
         return response;
     }
 
+    private void send(OutputStream outputStream, byte[] message) throws IOException {
+        //Send data over socket
+        if (Boolean.getBoolean("production")) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Sending: {}", this.getLogInfo(message));
+            }
+            outputStream.write(message);
+            outputStream.flush();
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Test mode send: {}", this.getLogInfo(message));
+            }
+        }
+    }
+
+    private R receive(InputStream inputStream) throws Exception {
+        List<ServerResponse> responses = new ArrayList<>();
+
+        byte[] overflow = new byte[0];
+        long startTime = System.currentTimeMillis();
+        while (responses.size() != this.getExpectedResultCount()) {
+            if ((System.currentTimeMillis() - startTime) > 5000) {
+                throw new RuntimeException("Did not receive data in a timely fashion. This means either: \n\t- You sent wrong data to the server and hence did not get an acknowledge.\n\t- Or you requested information from the server that was not available to the server");
+            }
+            int available = inputStream.available();
+            if (available > 0) {
+                byte[] read = new byte[available];
+                inputStream.read(read, 0, available);
+                byte[] data = Bytes.concat(overflow, read);
+                overflow = this.extractResponses(responses, data);
+            }
+            Thread.sleep(10);
+        }
+
+        return this.createResponse(responses);
+    }
+
     protected int getExpectedResultCount() {
         return 1;
     }
 
     protected abstract R createResponse(List<ServerResponse> serverResponses);
 
-    private byte[] extractResponses(List<ServerResponse> responses, byte[] data) throws Exception {
+    private byte[] extractResponses(Collection<ServerResponse> responses, byte[] data) throws Exception {
         LOG.debug("Raw bytes {}", ByteUtilities.bytesToHex(data));
         byte[] overflow = new byte[0];
         for (int i = 0; i < data.length; i++) {
@@ -118,6 +127,8 @@ public abstract class MessageSupport<R> {
                     overflow = new byte[data.length - i];
                     System.arraycopy(data, i, event, 0, data.length - i);
                     i = data.length-1;
+
+                    LOG.debug("Overflowing: {}", ByteUtilities.bytesToHex(overflow));
                 } else {
                     System.arraycopy(data, i, event, 0, eventLengthInclChkSum);
 
@@ -260,6 +271,11 @@ public abstract class MessageSupport<R> {
         return component;
     }
 
+    /**
+     * Method for toString readability
+     *
+     * @return The Classname of the current class
+     */
     public String getMessageClass() {
         return this.getClass().getSimpleName();
     }
