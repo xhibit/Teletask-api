@@ -54,7 +54,7 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     }
 
     @Override
-    public int getStart() {
+    public int getStxValue() {
         return 2;
     }
 
@@ -119,6 +119,11 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     @Override
     public String getOutputLogHeaderName(int index) {
         return "Output";
+    }
+
+    @Override
+    public int getAcknowledgeValue() {
+        return 10;
     }
 
     @Override

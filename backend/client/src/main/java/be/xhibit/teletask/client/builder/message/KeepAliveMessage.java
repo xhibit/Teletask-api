@@ -1,9 +1,13 @@
 package be.xhibit.teletask.client.builder.message;
 
+import be.xhibit.teletask.client.builder.SendResult;
+import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 
-public class KeepAliveMessage extends MessageSupport {
+import java.util.List;
+
+public class KeepAliveMessage extends MessageSupport<SendResult> {
     public KeepAliveMessage(ClientConfigSpec clientConfig) {
         super(clientConfig);
     }
@@ -21,5 +25,10 @@ public class KeepAliveMessage extends MessageSupport {
     @Override
     protected String getPayloadLogInfo() {
         return "";
+    }
+
+    @Override
+    protected SendResult createResponse(List<ServerResponse> serverResponses) {
+        return this.expectSingleAcknowledge(serverResponses);
     }
 }

@@ -1,12 +1,13 @@
 package be.xhibit.teletask.client.builder.message;
 
+import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.base.Joiner;
 
-public class LogMessage extends FunctionStateBasedMessageSupport {
+public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     public LogMessage(ClientConfigSpec ClientConfig, Function function, State state) {
         super(ClientConfig, function, state);
     }

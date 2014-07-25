@@ -4,7 +4,7 @@ import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 
-public abstract class FunctionStateBasedMessageSupport extends FunctionBasedMessageSupport {
+public abstract class FunctionStateBasedMessageSupport<R> extends FunctionBasedMessageSupport<R> {
     private final State state;
 
     protected FunctionStateBasedMessageSupport(ClientConfigSpec clientConfig, Function function, State state) {

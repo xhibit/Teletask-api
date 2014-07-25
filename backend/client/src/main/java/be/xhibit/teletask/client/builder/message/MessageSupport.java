@@ -4,23 +4,29 @@ import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
+import be.xhibit.teletask.client.builder.message.response.AcknowledgeServerResponse;
+import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
+import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public abstract class MessageSupport {
+public abstract class MessageSupport<R> {
     /**
      * Logger responsible for logging and debugging statements.
      */
@@ -35,9 +41,9 @@ public abstract class MessageSupport {
         this.clientConfig = clientConfig;
     }
 
-    public SendResult send(OutputStream outputStream) {
+    protected R send(OutputStream outputStream, InputStream inputStream) {
+        R response = null;
         MessageHandler messageHandler = this.getMessageHandler();
-        SendResult result;
         if (this.isValid()) {
             if (messageHandler.knowsCommand(this.getCommand())) {
                 byte[] message = messageHandler.compose(this.getCommand(), this.getPayload());
@@ -56,18 +62,64 @@ public abstract class MessageSupport {
                         }
                     }
 
-                    result = SendResult.SUCCESS;
+                    int available = inputStream.available();
+                    byte[] data = new byte[0];
+                    while (available > 0) {
+                        byte[] read = new byte[available];
+                        inputStream.read(read, 0, available);
+                        data = Bytes.concat(data, read);
+                        available = inputStream.available();
+                    }
+
+                    response = createResponse(this.extractResponses(data));
+
+//                    if (LOG.isDebugEnabled()) {
+//                        LOG.debug("Handling event: {}", eventMessage.getLogInfo(eventData));
+//                    }
+
+
                 } catch (Exception e) {
-                    result = SendResult.FAILED;
+                    LOG.error("Exception ({}) caught in send: {}", e.getClass().getName(), e.getMessage(), e);
                 }
             } else {
-                result = SendResult.UNKNOW_COMMAND;
+                LOG.warn("Message handler '{}' does not know of command '{}'", this.getMessageHandler().getClass().getSimpleName(), this.getCommand());
             }
         } else {
-            result = SendResult.INVALID;
+            LOG.warn("Invalid request");
         }
 
-        return result;
+        return response;
+    }
+
+    protected abstract R createResponse(List<ServerResponse> serverResponses);
+
+    private List<ServerResponse> extractResponses(byte[] data) throws Exception {
+        LOG.debug("Raw bytes {}", ByteUtilities.bytesToHex(data));
+        List<ServerResponse> responses = new ArrayList<>();
+        for (int i = 0; i < data.length; i++) {
+            byte b = data[i];
+            if (b == this.getMessageHandler().getStxValue()) {
+                byte eventLength = data[++i];
+                int eventLimit = i + eventLength - 1;
+                byte[] event = new byte[eventLength + 1]; // +1 for checksum
+                event[0] = b;
+                event[1] = eventLength;
+                int counter = 1;
+                for (; i <= eventLimit; i++) {
+                    int teller = counter++;
+                    event[teller] = data[i];
+                }
+                LOG.debug("Event bytes sent to handler: {}", ByteUtilities.bytesToHex(event));
+                try {
+                    responses.add(new EventMessageServerResponse(this.getMessageHandler().parseEvent(this.getClientConfig(), event)));
+                } catch (Exception e) {
+                    LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
+                }
+            } else if (b == this.getMessageHandler().getAcknowledgeValue()) {
+                responses.add(new AcknowledgeServerResponse());
+            }
+        }
+        return responses;
     }
 
     protected boolean isValid() {
@@ -161,5 +213,31 @@ public abstract class MessageSupport {
             outputs.add("Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)) + ")");
         }
         return Joiner.on(", ").join(outputs);
+    }
+
+    protected SendResult expectSingleAcknowledge(List<ServerResponse> serverResponses) {
+        SendResult result = SendResult.FAILED;
+        if (serverResponses.size() == 1 && serverResponses.get(0) instanceof AcknowledgeServerResponse) {
+            result = SendResult.SUCCESS;
+        }
+        return result;
+    }
+
+    protected ComponentSpec expectSingleEventMessage(List<ServerResponse> serverResponses) {
+        ComponentSpec result = null;
+        if (serverResponses.size() == 1 && serverResponses.get(0) instanceof EventMessageServerResponse) {
+            result = this.convert((EventMessageServerResponse) serverResponses.get(0));
+        }
+        return result;
+    }
+
+    protected ComponentSpec convert(EventMessageServerResponse serverResponse) {
+        EventMessage eventMessage = serverResponse.getEventMessage();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Event: {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
+        }
+        ComponentSpec component = this.getClientConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber());
+        component.setState(eventMessage.getState());
+        return component;
     }
 }

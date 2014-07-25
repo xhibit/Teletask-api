@@ -1,13 +1,14 @@
 package be.xhibit.teletask.client.builder.composer.v3_1;
 
-import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.client.builder.CommandConfig;
 import be.xhibit.teletask.client.builder.FunctionConfig;
+import be.xhibit.teletask.client.builder.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.EventMessage;
-import be.xhibit.teletask.client.builder.message.GetMessage;
 import be.xhibit.teletask.client.builder.message.GroupGetMessage;
+import be.xhibit.teletask.client.builder.message.KeepAliveMessage;
+import be.xhibit.teletask.client.builder.message.MessageExecutor;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
@@ -17,6 +18,8 @@ import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -59,7 +62,7 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
 
     @Override
     public byte[] compose(Command command, byte[] payload) {
-        int msgStx = this.getStart();                                       // STX: is this value always fixed 02h?
+        int msgStx = this.getStxValue();                                       // STX: is this value always fixed 02h?
         int msgLength = 4 + payload.length;                                 // Length: the length of the command without checksum
         int msgCommand = this.getCommandConfig(command).getNumber();        // Command Number
         int msgCentralUnit = 1;                                             // Now we only support 1 central unit per
@@ -81,7 +84,7 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public void handleEvent(TDSClient client, byte[] eventData) {
+    public EventMessage parseEvent(ClientConfigSpec config, byte[] eventData) {
         //02 09 10 01 01 00 03 00 00 20
         int counter = 3; //We skip first 4 since they are of no use to us at this time.
         Function function = this.getFunction(eventData[++counter]);
@@ -90,11 +93,7 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         int stateValue = eventData[++counter];
         State state = this.getState(stateValue == -1 ? 255 : stateValue);
 
-        EventMessage eventMessage = new EventMessage(client.getConfig(), function, number, state);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Handling event: {}", eventMessage.getLogInfo(eventData));
-        }
-        client.setState(function, number, state);
+        return new EventMessage(config, eventData, function, number, state);
     }
 
     @Override
@@ -110,5 +109,22 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     @Override
     public List<GroupGetMessage> getGroupGetMessages(ClientConfigSpec config, Function function, int... numbers) {
         return Arrays.asList(new GroupGetMessage(config, function, numbers));
+    }
+
+    @Override
+    public KeepAliveStrategy getKeepAliveStrategy() {
+        return new MicrosPlusKeepAliveStrategy();
+    }
+
+    private static class MicrosPlusKeepAliveStrategy implements KeepAliveStrategy {
+        @Override
+        public int getIntervalMinutes() {
+            return 3;
+        }
+
+        @Override
+        public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
+            MessageExecutor.of(new KeepAliveMessage(config), out, in).call();
+        }
     }
 }

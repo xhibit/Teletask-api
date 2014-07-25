@@ -1,12 +1,14 @@
 package be.xhibit.teletask.client.builder.composer.v2_8;
 
-import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.client.builder.CommandConfig;
 import be.xhibit.teletask.client.builder.FunctionConfig;
+import be.xhibit.teletask.client.builder.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.EventMessage;
 import be.xhibit.teletask.client.builder.message.GetMessage;
+import be.xhibit.teletask.client.builder.message.LogMessage;
+import be.xhibit.teletask.client.builder.message.MessageExecutor;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
@@ -16,6 +18,8 @@ import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +58,7 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
     @Override
     public byte[] compose(Command command, byte[] payload) {
-        int msgStx = this.getStart();                                       // STX: is this value always fixed 02h?
+        int msgStx = this.getStxValue();                                       // STX: is this value always fixed 02h?
         int msgLength = 3 + payload.length;                                 // Length: the length of the command without checksum
         int msgCommand = this.getCommandConfig(command).getNumber();        // Command Number
 
@@ -74,18 +78,14 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public void handleEvent(TDSClient client, byte[] eventData) {
+    public EventMessage parseEvent(ClientConfigSpec config, byte[] eventData) {
         //02 09 10 01 03 00 31
         int counter = 2; //We skip first 3 since they are of no use to us at this time.
         Function function = this.getFunction(eventData[++counter]);
         int number = eventData[++counter];
         int stateValue = eventData[++counter];
         State state = this.getState(stateValue == -1 ? 255 : stateValue);
-        EventMessage eventMessage = new EventMessage(client.getConfig(), function, number, state);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Handling event: {}", eventMessage.getLogInfo(eventData));
-        }
-        client.setState(function, number, state);
+        return new EventMessage(config, eventData, function, number, state);
     }
 
     @Override
@@ -100,5 +100,22 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     @Override
     protected Logger getLogger() {
         return LOG;
+    }
+
+    @Override
+    public KeepAliveStrategy getKeepAliveStrategy() {
+        return new MicrosKeepAliveStrategy();
+    }
+
+    private static class MicrosKeepAliveStrategy implements KeepAliveStrategy {
+        @Override
+        public int getIntervalMinutes() {
+            return 30;
+        }
+
+        @Override
+        public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
+            MessageExecutor.of(new LogMessage(config, Function.MOTOR, State.ON), out, in).call();
+        }
     }
 }
