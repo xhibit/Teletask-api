@@ -1,4 +1,4 @@
-package be.xhibit.teletask.client.builder;
+package be.xhibit.teletask.client.builder.message.strategy;
 
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 

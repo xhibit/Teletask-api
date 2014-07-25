@@ -2,7 +2,8 @@ package be.xhibit.teletask.client.builder.composer.v2_8;
 
 import be.xhibit.teletask.client.builder.CommandConfig;
 import be.xhibit.teletask.client.builder.FunctionConfig;
-import be.xhibit.teletask.client.builder.KeepAliveStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.EventMessage;
@@ -11,6 +12,7 @@ import be.xhibit.teletask.client.builder.message.LogMessage;
 import be.xhibit.teletask.client.builder.message.MessageExecutor;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.collect.ImmutableMap;
@@ -28,6 +30,8 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
      * Logger responsible for logging and debugging statements.
      */
     private static final Logger LOG = LoggerFactory.getLogger(MicrosMessageHandler.class);
+    public static final MicrosKeepAliveStrategy KEEP_ALIVE_STRATEGY = new MicrosKeepAliveStrategy();
+    public static final MicrosGroupGetStrategy GROUP_GET_STRATEGY = new MicrosGroupGetStrategy();
 
     public MicrosMessageHandler() {
         super(ImmutableMap.<Command, CommandConfig>builder()
@@ -89,22 +93,18 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public List<GetMessage> getGroupGetMessages(ClientConfigSpec config, Function function, int... numbers) {
-        List<GetMessage> messages = new ArrayList<>();
-        for (int number : numbers) {
-            messages.add(new GetMessage(config, function, number));
-        }
-        return messages;
-    }
-
-    @Override
     protected Logger getLogger() {
         return LOG;
     }
 
     @Override
     public KeepAliveStrategy getKeepAliveStrategy() {
-        return new MicrosKeepAliveStrategy();
+        return KEEP_ALIVE_STRATEGY;
+    }
+
+    @Override
+    public GroupGetStrategy getGroupGetStrategy() {
+        return GROUP_GET_STRATEGY;
     }
 
     private static class MicrosKeepAliveStrategy implements KeepAliveStrategy {
@@ -116,6 +116,17 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
         @Override
         public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
             MessageExecutor.of(new LogMessage(config, Function.MOTOR, State.ON), out, in).call();
+        }
+    }
+
+    private static class MicrosGroupGetStrategy implements GroupGetStrategy {
+        @Override
+        public List<ComponentSpec> execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
+            List<ComponentSpec> componentSpecs = new ArrayList<>();
+            for (int number : numbers) {
+                componentSpecs.add(MessageExecutor.of(new GetMessage(config, function, number), out, in).call());
+            }
+            return componentSpecs;
         }
     }
 }

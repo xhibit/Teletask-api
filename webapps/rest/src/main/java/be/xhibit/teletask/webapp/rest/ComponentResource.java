@@ -131,8 +131,7 @@ public class ComponentResource {
         //APIResponse response = new APIResponse("success", component);
 
         // component always holds the correct state, so no need to call client.getRelayState(number)
-        ComponentSpec component = this.client.getConfig().getComponent(function, number);
-        component.setState(this.client.get(component));
+        ComponentSpec component = this.client.get(function, number);
         APIResponse response = new APIResponse("success", component);
         return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
     }

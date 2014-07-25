@@ -2,15 +2,18 @@ package be.xhibit.teletask.client.builder.composer;
 
 import be.xhibit.teletask.client.builder.CommandConfig;
 import be.xhibit.teletask.client.builder.FunctionConfig;
-import be.xhibit.teletask.client.builder.KeepAliveStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.message.EventMessage;
-import be.xhibit.teletask.client.builder.message.GetMessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 public interface MessageHandler {
@@ -38,9 +41,9 @@ public interface MessageHandler {
 
     String getOutputLogHeaderName(int index);
 
-    List<? extends GetMessageSupport> getGroupGetMessages(ClientConfigSpec config, Function function, int... numbers);
-
     KeepAliveStrategy getKeepAliveStrategy();
 
     int getAcknowledgeValue();
+
+    GroupGetStrategy getGroupGetStrategy();
 }

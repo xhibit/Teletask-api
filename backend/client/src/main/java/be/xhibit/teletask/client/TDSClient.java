@@ -1,11 +1,12 @@
 package be.xhibit.teletask.client;
 
 import be.xhibit.teletask.client.builder.ByteUtilities;
-import be.xhibit.teletask.client.builder.KeepAliveStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
 import be.xhibit.teletask.client.builder.message.GetMessage;
+import be.xhibit.teletask.client.builder.message.GetMessageSupport;
 import be.xhibit.teletask.client.builder.message.LogMessage;
 import be.xhibit.teletask.client.builder.message.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.MessageSupport;
@@ -186,29 +187,17 @@ public final class TDSClient {
     }
 
     public SendResult set(Function function, int number, State state) {
-//        SendResult result = new SetMessage(this.getConfig(), function, number, state).send(this.out);
-//
-//        if (result == SendResult.SUCCESS) {
-//            this.setState(function, number, this.get(this.getConfig().getComponent(function, number)));
-//        }
-//
         return this.execute(new SetMessage(this.getConfig(), function, number, state));
     }
 
-    public SendResult groupGet(Function function, int... numbers) {
-        MessageHandler messageHandler = this.getMessageHandler();
-
-        SendResult result = SendResult.SUCCESS;
-
-        List<? extends GetMessage> messages = messageHandler.getGroupGetMessages(this.getConfig(), function, numbers);
-        for (GetMessage message : messages) {
-            SendResult sendResult = this.execute(message);
-            if (result == SendResult.SUCCESS && sendResult != SendResult.SUCCESS) {
-                result = SendResult.PARTIAL_SUCCESS;
-            }
+    public List<ComponentSpec> groupGet(Function function, int... numbers) {
+        List<ComponentSpec> componentSpecs = null;
+        try {
+            componentSpecs = this.getMessageHandler().getGroupGetStrategy().execute(this.getConfig(), this.out, this.in, function, numbers);
+        } catch (Exception e) {
+            LOG.error("Exception ({}) caught in groupGet: {}", e.getClass().getName(), e.getMessage(), e);
         }
-
-        return result;
+        return componentSpecs;
     }
 
     public void groupGet() {
@@ -226,13 +215,12 @@ public final class TDSClient {
         })));
     }
 
-    public State get(Function function, int number) {
+    public ComponentSpec get(Function function, int number) {
         return this.get(this.getConfig().getComponent(function, number));
     }
 
-    public State get(ComponentSpec component) {
-        SendResult sendResult = this.execute(new GetMessage(this.getConfig(), component.getFunction(), component.getNumber()));
-        return component.getState();
+    public ComponentSpec get(ComponentSpec component) {
+        return this.execute(new GetMessage(this.getConfig(), component.getFunction(), component.getNumber()));
     }
 
     public void close() {
@@ -382,7 +370,7 @@ public final class TDSClient {
             @Override
             public void run() {
                 try {
-                    keepAliveStrategy.execute(TDSClient.this.getConfig(), TDSClient.this.out, in);
+                    keepAliveStrategy.execute(TDSClient.this.getConfig(), TDSClient.this.out, TDSClient.this.in);
                 } catch (Exception e) {
                     LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
                 }
@@ -415,7 +403,7 @@ public final class TDSClient {
                 }
                 LOG.debug("Event bytes sent to handler: {}", ByteUtilities.bytesToHex(event));
                 try {
-                    messageHandler.parseEvent(this, event);
+//                    messageHandler.parseEvent(this, event);
                 } catch (Exception e) {
                     LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
                 }

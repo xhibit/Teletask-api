@@ -61,7 +61,7 @@ public abstract class MessageSupport<R> {
                             LOG.debug("Test mode send: {}", this.getLogInfo(message));
                         }
                     }
-
+                    Thread.sleep(100);
                     int available = inputStream.available();
                     byte[] data = new byte[0];
                     while (available > 0) {
@@ -71,7 +71,7 @@ public abstract class MessageSupport<R> {
                         available = inputStream.available();
                     }
 
-                    response = createResponse(this.extractResponses(data));
+                    response = this.createResponse(this.extractResponses(data));
 
 //                    if (LOG.isDebugEnabled()) {
 //                        LOG.debug("Handling event: {}", eventMessage.getLogInfo(eventData));
@@ -219,6 +219,8 @@ public abstract class MessageSupport<R> {
         SendResult result = SendResult.FAILED;
         if (serverResponses.size() == 1 && serverResponses.get(0) instanceof AcknowledgeServerResponse) {
             result = SendResult.SUCCESS;
+        } else {
+            throw new RuntimeException("No acknowledge received");
         }
         return result;
     }

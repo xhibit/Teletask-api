@@ -1,11 +1,14 @@
 package be.xhibit.teletask.client.builder.message;
 
 import be.xhibit.teletask.client.builder.SendResult;
+import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.base.Joiner;
+
+import java.util.List;
 
 public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     public LogMessage(ClientConfigSpec ClientConfig, Function function, State state) {
@@ -27,4 +30,8 @@ public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
         return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatState(this.getState()));
     }
 
+    @Override
+    protected SendResult createResponse(List<ServerResponse> serverResponses) {
+        return this.expectSingleAcknowledge(serverResponses);
+    }
 }

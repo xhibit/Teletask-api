@@ -2,7 +2,8 @@ package be.xhibit.teletask.client.builder.composer.v3_1;
 
 import be.xhibit.teletask.client.builder.CommandConfig;
 import be.xhibit.teletask.client.builder.FunctionConfig;
-import be.xhibit.teletask.client.builder.KeepAliveStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.EventMessage;
@@ -11,6 +12,7 @@ import be.xhibit.teletask.client.builder.message.KeepAliveMessage;
 import be.xhibit.teletask.client.builder.message.MessageExecutor;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.collect.ImmutableMap;
@@ -29,6 +31,8 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
      * Logger responsible for logging and debugging statements.
      */
     private static final Logger LOG = LoggerFactory.getLogger(MicrosPlusMessageHandler.class);
+    public static final MicrosPlusKeepAliveStrategy KEEP_ALIVE_STRATEGY = new MicrosPlusKeepAliveStrategy();
+    public static final MicrosPlusGroupGetStrategy GROUP_GET_STRATEGY = new MicrosPlusGroupGetStrategy();
 
     public MicrosPlusMessageHandler() {
         super(ImmutableMap.<Command, CommandConfig>builder()
@@ -107,13 +111,13 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public List<GroupGetMessage> getGroupGetMessages(ClientConfigSpec config, Function function, int... numbers) {
-        return Arrays.asList(new GroupGetMessage(config, function, numbers));
+    public KeepAliveStrategy getKeepAliveStrategy() {
+        return KEEP_ALIVE_STRATEGY;
     }
 
     @Override
-    public KeepAliveStrategy getKeepAliveStrategy() {
-        return new MicrosPlusKeepAliveStrategy();
+    public GroupGetStrategy getGroupGetStrategy() {
+        return GROUP_GET_STRATEGY;
     }
 
     private static class MicrosPlusKeepAliveStrategy implements KeepAliveStrategy {
@@ -125,6 +129,13 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         @Override
         public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
             MessageExecutor.of(new KeepAliveMessage(config), out, in).call();
+        }
+    }
+
+    private static class MicrosPlusGroupGetStrategy implements GroupGetStrategy {
+        @Override
+        public List<ComponentSpec> execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
+            return MessageExecutor.of(new GroupGetMessage(config, function, numbers), out, in).call();
         }
     }
 }
