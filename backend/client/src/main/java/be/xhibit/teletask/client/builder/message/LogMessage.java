@@ -5,14 +5,15 @@ import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
+import be.xhibit.teletask.model.spec.StateEnum;
+import be.xhibit.teletask.model.spec.StateEnumImpl;
 import com.google.common.base.Joiner;
 
 import java.util.List;
 
 public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
-    public LogMessage(ClientConfigSpec ClientConfig, Function function, State state) {
-        super(ClientConfig, function, state);
+    public LogMessage(ClientConfigSpec ClientConfig, Function function, StateEnum state) {
+        super(ClientConfig, function, new StateEnumImpl(state, function));
     }
 
     @Override

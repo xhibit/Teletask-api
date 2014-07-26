@@ -31,7 +31,7 @@ public class GroupGetMessage extends GetMessageSupport<List<ComponentSpec>> {
         List<ComponentSpec> componentSpecs = new ArrayList<>();
         for (ServerResponse serverResponse : serverResponses) {
             if (serverResponse instanceof EventMessageServerResponse) {
-                ComponentSpec component = this.convert((EventMessageServerResponse) serverResponse);
+                ComponentSpec component = MessageUtilities.handleEvent(this.getClass(), this.getClientConfig(), (EventMessageServerResponse) serverResponse);
                 componentSpecs.add(component);
             }
         }

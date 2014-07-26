@@ -7,7 +7,7 @@ import be.xhibit.teletask.model.spec.ComponentSpec;
  */
 public class APIResponse {
     private final String status;
-    private final ComponentSpec component;
+    private final ComponentSpec[] component;
 
     /**
      * Constructor setting both the response status and the component status.
@@ -16,7 +16,7 @@ public class APIResponse {
      *                  Can be useful in interpreting the result for proper error handling.
      * @param component The TDS Component status.
      */
-    public APIResponse(String status, ComponentSpec component) {
+    public APIResponse(String status, ComponentSpec... component) {
         this.status = status;
         this.component = component;
     }
@@ -25,7 +25,7 @@ public class APIResponse {
         return this.status;
     }
 
-    public ComponentSpec getComponent() {
+    public ComponentSpec[] getComponent() {
         return this.component;
     }
 }

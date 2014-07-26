@@ -13,6 +13,7 @@ public class Room implements RoomSpec {
     private List<LocalMood> localMoods;
     private List<Motor> motors;
     private List<GeneralMood> generalMoods;
+    private List<Dimmer> dimmers;
 
     public Room(int id, String name) {
         this.id = id;
@@ -53,11 +54,24 @@ public class Room implements RoomSpec {
         return this.motors;
     }
 
+    @Override
     public List<GeneralMood> getGeneralMoods() {
         if (this.generalMoods == null) {
             this.setGeneralMoods(new ArrayList<GeneralMood>());
         }
         return this.generalMoods;
+    }
+
+    @Override
+    public List<Dimmer> getDimmers() {
+        if (this.dimmers == null) {
+            this.setDimmers(new ArrayList<Dimmer>());
+        }
+        return this.dimmers;
+    }
+
+    public void setDimmers(List<Dimmer> dimmers) {
+        this.dimmers = dimmers;
     }
 
     public void setGeneralMoods(List<GeneralMood> generalMoods) {

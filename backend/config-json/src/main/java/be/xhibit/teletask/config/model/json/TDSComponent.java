@@ -3,6 +3,8 @@ package be.xhibit.teletask.config.model.json;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+import be.xhibit.teletask.model.spec.StateEnum;
+import be.xhibit.teletask.model.spec.StateEnumImpl;
 
 /**
  * This class represents a Teletask component, being either a: relay, motor, mood, ... basically anything which can be controlled.
@@ -19,7 +21,7 @@ public class TDSComponent implements ComponentSpec {
      */
     public TDSComponent() {
         this.description = "";
-        this.state = State.OFF;
+        this.state = new StateEnumImpl(StateEnum.OFF, function);
     }
 
     /**

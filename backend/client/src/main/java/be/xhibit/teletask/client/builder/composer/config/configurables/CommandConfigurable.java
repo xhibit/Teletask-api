@@ -1,15 +1,17 @@
-package be.xhibit.teletask.client.builder;
+package be.xhibit.teletask.client.builder.composer.config.configurables;
 
+import be.xhibit.teletask.client.builder.composer.config.Configurable;
+import be.xhibit.teletask.model.spec.Command;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-public class CommandConfig extends ConfigSupport {
+public class CommandConfigurable extends Configurable<Command> {
     private final Map<Integer, String> paramNames;
     private final boolean needsCentralUnitParameter;
 
-    public CommandConfig(int number, boolean needsCentralUnitParameter, String... paramNames) {
-        super(number);
+    public CommandConfigurable(Command command, int number, boolean needsCentralUnitParameter, String... paramNames) {
+        super(number, command);
 
         ImmutableMap.Builder<Integer, String> builder = ImmutableMap.builder();
         for (int i = 0; i < paramNames.length; i++) {

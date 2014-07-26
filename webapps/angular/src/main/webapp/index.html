@@ -16,6 +16,8 @@
 <script src="js/app.js"></script>
 <script src="js/controllers.js"></script>
 
+<a ng-click="configController.postSomething()">Test</a>
+
 <div class="container-fluid">
     <div class="col-xs-12 col-md-6 col-lg-3" ng-repeat="room in configController.config.rooms">
         <div class="panel panel-primary">
@@ -44,6 +46,13 @@
                     <div ng-repeat="component in room.generalMoods" class="list-group">
                         <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, 'on')">{{component.description}} - On</a>
                         <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'off')">{{component.description}} - Off</a>
+                    </div>
+                    <div ng-repeat="component in room.dimmers" class="list-group">
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '0')">{{component.description}} - 0</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '25')">{{component.description}} - 25</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '50')">{{component.description}} - 50</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '75')">{{component.description}} - 75</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '100')">{{component.description}} - 100</a>
                     </div>
                 </div>
             </div>
