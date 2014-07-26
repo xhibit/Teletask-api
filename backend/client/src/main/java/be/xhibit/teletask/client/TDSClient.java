@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -192,14 +193,19 @@ public final class TDSClient {
         return componentSpecs;
     }
 
-    public void groupGet() {
+    public List<ComponentSpec> groupGet() {
+        List<ComponentSpec> componentSpecs = new ArrayList<>();
         for (Function function : Function.values()) {
-            this.groupGet(function);
+            List<ComponentSpec> groupGet = this.groupGet(function);
+            if (groupGet != null) {
+                componentSpecs.addAll(groupGet);
+            }
         }
+        return componentSpecs;
     }
 
-    public void groupGet(Function function) {
-        this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
+    public List<ComponentSpec> groupGet(Function function) {
+        return this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
             @Override
             public Integer apply(ComponentSpec input) {
                 return input.getNumber();

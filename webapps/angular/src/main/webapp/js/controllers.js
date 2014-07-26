@@ -12,8 +12,16 @@
             controller.config = data;
         });
 
-        this.changeState = function(component, newState){
+        this.changeState = function (component, newState) {
             $http.get($rootScope.baseUrl + '/component/' + component.function + '/' + component.number + '/state/' + newState);
+        };
+
+        this.postSomething = function () {
+            $http.post($rootScope.baseUrl + '/group/relay/for', {numbers: [1, 2, 6]}).error(function (data, status, headers, config) {
+                window.alert("Error");
+            }).success(function (data, status, headers, config) {
+                window.alert(JSON.stringify(data));
+            });
         };
     }]);
 })();
