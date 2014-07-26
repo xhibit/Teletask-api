@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -207,12 +208,19 @@ public final class TDSClient {
         return sendResult;
     }
 
-    public List<ComponentSpec> groupGet(Function function, int... numbers) {
+    public List<ComponentSpec> groupGet(final Function function, final int... numbers) {
         List<ComponentSpec> componentSpecs = null;
         try {
-            componentSpecs = this.getMessageHandler().getGroupGetStrategy().execute(this.getConfig(), this.getOutputStream(), this.getInputStream(), function, numbers);
-        } catch (Exception e) {
+            componentSpecs = this.getExecutorService().submit(new Callable<List<ComponentSpec>>() {
+                @Override
+                public List<ComponentSpec> call() throws Exception {
+                    return TDSClient.this.getMessageHandler().getGroupGetStrategy().execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream(), function, numbers);
+                }
+            }).get();
+        } catch (InterruptedException e) {
             LOG.error("Exception ({}) caught in groupGet: {}", e.getClass().getName(), e.getMessage(), e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
         return componentSpecs;
     }

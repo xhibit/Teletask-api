@@ -205,7 +205,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/component/{function}/{number}")
     public Response component(@PathParam("function") String function, @PathParam("number") int number) {
-        APIResponse response = new APIResponse("success", this.getClient().get(Function.valueOf(function.toUpperCase()), number));
+        APIResponse response = new APIResponse("success", this.getClient().getConfig().getComponent(Function.valueOf(function.toUpperCase()), number));
         return this.buildsuccessResponse(response);
     }
 
