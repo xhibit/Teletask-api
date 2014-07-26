@@ -194,12 +194,16 @@ public final class TDSClient {
             sendResult = this.execute(new SetMessage(this.getConfig(), function, number, state));
 
             ComponentSpec component = this.getConfig().getComponent(function, number);
-            while (!state.equals(component.getState())) {
+            Long start = System.currentTimeMillis();
+            while (!state.equals(component.getState()) && (System.currentTimeMillis() - start) < 5000) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
                     LOG.error("Exception ({}) caught in set: {}", e.getClass().getName(), e.getMessage(), e);
                 }
+            }
+            if (!state.equals(component.getState())) {
+                throw new RuntimeException("Did not receive a state change within 5 seconds. Assuming the state change did not succeed");
             }
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
