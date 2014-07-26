@@ -41,10 +41,10 @@ public class ComponentResource {
 
     /**
      *
-     * Gets the relay state.  Returns 0 for off, 1 for on.
-     * URI: (GET) http://localhost:8080/teletask/api/relay/{number}
+     * Gets the complete config in JSON.
+     * URI: (GET) http://localhost:8080/teletask/api/config
      *
-     * @return JSON response confirming if the switch request was successful, together with the correct state.
+     * @return JSON representation of the complete Teletask config in place..
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
