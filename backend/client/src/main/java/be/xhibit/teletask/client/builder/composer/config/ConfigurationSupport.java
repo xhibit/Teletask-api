@@ -1,12 +1,10 @@
 package be.xhibit.teletask.client.builder.composer.config;
 
-import be.xhibit.teletask.model.spec.Command;
-
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ConfigurationSupport<T, C extends Configurable<T>> {
-    private Map<Integer, C> configByNumber;
+public abstract class ConfigurationSupport<T, C extends Configurable<T>, K> {
+    private Map<K, C> configByKey;
     private Map<T, C> configByObject;
     private final Iterable<C> config;
 
@@ -14,19 +12,23 @@ public abstract class ConfigurationSupport<T, C extends Configurable<T>> {
         this.config = config;
     }
 
-    public T getConfigObject(int number) {
-        return this.getConfigByNumber().get(number).getObject();
+    public T getConfigObject(K key) {
+        return this.getConfigByKey().get(key).getObject();
     }
 
     public C getConfigurable(T configObject) {
-        return this.getConfigByObject().get(configObject);
+        C state = this.getConfigByObject().get(configObject);
+        if (state == null) {
+            throw new IllegalArgumentException("Illegal state requested: " + configObject);
+        }
+        return state;
     }
 
-    private Map<Integer, C> getConfigByNumber() {
-        if (this.configByNumber == null) {
-            this.configByNumber = this.createConfigByNumberMap(this.getConfig());
+    private Map<K, C> getConfigByKey() {
+        if (this.configByKey == null) {
+            this.configByKey = this.createConfigByKeyMap(this.getConfig());
         }
-        return this.configByNumber;
+        return this.configByKey;
     }
 
     private Map<T, C> getConfigByObject() {
@@ -44,13 +46,15 @@ public abstract class ConfigurationSupport<T, C extends Configurable<T>> {
         return configMap;
     }
 
-    private Map<Integer, C> createConfigByNumberMap(Iterable<C> map) {
-        Map<Integer, C> configMap = new HashMap<>();
+    private Map<K, C> createConfigByKeyMap(Iterable<C> map) {
+        Map<K, C> configMap = new HashMap<>();
         for (C value : map) {
-            configMap.put(value.getNumber(), value);
+            configMap.put(this.getKey(value), value);
         }
         return configMap;
     }
+
+    protected abstract K getKey(C configurable);
 
     private Iterable<C> getConfig() {
         return this.config;

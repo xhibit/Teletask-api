@@ -5,7 +5,7 @@ import be.xhibit.teletask.client.builder.composer.config.configurables.CommandCo
 import be.xhibit.teletask.model.spec.Command;
 import com.google.common.collect.ImmutableList;
 
-public class MicrosPlusCommandConfiguration extends ConfigurationSupport<Command, CommandConfigurable> {
+public class MicrosPlusCommandConfiguration extends ConfigurationSupport<Command, CommandConfigurable, Integer> {
     public MicrosPlusCommandConfiguration() {
         super(ImmutableList.<CommandConfigurable>builder()
                 .add(new CommandConfigurable(Command.SET, 7, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "State"))
@@ -15,5 +15,10 @@ public class MicrosPlusCommandConfiguration extends ConfigurationSupport<Command
                 .add(new CommandConfigurable(Command.EVENT, 16, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "Err State", "State"))
                 .add(new CommandConfigurable(Command.KEEP_ALIVE, 11, true))
                 .build());
+    }
+
+    @Override
+    protected Integer getKey(CommandConfigurable configurable) {
+        return configurable.getNumber();
     }
 }

@@ -4,17 +4,18 @@ import be.xhibit.teletask.client.builder.composer.config.ConfigurationSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
+import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.primitives.Bytes;
 
 public abstract class MessageHandlerSupport implements MessageHandler {
-    private final ConfigurationSupport<Command, CommandConfigurable> commandConfiguration;
-    private final ConfigurationSupport<State, StateConfigurable> stateConfiguration;
-    private final ConfigurationSupport<Function, FunctionConfigurable> functionConfiguration;
+    private final ConfigurationSupport<Command, CommandConfigurable, Integer> commandConfiguration;
+    private final ConfigurationSupport<State, StateConfigurable, StateKey> stateConfiguration;
+    private final ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration;
 
-    protected MessageHandlerSupport(ConfigurationSupport<Command, CommandConfigurable> commandConfiguration, ConfigurationSupport<State, StateConfigurable> stateConfiguration, ConfigurationSupport<Function, FunctionConfigurable> functionConfiguration) {
+    protected MessageHandlerSupport(ConfigurationSupport<Command, CommandConfigurable, Integer> commandConfiguration, ConfigurationSupport<State, StateConfigurable, StateKey> stateConfiguration, ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration) {
         this.commandConfiguration = commandConfiguration;
         this.stateConfiguration = stateConfiguration;
         this.functionConfiguration = functionConfiguration;
@@ -60,15 +61,15 @@ public abstract class MessageHandlerSupport implements MessageHandler {
         return this.getFunctionConfiguration().getConfigurable(function);
     }
 
-    public ConfigurationSupport<Command, CommandConfigurable> getCommandConfiguration() {
+    public ConfigurationSupport<Command, CommandConfigurable, Integer> getCommandConfiguration() {
         return this.commandConfiguration;
     }
 
-    public ConfigurationSupport<State, StateConfigurable> getStateConfiguration() {
+    public ConfigurationSupport<State, StateConfigurable, StateKey> getStateConfiguration() {
         return this.stateConfiguration;
     }
 
-    public ConfigurationSupport<Function, FunctionConfigurable> getFunctionConfiguration() {
+    public ConfigurationSupport<Function, FunctionConfigurable, Integer> getFunctionConfiguration() {
         return this.functionConfiguration;
     }
 
@@ -83,8 +84,8 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     }
 
     @Override
-    public State getState(int state) {
-        return this.getStateConfiguration().getConfigObject(state);
+    public State getState(StateKey key) {
+        return this.getStateConfiguration().getConfigObject(key);
     }
 
     @Override

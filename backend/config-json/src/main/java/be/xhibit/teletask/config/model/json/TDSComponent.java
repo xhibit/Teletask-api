@@ -21,7 +21,7 @@ public class TDSComponent implements ComponentSpec {
      */
     public TDSComponent() {
         this.description = "";
-        this.state = new StateEnumImpl(StateEnum.OFF);
+        this.state = new StateEnumImpl(StateEnum.OFF, function);
     }
 
     /**

@@ -21,6 +21,6 @@ public class MessageExecutor<R> implements Callable<R> {
 
     @Override
     public R call() throws Exception {
-        return this.message.execute(this.out, in);
+        return this.message.execute(this.out, this.in);
     }
 }

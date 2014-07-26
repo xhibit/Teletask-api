@@ -1,12 +1,8 @@
 package be.xhibit.teletask.model.spec;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.Ints;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +38,7 @@ public enum Function {
         this.descr = descr;
         ImmutableMap.Builder<String, State> builder = ImmutableMap.builder();
         for (StateEnum state : states) {
-            builder.put(state.name().toUpperCase(), new StateEnumImpl(state));
+            builder.put(state.name().toUpperCase(), new StateEnumImpl(state, this));
         }
         this.states = builder.build();
     }

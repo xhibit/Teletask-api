@@ -1,6 +1,7 @@
 package be.xhibit.teletask.client.builder.composer.v3_1;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
+import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.client.builder.message.EventMessage;
 import be.xhibit.teletask.client.builder.message.GroupGetMessage;
 import be.xhibit.teletask.client.builder.message.KeepAliveMessage;
@@ -72,7 +73,7 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         int number = ByteBuffer.wrap(new byte[]{eventData[++counter], eventData[++counter]}).getShort();
         ++counter; // This is the ErrorState, not used at this time
         int stateValue = eventData[++counter];
-        State state = this.getState(stateValue == -1 ? 255 : stateValue);
+        State state = this.getState(new StateKey(function, stateValue == -1 ? 255 : stateValue));
 
         return new EventMessage(config, eventData, function, number, state);
     }

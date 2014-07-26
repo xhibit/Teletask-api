@@ -42,4 +42,9 @@ public class DimmerStateImpl implements State {
     public String toString() {
         return this.getValue();
     }
+
+    @Override
+    public Function getFunction() {
+        return Function.DIMMER;
+    }
 }

@@ -70,7 +70,7 @@ public abstract class MessageSupport<R> {
     }
 
     private R receive(InputStream inputStream) throws Exception {
-        return MessageUtilities.receive(inputStream, this.getClientConfig(), this.getMessageHandler(), new MessageUtilities.StopCondition() {
+        return MessageUtilities.receive(this.getClass(), inputStream, this.getClientConfig(), this.getMessageHandler(), new MessageUtilities.StopCondition() {
             @Override
             public boolean isComplete(List<ServerResponse> responses, byte[] overflow) {
                 return responses.size() == MessageSupport.this.getExpectedResultCount();
@@ -78,6 +78,10 @@ public abstract class MessageSupport<R> {
         }, new MessageUtilities.ResponseConverter<R>() {
             @Override
             public R convert(List<ServerResponse> responses) {
+                if (responses.size() > MessageSupport.this.getExpectedResultCount()) {
+                    LOG.warn("More results than expected, assuming the stream sent some log commands.");
+                }
+
                 return MessageSupport.this.convertResponse(responses);
             }
         });
@@ -231,17 +235,7 @@ public abstract class MessageSupport<R> {
                 return input instanceof EventMessageServerResponse;
             }
         });
-        return this.convert(serverResponse);
-    }
-
-    protected ComponentSpec convert(EventMessageServerResponse serverResponse) {
-        EventMessage eventMessage = serverResponse.getEventMessage();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Event: {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
-        }
-        ComponentSpec component = this.getClientConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber());
-        component.setState(eventMessage.getState());
-        return component;
+        return MessageUtilities.handleEvent(this.getClass(), this.getClientConfig(), serverResponse);
     }
 
     /**

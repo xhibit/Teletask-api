@@ -241,13 +241,13 @@ public class ComponentResource {
     }
 
     private Response get(int number, Function function) {
-        return this.buildGetResponse(this.getClient().get(function, number));
+        return this.buildGetResponse(this.getClient().getConfig().getComponent(function, number));
     }
 
     private Response set(Function function, int number, String state) {
         this.getClient().set(function, number, function.stateValue(state));
 
-        return this.get(number, Function.RELAY);
+        return this.buildGetResponse(this.getClient().getConfig().getComponent(function, number));
     }
 
     private Response buildGroupGetResponse(List<ComponentSpec> componentSpecs) {

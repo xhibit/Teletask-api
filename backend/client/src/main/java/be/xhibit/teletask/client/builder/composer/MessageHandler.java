@@ -3,6 +3,7 @@ package be.xhibit.teletask.client.builder.composer;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
+import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.message.EventMessage;
@@ -30,7 +31,7 @@ public interface MessageHandler {
 
     Command getCommand(int command);
 
-    State getState(int state);
+    State getState(StateKey key);
 
     boolean knows(Command command);
 

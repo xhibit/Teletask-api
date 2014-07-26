@@ -13,7 +13,7 @@ import java.util.List;
 
 public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     public LogMessage(ClientConfigSpec ClientConfig, Function function, StateEnum state) {
-        super(ClientConfig, function, new StateEnumImpl(state));
+        super(ClientConfig, function, new StateEnumImpl(state, function));
     }
 
     @Override
