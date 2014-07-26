@@ -5,7 +5,7 @@
     var app = angular.module('homies', ['homies-controller']);
 
     app.run(function ($rootScope) {
-        $rootScope.baseUrl = 'http://localhost:7776/api';
+        $rootScope.baseUrl = './api';
 //        $rootScope.baseUrl = 'https://raspberry-pi.griffin.lan:7070/teletask/api';
 //        $rootScope.baseUrl = 'http://stewie.griffin.lan:7070/teletask/api';
     });
