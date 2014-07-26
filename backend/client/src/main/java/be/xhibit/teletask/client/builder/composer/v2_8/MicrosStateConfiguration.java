@@ -14,7 +14,7 @@ public class MicrosStateConfiguration extends ConfigurationSupport<State, StateC
     }
 
     private static Iterable<StateConfigurable> createStateList() {
-        ImmutableList.Builder<StateConfigurable> builder = ImmutableList.<StateConfigurable>builder();
+        ImmutableList.Builder<StateConfigurable> builder = ImmutableList.builder();
         for (int i = 0; i <= 100; i++) {
             builder.add(new StateConfigurable(new DimmerStateImpl(i), i));
         }
