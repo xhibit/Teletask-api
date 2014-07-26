@@ -93,11 +93,6 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    protected Logger getLogger() {
-        return LOG;
-    }
-
-    @Override
     public KeepAliveStrategy getKeepAliveStrategy() {
         return KEEP_ALIVE_STRATEGY;
     }

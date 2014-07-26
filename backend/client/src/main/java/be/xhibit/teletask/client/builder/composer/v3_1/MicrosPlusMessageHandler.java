@@ -108,11 +108,6 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    protected Logger getLogger() {
-        return LOG;
-    }
-
-    @Override
     public String getOutputLogHeaderName(int index) {
         return "Output Part " + (((index + 1) % 2) + 1);
     }

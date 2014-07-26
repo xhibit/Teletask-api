@@ -29,26 +29,12 @@ public abstract class MessageHandlerSupport implements MessageHandler {
         this.functionConfigMap = functionConfigMap;
     }
 
-    private String getMessageChecksumCalculationSteps(byte[] message) {
-        StringBuilder builder = new StringBuilder(100);
-        boolean first = true;
-        for (byte messageByte : message) {
-            if (!first) {
-                builder.append(" + ");
-            }
-            builder.append(messageByte);
-            first = false;
-        }
-        return builder.toString();
-    }
-
     protected byte[] addCheckSum(byte[] messageBytes) {
         // ChkSm: Command Number + Command Parameters + Length + STX
         byte checkSumByte = 0;
         for (byte messageByte : messageBytes) {
             checkSumByte += messageByte;
         }
-        this.getLogger().debug("Checksum calculation: {} = {}", this.getMessageChecksumCalculationSteps(messageBytes), checkSumByte);
         messageBytes = Bytes.concat(messageBytes, new byte[]{checkSumByte});
         return messageBytes;
     }
@@ -57,8 +43,6 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     public int getStxValue() {
         return 2;
     }
-
-    protected abstract Logger getLogger();
 
     protected Map<Integer, Command> getCommandMap() {
         if (this.commandMap == null) {

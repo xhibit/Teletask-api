@@ -130,10 +130,28 @@ public abstract class MessageSupport<R> {
         table.append(System.lineSeparator()).append(hexLine);
         table.append(System.lineSeparator()).append(seperatorLine);
 
-        return System.lineSeparator() + "Command: " + this.getCommand() + ", Payload: " + this.getPayloadLogInfo() + System.lineSeparator() + "Raw Bytes: " + ByteUtilities.bytesToHex(message) + System.lineSeparator() + seperatorLine + System.lineSeparator() + table.toString();
+        return System.lineSeparator() + "Command: " + this.getCommand() + System.lineSeparator() +
+                "Payload: " + this.getPayloadLogInfo() + System.lineSeparator() +
+                "Length: " + message[1] + System.lineSeparator() +
+                "Checksum calculation steps: " + this.getMessageChecksumCalculationSteps(message) + " = " + message[message.length - 1] + System.lineSeparator() +
+                "Raw Bytes: " + ByteUtilities.bytesToHex(message) + System.lineSeparator() +
+                seperatorLine + System.lineSeparator() +
+                table.toString();
     }
 
     protected abstract String getPayloadLogInfo();
+
+    private String getMessageChecksumCalculationSteps(byte[] message) {
+        StringBuilder builder = new StringBuilder(100);
+        for (int i = 0; i < message.length - 1; i++) {
+            byte b = message[i];
+            if (i > 0) {
+                builder.append(" + ");
+            }
+            builder.append(b);
+        }
+        return builder.toString();
+    }
 
     private String getTableSeperatorLine(int size) {
         return Strings.repeat("-", size);
@@ -231,6 +249,7 @@ public abstract class MessageSupport<R> {
      *
      * @return The Classname of the current class
      */
+    @SuppressWarnings("UnusedDeclaration")
     public String getMessageClass() {
         return this.getClass().getSimpleName();
     }

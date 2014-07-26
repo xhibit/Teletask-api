@@ -24,7 +24,7 @@ public class KeepAliveMessage extends MessageSupport<SendResult> {
 
     @Override
     protected String getPayloadLogInfo() {
-        return "";
+        return "None";
     }
 
     @Override

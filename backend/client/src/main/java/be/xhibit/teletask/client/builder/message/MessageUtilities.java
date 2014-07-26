@@ -49,11 +49,11 @@ public final class MessageUtilities {
     }
 
     private static byte[] extractResponses(ClientConfigSpec config, MessageHandler messageHandler, Collection<ServerResponse> responses, byte[] data) throws Exception {
-        LOG.debug("Raw bytes {}", ByteUtilities.bytesToHex(data));
+        LOG.debug("Receive - Raw bytes: {}", ByteUtilities.bytesToHex(data));
         byte[] overflow = new byte[0];
         for (int i = 0; i < data.length; i++) {
             byte b = data[i];
-            LOG.debug("Processing: {}", ByteUtilities.bytesToHex(b));
+            LOG.debug("Receive - Processing byte: {}", ByteUtilities.bytesToHex(b));
             if (b == messageHandler.getStxValue()) {
                 int eventLengthInclChkSum = data[i + 1] + 1; // +1 for checksum
                 byte[] event = new byte[eventLengthInclChkSum];
@@ -63,13 +63,13 @@ public final class MessageUtilities {
                     System.arraycopy(data, i, event, 0, data.length - i);
                     i = data.length - 1;
 
-                    LOG.debug("Overflowing: {}", ByteUtilities.bytesToHex(overflow));
+                    LOG.debug("Receive - Overflowing following byte[]: {}", ByteUtilities.bytesToHex(overflow));
                 } else {
                     System.arraycopy(data, i, event, 0, eventLengthInclChkSum);
 
                     i += eventLengthInclChkSum - 1;
 
-                    LOG.debug("Event bytes part: {}", ByteUtilities.bytesToHex(event));
+                    LOG.debug("Receive - Found event bytes: {}", ByteUtilities.bytesToHex(event));
                     try {
                         responses.add(new EventMessageServerResponse(messageHandler.parseEvent(config, event)));
                     } catch (Exception e) {
