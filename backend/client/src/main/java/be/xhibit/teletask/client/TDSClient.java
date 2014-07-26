@@ -16,6 +16,7 @@ import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+import be.xhibit.teletask.model.spec.StateEnum;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import org.slf4j.Logger;
@@ -225,7 +226,7 @@ public final class TDSClient {
         LOG.debug("Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
 
         // close all log events to stop reporting
-        this.sendLogEventMessages(State.OFF);
+        this.sendLogEventMessages(StateEnum.OFF);
 
         this.stopExecutorService();
         this.closeInputStream();
@@ -284,7 +285,7 @@ public final class TDSClient {
         return sendResult;
     }
 
-    private void sendLogEventMessages(State state) {
+    private void sendLogEventMessages(StateEnum state) {
         this.sendLogEventMessage(Function.RELAY, state);
         this.sendLogEventMessage(Function.LOCMOOD, state);
         this.sendLogEventMessage(Function.GENMOOD, state);
@@ -298,7 +299,7 @@ public final class TDSClient {
 
         this.connect(host, port);
 
-        this.sendLogEventMessages(State.ON);
+        this.sendLogEventMessages(StateEnum.ON);
 
         this.startEventListener();
 
@@ -379,7 +380,7 @@ public final class TDSClient {
         return MessageHandlerFactory.getMessageHandler(this.getConfig().getCentralUnitType());
     }
 
-    private void sendLogEventMessage(Function function, State state) {
+    private void sendLogEventMessage(Function function, StateEnum state) {
         this.execute(new LogMessage(this.getConfig(), function, state));
     }
 

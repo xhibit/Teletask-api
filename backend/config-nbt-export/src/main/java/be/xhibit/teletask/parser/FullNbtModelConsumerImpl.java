@@ -1,6 +1,7 @@
 package be.xhibit.teletask.parser;
 
 import be.xhibit.teletask.model.nbt.CentralUnit;
+import be.xhibit.teletask.model.nbt.Dimmer;
 import be.xhibit.teletask.model.nbt.GeneralMood;
 import be.xhibit.teletask.model.nbt.Input;
 import be.xhibit.teletask.model.nbt.InputInterface;
@@ -97,6 +98,15 @@ public class FullNbtModelConsumerImpl implements Consumer {
         Relay relay = new Relay(Integer.valueOf(id), room, type, description);
         room.getRelays().add(relay);
         this.getCentralUnit().getComponents().add(relay);
+    }
+
+    @Override
+    public void dimmer(String id, String roomName, String type, String description) {
+        this.getLogger().debug("dimmer: {}:{} (Room {}) - {}", type, id, roomName, description);
+        Room room = this.getCentralUnit().findRoom(roomName);
+        Dimmer dimmer = new Dimmer(Integer.valueOf(id), room, type, description);
+        room.getDimmers().add(dimmer);
+        this.getCentralUnit().getComponents().add(dimmer);
     }
 
     @Override

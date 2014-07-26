@@ -1,29 +1,24 @@
 package be.xhibit.teletask.client.builder.composer;
 
-import be.xhibit.teletask.client.builder.CommandConfig;
-import be.xhibit.teletask.client.builder.FunctionConfig;
+import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
+import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
+import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
-import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.message.EventMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
-import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
 
 public interface MessageHandler {
     byte[] compose(Command command, byte[] payload);
 
-    CommandConfig getCommandConfig(Command command);
+    CommandConfigurable getCommandConfig(Command command);
 
-    StateConfig getStateConfig(State state);
+    StateConfigurable getStateConfig(State state);
 
-    FunctionConfig getFunctionConfig(Function function);
+    FunctionConfigurable getFunctionConfig(Function function);
 
     byte[] composeOutput(int... number);
 
@@ -37,7 +32,11 @@ public interface MessageHandler {
 
     State getState(int state);
 
-    boolean knowsCommand(Command command);
+    boolean knows(Command command);
+
+    boolean knows(Function function);
+
+    boolean knows(State state);
 
     String getOutputLogHeaderName(int index);
 

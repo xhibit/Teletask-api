@@ -3,20 +3,15 @@ package be.xhibit.teletask.webapp.rest;
 import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -250,7 +245,7 @@ public class ComponentResource {
     }
 
     private Response set(Function function, int number, String state) {
-        this.getClient().set(function, number, State.valueOf(state));
+        this.getClient().set(function, number, function.stateValue(state));
 
         return this.get(number, Function.RELAY);
     }

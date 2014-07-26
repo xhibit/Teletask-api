@@ -1,24 +1,19 @@
 package be.xhibit.teletask.client.builder.composer.v2_8;
 
-import be.xhibit.teletask.client.builder.CommandConfig;
-import be.xhibit.teletask.client.builder.FunctionConfig;
-import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
-import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
-import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.EventMessage;
 import be.xhibit.teletask.client.builder.message.GetMessage;
 import be.xhibit.teletask.client.builder.message.LogMessage;
 import be.xhibit.teletask.client.builder.message.MessageExecutor;
+import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
-import com.google.common.collect.ImmutableMap;
+import be.xhibit.teletask.model.spec.StateEnum;
 import com.google.common.primitives.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,38 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MicrosMessageHandler extends MessageHandlerSupport {
-    /**
-     * Logger responsible for logging and debugging statements.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(MicrosMessageHandler.class);
     public static final MicrosKeepAliveStrategy KEEP_ALIVE_STRATEGY = new MicrosKeepAliveStrategy();
     public static final MicrosGroupGetStrategy GROUP_GET_STRATEGY = new MicrosGroupGetStrategy();
 
     public MicrosMessageHandler() {
-        super(ImmutableMap.<Command, CommandConfig>builder()
-                        .put(Command.SET, new CommandConfig(1, false, "Fnc", "Output", "State"))
-                        .put(Command.GET, new CommandConfig(2, false, "Fnc", "Output"))
-                        .put(Command.LOG, new CommandConfig(3, false, "Fnc", "Sate"))
-                        .put(Command.EVENT, new CommandConfig(8, false, "Fnc", "Output", "State"))
-                        .build(),
-                ImmutableMap.<State, StateConfig>builder()
-                        .put(State.ON, new StateConfig(255))
-                        .put(State.OFF, new StateConfig(0))
-                        .put(State.UP, new StateConfig(255))
-                        .put(State.DOWN, new StateConfig(0))
-                        .build(),
-                ImmutableMap.<Function, FunctionConfig>builder()
-                        .put(Function.RELAY, new FunctionConfig(1))
-                        .put(Function.DIMMER, new FunctionConfig(2))
-                        .put(Function.MOTOR, new FunctionConfig(55))
-                        .put(Function.LOCMOOD, new FunctionConfig(8))
-                        .put(Function.TIMEDMOOD, new FunctionConfig(9))
-                        .put(Function.GENMOOD, new FunctionConfig(10))
-                        .put(Function.FLAG, new FunctionConfig(15))
-                        .put(Function.SENSOR, new FunctionConfig(20))
-                        .put(Function.COND, new FunctionConfig(60))
-                        .build()
-        );
+        super(new MicrosCommandConfiguration(), new MicrosStateConfiguration(), new MicrosFunctionConfiguration());
     }
 
     @Override
@@ -110,7 +78,7 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
         @Override
         public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
-            MessageExecutor.of(new LogMessage(config, Function.MOTOR, State.ON), out, in).call();
+            MessageExecutor.of(new LogMessage(config, Function.MOTOR, StateEnum.ON), out, in).call();
         }
     }
 

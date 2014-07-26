@@ -49,7 +49,7 @@ public abstract class MessageSupport<R> {
         R response = null;
         MessageHandler messageHandler = this.getMessageHandler();
         if (this.isValid()) {
-            if (messageHandler.knowsCommand(this.getCommand())) {
+            if (messageHandler.knows(this.getCommand())) {
                 byte[] message = messageHandler.compose(this.getCommand(), this.getPayload());
 
                 try {

@@ -1,21 +1,17 @@
 package be.xhibit.teletask.client.builder.composer.v3_1;
 
-import be.xhibit.teletask.client.builder.CommandConfig;
-import be.xhibit.teletask.client.builder.FunctionConfig;
-import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
-import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
-import be.xhibit.teletask.client.builder.StateConfig;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.EventMessage;
 import be.xhibit.teletask.client.builder.message.GroupGetMessage;
 import be.xhibit.teletask.client.builder.message.KeepAliveMessage;
 import be.xhibit.teletask.client.builder.message.MessageExecutor;
+import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,33 +30,7 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     public static final MicrosPlusGroupGetStrategy GROUP_GET_STRATEGY = new MicrosPlusGroupGetStrategy();
 
     public MicrosPlusMessageHandler() {
-        super(ImmutableMap.<Command, CommandConfig>builder()
-                        .put(Command.SET, new CommandConfig(7, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "State"))
-                        .put(Command.GET, new CommandConfig(6, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2"))
-                        .put(Command.GROUPGET, new CommandConfig(9, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2"))
-                        .put(Command.LOG, new CommandConfig(3, false, "Fnc", "State"))
-                        .put(Command.EVENT, new CommandConfig(16, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "Err State", "State"))
-                        .put(Command.KEEP_ALIVE, new CommandConfig(11, true))
-                        .build(),
-                ImmutableMap.<State, StateConfig>builder()
-                        .put(State.ON, new StateConfig(255))
-                        .put(State.OFF, new StateConfig(0))
-                        .put(State.UP, new StateConfig(1))
-                        .put(State.DOWN, new StateConfig(2))
-                        .put(State.STOP, new StateConfig(3))
-                        .put(State.TOGGLE, new StateConfig(103))
-                        .build(),
-                ImmutableMap.<Function, FunctionConfig>builder()
-                        .put(Function.RELAY, new FunctionConfig(1))
-                        .put(Function.DIMMER, new FunctionConfig(2))
-                        .put(Function.MOTOR, new FunctionConfig(6))
-                        .put(Function.LOCMOOD, new FunctionConfig(8))
-                        .put(Function.TIMEDMOOD, new FunctionConfig(9))
-                        .put(Function.GENMOOD, new FunctionConfig(10))
-                        .put(Function.FLAG, new FunctionConfig(15))
-                        .put(Function.SENSOR, new FunctionConfig(20))
-                        .put(Function.COND, new FunctionConfig(60))
-                        .build());
+        super(new MicrosPlusCommandConfiguration(), new MicrosPlusStateConfiguration(), new MicrosPlusFunctionConfiguration());
     }
 
     @Override

@@ -1,8 +1,11 @@
 package be.xhibit.teletask.model.spec;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Ints;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,24 +25,33 @@ import java.util.Map;
  * COND = 60; //control or get the status of a Condition
  */
 public enum Function {
-    RELAY("relay", State.ON, State.OFF, State.TOGGLE),
-    DIMMER("dimmer", State.ON, State.OFF, State.TOGGLE),
-    MOTOR("motor on/off", State.UP, State.DOWN, State.STOP),
-    LOCMOOD("local mood", State.ON, State.OFF, State.TOGGLE),
-    TIMEDMOOD("timed mood", State.ON, State.OFF, State.TOGGLE),
-    GENMOOD("general mood", State.ON, State.OFF, State.TOGGLE),
-    FLAG("flag", State.ON, State.OFF, State.TOGGLE),
-    SENSOR("sensor value", State.ON, State.OFF, State.TOGGLE),
-    COND("condition", State.ON, State.OFF, State.TOGGLE);
+    RELAY("relay", StateEnum.ON, StateEnum.OFF, StateEnum.TOGGLE),
+    DIMMER("dimmer", DimmerStateImpl.DIMMER_STATES),
+    MOTOR("motor on/off", StateEnum.UP, StateEnum.DOWN, StateEnum.STOP),
+    LOCMOOD("local mood", StateEnum.ON, StateEnum.OFF, StateEnum.TOGGLE),
+    TIMEDMOOD("timed mood", StateEnum.ON, StateEnum.OFF, StateEnum.TOGGLE),
+    GENMOOD("general mood", StateEnum.ON, StateEnum.OFF, StateEnum.TOGGLE),
+    FLAG("flag", StateEnum.ON, StateEnum.OFF, StateEnum.TOGGLE),
+    SENSOR("sensor value", StateEnum.ON, StateEnum.OFF, StateEnum.TOGGLE),
+    COND("condition", StateEnum.ON, StateEnum.OFF, StateEnum.TOGGLE);
 
     private final String descr;
-    private final List<State> states;
+    private final Map<String, State> states;
 
-    Function(String descr, State... states) {
+    Function(String descr, StateEnum... states) {
         this.descr = descr;
-        ImmutableList.Builder<State> builder = ImmutableList.builder();
+        ImmutableMap.Builder<String, State> builder = ImmutableMap.builder();
+        for (StateEnum state : states) {
+            builder.put(state.name().toUpperCase(), new StateEnumImpl(state));
+        }
+        this.states = builder.build();
+    }
+
+    Function(String descr, List<? extends State> states) {
+        this.descr = descr;
+        ImmutableMap.Builder<String, State> builder = ImmutableMap.builder();
         for (State state : states) {
-            builder.add(state);
+            builder.put(state.getValue().toUpperCase(), state);
         }
         this.states = builder.build();
     }
@@ -48,7 +60,11 @@ public enum Function {
         return this.descr;
     }
 
-    public List<State> getStates() {
-        return this.states;
+    public Collection<State> getStates() {
+        return this.states.values();
+    }
+
+    public State stateValue(String state) {
+        return this.states.get(state.toUpperCase());
     }
 }
