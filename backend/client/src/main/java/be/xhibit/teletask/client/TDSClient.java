@@ -296,7 +296,7 @@ public final class TDSClient {
 
         this.startEventListener();
 
-//        this.groupGet();
+        this.groupGet();
 
         this.startKeepAlive();
     }
