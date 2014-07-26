@@ -1,14 +1,20 @@
 package be.xhibit.teletask.client.builder.composer;
 
-import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.client.builder.CommandConfig;
 import be.xhibit.teletask.client.builder.FunctionConfig;
+import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
+import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.StateConfig;
+import be.xhibit.teletask.client.builder.message.EventMessage;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 
-import java.util.Map;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
 
 public interface MessageHandler {
     byte[] compose(Command command, byte[] payload);
@@ -19,11 +25,11 @@ public interface MessageHandler {
 
     FunctionConfig getFunctionConfig(Function function);
 
-    byte[] composeOutput(int number);
+    byte[] composeOutput(int... number);
 
-    int getStart();
+    int getStxValue();
 
-    void handleEvent(TDSClient client, byte[] eventData);
+    EventMessage parseEvent(ClientConfigSpec config, byte[] eventData);
 
     Function getFunction(int function);
 
@@ -32,4 +38,12 @@ public interface MessageHandler {
     State getState(int state);
 
     boolean knowsCommand(Command command);
+
+    String getOutputLogHeaderName(int index);
+
+    KeepAliveStrategy getKeepAliveStrategy();
+
+    int getAcknowledgeValue();
+
+    GroupGetStrategy getGroupGetStrategy();
 }

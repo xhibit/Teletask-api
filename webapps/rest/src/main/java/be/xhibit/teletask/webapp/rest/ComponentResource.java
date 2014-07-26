@@ -8,9 +8,6 @@ import be.xhibit.teletask.model.spec.State;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.common.primitives.Ints;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -24,27 +21,22 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 public class ComponentResource {
-    private static final ObjectWriter WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
-
-    /**
-     * Logger responsible for logging and debugging statements.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(ComponentResource.class);
+    private static final ObjectWriter PRETTY_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
+    private static final ObjectWriter WRITER = new ObjectMapper().writer();
 
     /**
      * The TDSClient object, which makes the IP socket connection to the TDS hardware.
      * The ComponentResource is loaded a a singleton.  This way we know only one instance of the TDSClient is created, and only one client is accessing
      * the TDS domotics central unit.
      */
-    private final TDSClient client;
+    private TDSClient client;
 
     /**
      * Constructs a new resource using the given client config.
      *
-     * @param clientConfig The configuration
+     * @param client The client
      */
-    public ComponentResource(ClientConfigSpec clientConfig) {
-        this.client = TDSClient.getInstance(clientConfig);
+    public ComponentResource() {
     }
 
     /**
@@ -58,8 +50,23 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/config")
     public Response config() throws JsonProcessingException {
-        ClientConfigSpec config = this.client.getConfig();
+        ClientConfigSpec config = this.getClient().getConfig();
         return Response.status(200).entity(WRITER.writeValueAsString(config)).header("Access-Control-Allow-Origin", "*").build();
+    }
+
+    /**
+     *
+     * Gets the relay state.  Returns 0 for off, 1 for on.
+     * URI: (GET) http://localhost:8080/teletask/api/relay/{number}
+     *
+     * @return JSON response confirming if the switch request was successful, together with the correct state.
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/pretty-config")
+    public Response prettyConfig() throws JsonProcessingException {
+        ClientConfigSpec config = this.getClient().getConfig();
+        return Response.status(200).entity(PRETTY_WRITER.writeValueAsString(config)).header("Access-Control-Allow-Origin", "*").build();
     }
 
     /**
@@ -131,8 +138,7 @@ public class ComponentResource {
         //APIResponse response = new APIResponse("success", component);
 
         // component always holds the correct state, so no need to call client.getRelayState(number)
-        ComponentSpec component = this.client.getConfig().getComponent(function, number);
-        component.setState(this.client.get(component));
+        ComponentSpec component = this.getClient().get(function, number);
         APIResponse response = new APIResponse("success", component);
         return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
     }
@@ -230,7 +236,7 @@ public class ComponentResource {
             function = Function.LOCMOOD;
         }
 
-        APIResponse response = new APIResponse("success", this.client.getConfig().getComponent(function, number));
+        APIResponse response = new APIResponse("success", this.getClient().get(function, number));
         return Response.status(200).entity(response).build();
     }
 
@@ -238,7 +244,7 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/component/{function}/{number}")
     public Response component(@PathParam("function") String function, @PathParam("number") int number) {
-        APIResponse response = new APIResponse("success", this.client.getConfig().getComponent(Function.valueOf(function.toUpperCase()), number));
+        APIResponse response = new APIResponse("success", this.getClient().get(Function.valueOf(function.toUpperCase()), number));
         return Response.status(200).entity(response).build();
     }
 
@@ -253,7 +259,7 @@ public class ComponentResource {
     }
 
     private void set(Function function, int number, String state) {
-        this.client.set(function, number, State.valueOf(state.toUpperCase()));
+        this.getClient().set(function, number, State.valueOf(state.toUpperCase()));
     }
 
     /**
@@ -263,17 +269,19 @@ public class ComponentResource {
      * @return A JSON REST response.
      */
     private Response buildResponse(int number, Function function) {
-        ComponentSpec component = this.client.getConfig().getComponent(function, number);
+        ComponentSpec component = this.getClient().get(function, number);
         APIResponse apiResponse = new APIResponse("success", component);
         return Response.status(200).entity(apiResponse).header("Access-Control-Allow-Origin", "*").build();
     }
 
-    /**
-     * Helper method for determining if a parameter is an Integer
-     * @param stringValue The value to check
-     * @return true or false
-     */
-    public static boolean isInteger(String stringValue) {
-        return Ints.tryParse(stringValue) != null;
+    private TDSClient getClient() {
+        while (this.client == null) {
+            this.setClient(TeletaskHttpServletDispatcher.getClient());
+        }
+        return this.client;
+    }
+
+    private void setClient(TDSClient client) {
+        this.client = client;
     }
 }

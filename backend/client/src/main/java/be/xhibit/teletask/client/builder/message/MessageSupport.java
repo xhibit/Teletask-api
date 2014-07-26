@@ -4,21 +4,33 @@ import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
+import be.xhibit.teletask.client.builder.message.response.AcknowledgeServerResponse;
+import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
+import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public abstract class MessageSupport {
+public abstract class MessageSupport<R> {
     /**
      * Logger responsible for logging and debugging statements.
      */
@@ -33,40 +45,63 @@ public abstract class MessageSupport {
         this.clientConfig = clientConfig;
     }
 
-    public SendResult send(OutputStream outputStream) {
+    protected R execute(OutputStream outputStream, InputStream inputStream) {
+        R response = null;
         MessageHandler messageHandler = this.getMessageHandler();
-        SendResult result;
         if (this.isValid()) {
             if (messageHandler.knowsCommand(this.getCommand())) {
                 byte[] message = messageHandler.compose(this.getCommand(), this.getPayload());
 
                 try {
-                    //Send data over socket
-                    if (Boolean.getBoolean("production")) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Sending: {}", this.getLogInfo(message));
-                        }
-                        outputStream.write(message);
-                        outputStream.flush();
-                    } else {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Test mode send: {}", this.getLogInfo(message));
-                        }
-                    }
+                    this.send(outputStream, message);
 
-                    result = SendResult.SUCCESS;
+                    response = this.receive(inputStream);
                 } catch (Exception e) {
-                    result = SendResult.FAILED;
+                    LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
                 }
             } else {
-                result = SendResult.UNKNOW_COMMAND;
+                LOG.warn("Message handler '{}' does not know of command '{}'", this.getMessageHandler().getClass().getSimpleName(), this.getCommand());
             }
         } else {
-            result = SendResult.INVALID;
+            LOG.warn("Invalid request: {}", this);
         }
 
-        return result;
+        return response;
     }
+
+    private R receive(InputStream inputStream) throws Exception {
+        return MessageUtilities.receive(inputStream, this.getClientConfig(), this.getMessageHandler(), new MessageUtilities.StopCondition() {
+            @Override
+            public boolean isComplete(List<ServerResponse> responses, byte[] overflow) {
+                return responses.size() == MessageSupport.this.getExpectedResultCount();
+            }
+        }, new MessageUtilities.ResponseConverter<R>() {
+            @Override
+            public R convert(List<ServerResponse> responses) {
+                return MessageSupport.this.convertResponse(responses);
+            }
+        });
+    }
+
+    private void send(OutputStream outputStream, byte[] message) throws IOException {
+        //Send data over socket
+        if (Boolean.getBoolean("production")) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Sending: {}", this.getLogInfo(message));
+            }
+            MessageUtilities.send(outputStream, message);
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Test mode send: {}", this.getLogInfo(message));
+            }
+        }
+    }
+
+    protected int getExpectedResultCount() {
+        return 1;
+    }
+
+    protected abstract R convertResponse(List<ServerResponse> serverResponses);
 
     protected boolean isValid() {
         return true;
@@ -95,10 +130,28 @@ public abstract class MessageSupport {
         table.append(System.lineSeparator()).append(hexLine);
         table.append(System.lineSeparator()).append(seperatorLine);
 
-        return System.lineSeparator() + "Command: " + this.getCommand() + ", Payload: " + this.getPayloadLogInfo() + System.lineSeparator() + seperatorLine + System.lineSeparator() + table.toString();
+        return System.lineSeparator() + "Command: " + this.getCommand() + System.lineSeparator() +
+                "Payload: " + this.getPayloadLogInfo() + System.lineSeparator() +
+                "Length: " + message[1] + System.lineSeparator() +
+                "Checksum calculation steps: " + this.getMessageChecksumCalculationSteps(message) + " = " + message[message.length - 1] + System.lineSeparator() +
+                "Raw Bytes: " + ByteUtilities.bytesToHex(message) + System.lineSeparator() +
+                seperatorLine + System.lineSeparator() +
+                table.toString();
     }
 
     protected abstract String getPayloadLogInfo();
+
+    private String getMessageChecksumCalculationSteps(byte[] message) {
+        StringBuilder builder = new StringBuilder(100);
+        for (int i = 0; i < message.length - 1; i++) {
+            byte b = message[i];
+            if (i > 0) {
+                builder.append(" + ");
+            }
+            builder.append(b);
+        }
+        return builder.toString();
+    }
 
     private String getTableSeperatorLine(int size) {
         return Strings.repeat("-", size);
@@ -116,11 +169,11 @@ public abstract class MessageSupport {
         StringBuilder builder = new StringBuilder(500);
         builder.append("| STX | Length | Command | ");
         for (int i = 1; i <= parts.size() - 4; i++) {
-            String paramName = this.getMessageParamName(i);
-            if (paramName == null) {
-                paramName = "Parameter " + i;
+            String logHeaderName = this.getLogHeaderName(i);
+            if (logHeaderName == null) {
+                logHeaderName = "Parameter " + i;
             }
-            builder.append(paramName).append(" | ");
+            builder.append(logHeaderName).append(" | ");
         }
         builder.append("ChkSm |");
         return builder;
@@ -133,12 +186,16 @@ public abstract class MessageSupport {
                 .splitToList(ByteUtilities.bytesToHex(message));
     }
 
-    private String getMessageParamName(int index) {
+    protected String getLogHeaderName(int index) {
         return this.getMessageHandler().getCommandConfig(this.getCommand()).getParamNames().get(index);
     }
 
-    protected String formatState(State state) {
-        return "State( " + state + " | " + (state == null ? null : this.getMessageHandler().getStateConfig(state).getNumber()) + " | " + (state == null ? null : ByteUtilities.bytesToHex((byte) this.getMessageHandler().getStateConfig(state).getNumber())) + ")";
+    protected String formatState(State... states) {
+        Collection<String> log = new ArrayList<>();
+        for (State state : states) {
+            log.add("State( " + state + " | " + (state == null ? null : this.getMessageHandler().getStateConfig(state).getNumber()) + " | " + (state == null ? null : ByteUtilities.bytesToHex((byte) this.getMessageHandler().getStateConfig(state).getNumber())) + ")");
+        }
+        return Joiner.on(", ").join(log);
     }
 
     protected MessageHandler getMessageHandler() {
@@ -149,7 +206,61 @@ public abstract class MessageSupport {
         return "Function( " + function + " | " + this.getMessageHandler().getFunctionConfig(function).getNumber() + " | " + ByteUtilities.bytesToHex((byte) this.getMessageHandler().getFunctionConfig(function).getNumber()) + ")";
     }
 
-    protected String formatOutput(int number) {
-        return "Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)) + ")";
+    protected String formatOutput(int... numbers) {
+        Collection<String> outputs = new ArrayList<>();
+        for (int number : numbers) {
+            outputs.add("Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)) + ")");
+        }
+        return Joiner.on(", ").join(outputs);
+    }
+
+    protected SendResult expectSingleAcknowledge(List<ServerResponse> serverResponses) {
+        SendResult result = null;
+        if (serverResponses.size() == 1 && serverResponses.get(0) instanceof AcknowledgeServerResponse) {
+            result = SendResult.SUCCESS;
+        } else {
+            throw new RuntimeException("No acknowledge received");
+        }
+        return result;
+    }
+
+    protected ComponentSpec expectSingleEventMessage(Iterable<ServerResponse> serverResponses) {
+        EventMessageServerResponse serverResponse = (EventMessageServerResponse) Iterables.find(serverResponses, new Predicate<ServerResponse>() {
+            @Override
+            public boolean apply(ServerResponse input) {
+                return input instanceof EventMessageServerResponse;
+            }
+        });
+        return this.convert(serverResponse);
+    }
+
+    protected ComponentSpec convert(EventMessageServerResponse serverResponse) {
+        EventMessage eventMessage = serverResponse.getEventMessage();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Event: {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
+        }
+        ComponentSpec component = this.getClientConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber());
+        component.setState(eventMessage.getState());
+        return component;
+    }
+
+    /**
+     * Method for toString readability
+     *
+     * @return The Classname of the current class
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public String getMessageClass() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return new ObjectMapper().writer().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            LOG.error("Exception ({}) caught in toString: {}", e.getClass().getName(), e.getMessage());
+        }
+        return super.toString();
     }
 }

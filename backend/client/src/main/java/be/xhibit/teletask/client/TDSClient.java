@@ -1,28 +1,39 @@
 package be.xhibit.teletask.client;
 
 import be.xhibit.teletask.client.builder.ByteUtilities;
+import be.xhibit.teletask.client.builder.message.MessageUtilities;
+import be.xhibit.teletask.client.builder.message.response.ServerResponse;
+import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
 import be.xhibit.teletask.client.builder.message.GetMessage;
-import be.xhibit.teletask.client.builder.message.KeepAliveMessage;
 import be.xhibit.teletask.client.builder.message.LogMessage;
+import be.xhibit.teletask.client.builder.message.MessageExecutor;
+import be.xhibit.teletask.client.builder.message.MessageSupport;
 import be.xhibit.teletask.client.builder.message.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by IntelliJ IDEA.
@@ -129,22 +140,22 @@ public final class TDSClient {
     private static final Logger LOG = LoggerFactory.getLogger(TDSClient.class);
 
     private Socket socket;
+    private OutputStream outputStream;
+    private InputStream inputStream;
 
-    private DataOutputStream out;
-    private DataInputStream in;
+    private final ClientConfigSpec config;
 
-    private ClientConfigSpec clientConfig;
+    private static TDSClient instance = null;
 
-    private boolean readTDSEvents = true;
-
-    private static final Map<String, TDSClient> CLIENTS = new HashMap<>();
+    private final ExecutorService executorService;
 
     /**
      * Default constructor.  Responsible for reading the client config (JSON).
      * Singleton class.  Private constructor to prevent new instance creations.
      */
-    private TDSClient(ClientConfigSpec clientConfig) {
-        this.configure(clientConfig);
+    private TDSClient(ClientConfigSpec config) {
+        this.config = config;
+        this.executorService = Executors.newSingleThreadExecutor();
     }
 
     /**
@@ -153,107 +164,118 @@ public final class TDSClient {
      * @return a new or existing TDSClient instance.
      */
     public static synchronized TDSClient getInstance(ClientConfigSpec clientConfig) {
-        String index = clientConfig.getHost() + ":" + clientConfig.getPort();
-        TDSClient client = CLIENTS.get(index);
-
-        if (client == null) {
-            client = new TDSClient(clientConfig);
-            CLIENTS.put(index, client);
-        } else {
-            client.configure(clientConfig);
+        if (instance == null) {
+            instance = new TDSClient(clientConfig);
+            instance.start();
         }
 
-        client.start();
-
-        return client;
+        return instance;
     }
 
 // ################################################ PUBLIC API FUNCTIONS
 
     public SendResult set(ComponentSpec component, State state) {
-        Function function = component.getFunction();
-        int number = component.getNumber();
-
-        return this.set(function, number, state);
+        return this.set(component.getFunction(), component.getNumber(), state);
     }
 
     public SendResult set(Function function, int number, State state) {
-        SendResult result = new SetMessage(this.getConfig(), function, number, state).send(this.out);
+        return this.execute(new SetMessage(this.getConfig(), function, number, state));
+    }
 
-        if (result == SendResult.SUCCESS) {
-            this.setState(function, number, this.get(this.getConfig().getComponent(function, number)));
+    public List<ComponentSpec> groupGet(Function function, int... numbers) {
+        List<ComponentSpec> componentSpecs = null;
+        try {
+            componentSpecs = this.getMessageHandler().getGroupGetStrategy().execute(this.getConfig(), this.getOutputStream(), this.getInputStream(), function, numbers);
+        } catch (Exception e) {
+            LOG.error("Exception ({}) caught in groupGet: {}", e.getClass().getName(), e.getMessage(), e);
         }
-
-        return result;
+        return componentSpecs;
     }
 
-    public SendResult keepAlive() {
-        return new KeepAliveMessage(this.getConfig()).send(this.out);
+    public void groupGet() {
+        for (Function function : Function.values()) {
+            this.groupGet(function);
+        }
     }
 
-    public State get(Function function, int number) {
+    public void groupGet(Function function) {
+        this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
+            @Override
+            public Integer apply(ComponentSpec input) {
+                return input.getNumber();
+            }
+        })));
+    }
+
+    public ComponentSpec get(Function function, int number) {
         return this.get(this.getConfig().getComponent(function, number));
     }
 
-    public State get(ComponentSpec component) {
-        component.setState(null);
-        this.getStateFromCentralUnit(component.getFunction(), component.getNumber());
-        return this.getState(component);
+    public ComponentSpec get(ComponentSpec component) {
+        return this.execute(new GetMessage(this.getConfig(), component.getFunction(), component.getNumber()));
     }
 
-    public void close() {
+    public void stop() {
         LOG.debug("Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
 
         // close all log events to stop reporting
         this.sendLogEventMessages(State.OFF);
 
-        try {
-            this.readTDSEvents = false;
-            this.in.close();
-            this.out.close();
-            this.socket.close();
-            System.exit(0);
-        } catch (IOException e) {
-            LOG.error("Error disconnecting from host\n", e);
-        }
+        this.stopExecutorService();
+        this.closeInputStream();
+        this.closeOutputStream();
+        this.closeSocket();
+
         LOG.debug("Disconnected successfully");
     }
 
+    private void closeSocket() {
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            LOG.error("Exception ({}) caught in stop: {}", e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private void closeOutputStream() {
+        try {
+            this.getOutputStream().close();
+        } catch (IOException e) {
+            LOG.error("Exception ({}) caught in stop: {}", e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private void closeInputStream() {
+        try {
+            this.getInputStream().close();
+        } catch (IOException e) {
+            LOG.error("Exception ({}) caught in stop: {}", e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
+    private void stopExecutorService() {
+        try {
+            this.getExecutorService().shutdown();
+            this.getExecutorService().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            LOG.error("Exception ({}) caught in stop: {}", e.getClass().getName(), e.getMessage(), e);
+        }
+    }
+
     public ClientConfigSpec getConfig() {
-        return this.clientConfig;
+        return this.config;
     }
 
     // ################################################ PRIVATE API FUNCTIONS
 
-    private void configure(ClientConfigSpec clientConfig) {
-        this.clientConfig = clientConfig;
-    }
-
-    private State getState(ComponentSpec component) {
-        State state = null;
-        while ((state = component.getState()) == null) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                LOG.error("Exception ({}) caught in getState: {}", e.getClass().getName(), e.getMessage(), e);
-            }
+    private <R> R execute(MessageSupport<R> message) {
+        R sendResult = null;
+        try {
+            sendResult = this.getExecutorService().submit(MessageExecutor.of(message, this.getOutputStream(), this.getInputStream())).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
         }
-        return state;
-    }
-
-    public void setState(Function function, int number, State state) {
-        ComponentSpec component = this.getConfig().getComponent(function, number);
-        if (component != null) {
-            component.setState(state);
-        }
-    }
-
-    private void getStateFromCentralUnit(Function function, int number) {
-        new GetMessage(this.getConfig(), function, number).send(this.out);
-    }
-
-    private String getStateIndex(Function function, int number) {
-        return function + ":" + number;
+        return sendResult;
     }
 
     private void sendLogEventMessages(State state) {
@@ -261,17 +283,54 @@ public final class TDSClient {
         this.sendLogEventMessage(Function.LOCMOOD, state);
         this.sendLogEventMessage(Function.GENMOOD, state);
         this.sendLogEventMessage(Function.MOTOR, state);
+        this.sendLogEventMessage(Function.DIMMER, state);
     }
 
     private void start() {
         String host = this.getConfig().getHost();
         int port = this.getConfig().getPort();
 
-        // delay to wait for the first execution, should occur immediately at startup
-        int timerDelay = 0;
-        // time in milliseconds to wait between every execution: every 30 minutes
-        int timerPeriod = 30 * 60 * 1000;
+        this.connect(host, port);
 
+        this.sendLogEventMessages(State.ON);
+
+        this.startEventListener();
+
+        this.groupGet();
+
+        this.startKeepAlive();
+    }
+
+    private void startEventListener() {
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                TDSClient.this.getExecutorService().submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            MessageUtilities.receive(TDSClient.this.getInputStream(), TDSClient.this.getConfig(), TDSClient.this.getMessageHandler(), new MessageUtilities.StopCondition() {
+                                @Override
+                                public boolean isComplete(List<ServerResponse> responses, byte[] overflow) {
+                                    return overflow != null && overflow.length == 0;
+                                }
+                            }, new MessageUtilities.ResponseConverter<Object>() {
+                                @Override
+                                public Object convert(List<ServerResponse> responses) {
+                                    return null;
+                                }
+                            });
+                        } catch (Exception e) {
+                            LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
+                        }
+                    }
+                });
+            }
+        }, 0, 20);
+    }
+
+    private void connect(String host, int port) {
         // Connect method
         LOG.debug("Connecting to {}:{}", host, port);
 
@@ -287,70 +346,42 @@ public final class TDSClient {
         LOG.debug("Successfully Connected");
 
         try {
-            this.out = new DataOutputStream(this.socket.getOutputStream());
-            this.in = new DataInputStream(this.socket.getInputStream());
+            this.outputStream = this.socket.getOutputStream();
+            this.inputStream = this.socket.getInputStream();
         } catch (IOException e) {
             LOG.error("Couldn't get I/O for the connection to: {}:{}", host, port);
             System.exit(1);
         }
+    }
 
-        final MessageHandler messageHandler = MessageHandlerFactory.getMessageHandler(this.getConfig().getCentralUnitType());
-
-        // open the log event(s), run periodically to keep the connection to the server open
-        //readTDSEvents = true;
+    private void startKeepAlive() {
+        final KeepAliveStrategy keepAliveStrategy = this.getMessageHandler().getKeepAliveStrategy();
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
+            @Override
             public void run() {
-                TDSClient.this.sendLogEventMessages(State.ON);
-            }
-        }, timerDelay, timerPeriod);
-
-        Timer keepAlive = new Timer();
-        keepAlive.schedule(new TimerTask() {
-            public void run() {
-                TDSClient.this.keepAlive();
-            }
-        }, 0, 60 * 1000);
-
-        // read the TDS output for log messages every XXX milliseconds
-        try {
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        while (TDSClient.this.readTDSEvents) {
-                            int available = TDSClient.this.in.available();
-                            if (available > 0) {
-                                byte[] data = new byte[available];
-                                TDSClient.this.in.readFully(data);
-                                try {
-                                    TDSClient.this.readLogResponse(messageHandler, data);
-                                } catch (Exception e) {
-                                    LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
-                                }
-                            }
-                            Thread.sleep(1); // Reduces CPU load
-                        }
-                    } catch (Exception ex) {
-                        LOG.error("Exception in thread runner: {}", ex.getMessage());
-                    }
+                try {
+                    keepAliveStrategy.execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream());
+                } catch (Exception e) {
+                    LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
                 }
-            }.start();
+            }
+        }, 0, keepAliveStrategy.getIntervalMinutes() * 60 * 1000);
+    }
 
-        } catch (Exception ex) {
-            ex.getStackTrace();
-        }
+    private MessageHandler getMessageHandler() {
+        return MessageHandlerFactory.getMessageHandler(this.getConfig().getCentralUnitType());
     }
 
     private void sendLogEventMessage(Function function, State state) {
-        new LogMessage(this.getConfig(), function, state).send(this.out);
+        this.execute(new LogMessage(this.getConfig(), function, state));
     }
 
     private void readLogResponse(MessageHandler messageHandler, byte[] data) throws Exception {
         LOG.debug("Raw bytes {}", ByteUtilities.bytesToHex(data));
         for (int i = 0; i < data.length; i++) {
             byte b = data[i];
-            if (b == messageHandler.getStart()) {
+            if (b == messageHandler.getStxValue()) {
                 byte eventLength = data[++i];
                 int eventLimit = i + eventLength - 1;
                 byte[] event = new byte[eventLength + 1]; // +1 for checksum
@@ -363,7 +394,7 @@ public final class TDSClient {
                 }
                 LOG.debug("Event bytes sent to handler: {}", ByteUtilities.bytesToHex(event));
                 try {
-                    messageHandler.handleEvent(this, event);
+//                    messageHandler.parseEvent(this, event);
                 } catch (Exception e) {
                     LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
                 }
@@ -380,5 +411,17 @@ public final class TDSClient {
     @Override
     public final TDSClient clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
+    }
+
+    private ExecutorService getExecutorService() {
+        return this.executorService;
+    }
+
+    public OutputStream getOutputStream() {
+        return this.outputStream;
+    }
+
+    public InputStream getInputStream() {
+        return this.inputStream;
     }
 }
