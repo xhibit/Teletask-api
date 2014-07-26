@@ -47,6 +47,13 @@
                         <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, 'on')">{{component.description}} - On</a>
                         <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'off')">{{component.description}} - Off</a>
                     </div>
+                    <div ng-repeat="component in room.dimmers" class="list-group">
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '0')">{{component.description}} - 0</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '25')">{{component.description}} - 25</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '50')">{{component.description}} - 50</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '75')">{{component.description}} - 75</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '100')">{{component.description}} - 100</a>
+                    </div>
                 </div>
             </div>
         </div>

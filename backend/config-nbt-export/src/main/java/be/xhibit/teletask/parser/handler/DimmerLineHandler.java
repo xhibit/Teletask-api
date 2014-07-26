@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class DimmerLineHandler extends LineHandlerSupport {
     private static final DimmerLineHandler INSTANCE = new DimmerLineHandler();
 
-    private static final Pattern START_PATTERN = Pattern.compile("\\s*RELAYS");
+    private static final Pattern START_PATTERN = Pattern.compile("\\s*DIMMERS");
 
     private static final Pattern DIMMER_PATTERN = Pattern.compile("(\\d*)\\s*([^�]*)�\\s*([^�]*)�\\s*(.*)\\s{2}");
 

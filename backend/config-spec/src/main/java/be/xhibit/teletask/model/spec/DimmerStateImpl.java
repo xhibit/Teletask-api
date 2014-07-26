@@ -12,7 +12,7 @@ public class DimmerStateImpl implements State {
     }
     private final int percentage;
 
-    private DimmerStateImpl(int percentage) {
+    public DimmerStateImpl(int percentage) {
         this.percentage = percentage;
     }
 
