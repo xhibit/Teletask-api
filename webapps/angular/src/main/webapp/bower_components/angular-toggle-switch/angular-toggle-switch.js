@@ -4,15 +4,19 @@ angular.module('toggle-switch', ['ng']).directive('toggleSwitch', function () {
     replace: true,
     scope: {
       model: '=',
+      onValue: '@',
+      offValue: '@',
       disabled: '@',
       onLabel: '@',
       offLabel: '@',
       knobLabel: '@'
     },
-    template: '<div class="switch" ng-class="{ \'disabled\': disabled }"><div class="switch-animate" ng-class="{\'switch-off\': model == \'OFF\', \'switch-on\': model == \'ON\'}"><span class="switch-left" ng-bind="onLabel"></span><span class="knob" ng-bind="knobLabel"></span><span class="switch-right" ng-bind="offLabel"></span></div></div>',
+    template: '<div class="switch" ng-class="{ \'disabled\': disabled }"><div class="switch-animate" ng-class="{\'switch-off\': (model == offValue), \'switch-on\': (model == onValue)}"><span class="switch-left" ng-bind="onLabel"></span><span class="knob" ng-bind="knobLabel"></span><span class="switch-right" ng-bind="offLabel"></span></div></div>',
     link: function(scope, element, attrs){
       if (!attrs.onLabel) { attrs.onLabel = 'On'; }
       if (!attrs.offLabel) { attrs.offLabel = 'Off'; }
+      if (!attrs.onValue) { attrs.onValue = 'true'; }
+      if (!attrs.offValue) { attrs.offValue = 'false'; }
       if (!attrs.knobLabel) { attrs.knobLabel = '\u00a0'; }
       if (!attrs.disabled) { attrs.disabled = false; }
 
@@ -22,7 +26,8 @@ angular.module('toggle-switch', ['ng']).directive('toggleSwitch', function () {
 
       scope.toggle = function toggle() {
         if(!scope.disabled) {
-          scope.model = scope.model == 'ON' ? 'OFF' : 'ON';
+            var newModel = (scope.model == scope.onValue ? scope.offValue : scope.onValue);
+            scope.model = newModel;
         }
       };
     }
