@@ -130,6 +130,19 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+
+            <dependency>
+                <groupId>javax.websocket</groupId>
+                <artifactId>javax.websocket-api</artifactId>
+                <version>1.0</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!--<dependency>-->
+                <!--<groupId>org.glassfish.tyrus</groupId>-->
+                <!--<artifactId>tyrus-server</artifactId>-->
+                <!--<version>1.7</version>-->
+            <!--</dependency>-->
         </dependencies>
     </dependencyManagement>
 

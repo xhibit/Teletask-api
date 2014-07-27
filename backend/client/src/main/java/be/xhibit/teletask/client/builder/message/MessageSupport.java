@@ -55,7 +55,7 @@ public abstract class MessageSupport<R> {
                 try {
                     this.send(outputStream, message);
 
-                    response = this.receive(inputStream);
+//                    response = this.receive(inputStream); //This is only needed when not using event log
                 } catch (Exception e) {
                     LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
                 }

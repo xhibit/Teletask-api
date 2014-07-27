@@ -3,24 +3,29 @@
 (function () {
     /* Controllers */
     var app = angular.module('homies-controller', []);
-    app.controller('ConfigController', ['$rootScope', '$http', function ($rootScope, $http) {
-        var controller = this;
-
-        var config = [];
+    app.controller('ConfigController', ['$rootScope', '$scope', '$http', function ($rootScope, $scope, $http) {
+        $scope.config = [];
 
         $http.get($rootScope.baseUrl + '/config').success(function (data, status, headers, config) {
-            controller.config = data;
+            $scope.config = data;
         });
 
         this.changeState = function (component, newState) {
             $http.get($rootScope.baseUrl + '/component/' + component.function + '/' + component.number + '/state/' + newState);
         };
 
-        this.postSomething = function () {
+        this.groupGet = function () {
             $http.post($rootScope.baseUrl + '/group/relay/for', {numbers: [1, 2, 6]}).error(function (data, status, headers, config) {
                 window.alert("Error");
             }).success(function (data, status, headers, config) {
                 window.alert(JSON.stringify(data));
+            });
+        };
+
+        var wsocket = new WebSocket($rootScope.baseWsUrl + '/state-changes');
+        wsocket.onmessage = function (evt) {
+            $scope.$apply(function () {
+                $scope.config = angular.fromJson(evt.data);
             });
         };
     }]);
