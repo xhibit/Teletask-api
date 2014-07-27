@@ -2,7 +2,7 @@
 
 (function () {
     /* Controllers */
-    var app = angular.module('homies-controller', []);
+    var app = angular.module('homies-controller', ['toggle-switch']);
     app.controller('ConfigController', ['$rootScope', '$scope', '$http', function ($rootScope, $scope, $http) {
         $scope.config = [];
 
