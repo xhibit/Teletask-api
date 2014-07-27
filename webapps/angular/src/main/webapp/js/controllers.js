@@ -6,9 +6,22 @@
     app.controller('ConfigController', ['$rootScope', '$scope', '$http', function ($rootScope, $scope, $http) {
         $scope.config = [];
 
+//        $scope.roomStates = [];
+
         $http.get($rootScope.baseUrl + '/config').success(function (data, status, headers, config) {
             $scope.config = data;
+//            angular.forEach(data.rooms, function(room, key) {
+//                this.push({id: room.id, state: 'collapse'});
+//            }, $scope.roomStates);
         });
+
+//        $scope.roomState = function(roomId) {
+//            angular.forEach($scope.roomStates, function(room, key) {
+//                if(room.id == roomId) {
+//                    return room.state;
+//                }
+//            });
+//        };
 
         this.changeState = function (component, newState) {
             $http.get($rootScope.baseUrl + '/component/' + component.function + '/' + component.number + '/state/' + newState);

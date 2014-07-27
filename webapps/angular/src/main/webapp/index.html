@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/bootstrap-theme.css">
 </head>
-<body ng-controller="ConfigController">
+<body ng-controller="ConfigController as configController">
 
 <script src="js/jquery-1.11.1.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
@@ -24,36 +24,37 @@
                     {{room.name}}
                 </h3>
             </div>
-            <div id="collapsingPanel{{room.id}}" class="panel-collapse collapse">
+            <!--<div id="collapsingPanel{{room.id}}" class="panel-collapse collapse">-->
+            <div id="collapsingPanel{{room.id}}" class="panel-collapse">
                 <div class="panel-body">
                     <div ng-repeat="component in room.relays" class="list-group">
                         <a class="list-group-item list-group-item-{{component.state.value == 'ON' ? 'success' : 'danger'}}" >{{component.state.value}}</a>
-                        <a class="list-group-item list-group-item-success" ng-click="changeState(component, 'on')">{{component.description}} - On</a>
-                        <a class="list-group-item list-group-item-danger" ng-click="changeState(component, 'off')">{{component.description}} - Off</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, 'on')">{{component.description}} - On</a>
+                        <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'off')">{{component.description}} - Off</a>
                     </div>
                     <div ng-repeat="component in room.localMoods" class="list-group">
                         <a class="list-group-item list-group-item-success" >{{component.state.value}}</a>
-                        <a class="list-group-item list-group-item-success" ng-click="changeState(component, 'on')">{{component.description}} - On</a>
-                        <a class="list-group-item list-group-item-danger" ng-click="changeState(component, 'off')">{{component.description}} - Off</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, 'on')">{{component.description}} - On</a>
+                        <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'off')">{{component.description}} - Off</a>
                     </div>
                     <div ng-repeat="component in room.motors" class="list-group">
                         <a class="list-group-item list-group-item-success" >{{component.state.value}}</a>
-                        <a class="list-group-item list-group-item-info" ng-click="changeState(component, 'up')">{{component.description}} - Up</a>
-                        <a class="list-group-item list-group-item-info" ng-click="changeState(component, 'down')">{{component.description}} - Down</a>
-                        <a class="list-group-item list-group-item-danger" ng-click="changeState(component, 'stop')">{{component.description}} - Stop</a>
+                        <a class="list-group-item list-group-item-info" ng-click="configController.changeState(component, 'up')">{{component.description}} - Up</a>
+                        <a class="list-group-item list-group-item-info" ng-click="configController.changeState(component, 'down')">{{component.description}} - Down</a>
+                        <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'stop')">{{component.description}} - Stop</a>
                     </div>
                     <div ng-repeat="component in room.generalMoods" class="list-group">
                         <a class="list-group-item list-group-item-success" >{{component.state.value}}</a>
-                        <a class="list-group-item list-group-item-success" ng-click="changeState(component, 'on')">{{component.description}} - On</a>
-                        <a class="list-group-item list-group-item-danger" ng-click="changeState(component, 'off')">{{component.description}} - Off</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, 'on')">{{component.description}} - On</a>
+                        <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'off')">{{component.description}} - Off</a>
                     </div>
                     <div ng-repeat="component in room.dimmers" class="list-group">
                         <a class="list-group-item list-group-item-success" >{{component.state.value}}</a>
-                        <a class="list-group-item list-group-item-success" ng-click="changeState(component, '0')">{{component.description}} - 0</a>
-                        <a class="list-group-item list-group-item-success" ng-click="changeState(component, '25')">{{component.description}} - 25</a>
-                        <a class="list-group-item list-group-item-success" ng-click="changeState(component, '50')">{{component.description}} - 50</a>
-                        <a class="list-group-item list-group-item-success" ng-click="changeState(component, '75')">{{component.description}} - 75</a>
-                        <a class="list-group-item list-group-item-success" ng-click="changeState(component, '100')">{{component.description}} - 100</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '0')">{{component.description}} - 0</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '25')">{{component.description}} - 25</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '50')">{{component.description}} - 50</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '75')">{{component.description}} - 75</a>
+                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, '100')">{{component.description}} - 100</a>
                     </div>
                 </div>
             </div>
