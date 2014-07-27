@@ -11,12 +11,12 @@
     <link rel="stylesheet" href="bower_components/angular-toggle-switch/angular-toggle-switch.css">
 
     <style>
-        .vcenter {
-            position: relative;
-            top: 50%;
-            transform: translateY(45%);
-            transform-style: preserve-3d;
-        }
+        /*.vcenter {*/
+            /*position: relative;*/
+            /*top: 50%;*/
+            /*transform: translateY(45%);*/
+            /*transform-style: preserve-3d;*/
+        /*}*/
     </style>
 </head>
 <body ng-controller="ConfigController as configController">
@@ -45,27 +45,60 @@
                                 <div class="col-xs-6 vcenter">
                                     {{component.description}}
                                 </div>
-                                <div class="col-xs-1">
-                                    <button type="button" style="width: 65px;" class="btn btn-{{component.state.value == 'OFF' ? 'danger' : 'success'}}" ng-click="configController.changeState(component, component.state.value == 'OFF' ? 'on' : 'off')">{{component.state.value}}</button>
+                                <div class="col-xs-6">
+                                    <div class="btn-group">
+                                        <button type="button" style="width: 50px;" class="btn btn-{{component.state.value == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
+                                        <button type="button" style="width: 50px;" class="btn btn-{{component.state.value == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div ng-repeat="component in room.localMoods" class="list-group">
-                        <a class="list-group-item list-group-item-success">{{component.state.value}}</a>
-                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, 'on')">{{component.description}} - On</a>
-                        <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'off')">{{component.description}} - Off</a>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-xs-6 vcenter">
+                                    {{component.description}}
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="btn-group">
+                                        <button type="button" style="width: 50px;" class="btn btn-{{component.state.value == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
+                                        <button type="button" style="width: 50px;" class="btn btn-{{component.state.value == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div ng-repeat="component in room.motors" class="list-group">
-                        <a class="list-group-item list-group-item-success">{{component.state.value}}</a>
-                        <a class="list-group-item list-group-item-info" ng-click="configController.changeState(component, 'up')">{{component.description}} - Up</a>
-                        <a class="list-group-item list-group-item-info" ng-click="configController.changeState(component, 'down')">{{component.description}} - Down</a>
-                        <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'stop')">{{component.description}} - Stop</a>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-xs-6 vcenter">
+                                    {{component.description}}
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="btn-group">
+                                        <button type="button" style="width: 50px;" class="btn btn-{{component.state.value == 'UP' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'up')">Up</button>
+                                        <button type="button" style="width: 50px;" class="btn btn-default" ng-click="configController.changeState(component, 'stop')">Stop</button>
+                                        <button type="button" style="width: 50px;" class="btn btn-{{component.state.value == 'DOWN' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'down')">Down</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div ng-repeat="component in room.generalMoods" class="list-group">
-                        <a class="list-group-item list-group-item-success">{{component.state.value}}</a>
-                        <a class="list-group-item list-group-item-success" ng-click="configController.changeState(component, 'on')">{{component.description}} - On</a>
-                        <a class="list-group-item list-group-item-danger" ng-click="configController.changeState(component, 'off')">{{component.description}} - Off</a>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-xs-6 vcenter">
+                                    {{component.description}}
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="btn-group">
+                                        <button type="button" style="width: 50px;" class="btn btn-{{component.state.value == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
+                                        <button type="button" style="width: 50px;" class="btn btn-{{component.state.value == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div ng-repeat="component in room.dimmers" class="list-group">
                         <a class="list-group-item list-group-item-success">{{component.state.value}}</a>
