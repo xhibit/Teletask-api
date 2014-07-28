@@ -35,6 +35,16 @@ public class InterestingNbtModelConsumerImpl extends FullNbtModelConsumerImpl {
     }
 
     @Override
+    public void dimmer(String id, String roomName, String type, String description) {
+        super.dimmer(id, roomName, type, description);
+    }
+
+    @Override
+    public void generalMood(String id, String roomName, String type, String description) {
+        super.generalMood(id, roomName, type, description);
+    }
+
+    @Override
     public void room(String id, String name) {
         super.room(id, name);
     }

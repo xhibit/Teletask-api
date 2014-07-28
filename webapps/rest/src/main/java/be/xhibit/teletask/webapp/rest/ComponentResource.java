@@ -3,6 +3,7 @@ package be.xhibit.teletask.webapp.rest;
 import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
+import be.xhibit.teletask.webapp.ClientHolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -265,7 +266,7 @@ public class ComponentResource {
 
     private TDSClient getClient() {
         while (this.client == null) {
-            this.setClient(TeletaskHttpServletDispatcher.getClient());
+            this.setClient(ClientHolder.getClient());
         }
         return this.client;
     }

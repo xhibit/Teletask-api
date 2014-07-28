@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Client</title>
+    <script type="text/javascript">
+
+        var wsocket;
+        function connect() {
+            wsocket = new WebSocket("ws://ridiekel-desktop:7776/state-changes");
+            wsocket.onmessage = onMessage;
+        }
+
+        function onMessage(evt) {
+            var element = document.getElementById("rate");
+            element.innerHTML = element.innerHTML + '<br/><br/><br/>' + evt.data;
+        }
+
+        window.addEventListener("load", connect, false);
+    </script>
+</head>
+<body>
+
+<table>
+    <tr>
+        <td><label id="rateLbl">State Changes:</label></td>
+        <td><label id="rate"></label></td>
+    </tr>
+</table>
+</body>
+</html>

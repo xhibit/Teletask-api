@@ -12,6 +12,7 @@ import be.xhibit.teletask.client.builder.message.SetMessage;
 import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
 import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
+import be.xhibit.teletask.client.listener.StateChangeListener;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
@@ -156,6 +157,8 @@ public final class TDSClient {
     private final Timer keepAliveTimer = new Timer();
     private final Timer eventListenerTimer = new Timer();
 
+    private final List<StateChangeListener> stateChangeListeners = new ArrayList<>();
+
     /**
      * Default constructor.  Responsible for reading the client config (JSON).
      * Singleton class.  Private constructor to prevent new instance creations.
@@ -180,6 +183,10 @@ public final class TDSClient {
     }
 
 // ################################################ PUBLIC API FUNCTIONS
+
+    public void registerStateChangeListener(StateChangeListener listener) {
+        this.stateChangeListeners.add(listener);
+    }
 
     public SendResult set(ComponentSpec component, State state) {
         return this.set(component.getFunction(), component.getNumber(), state);
@@ -436,8 +443,15 @@ public final class TDSClient {
         public void run() {
             try {
                 List<EventMessageServerResponse> messages = this.getEventMessageServerResponses();
+                List<ComponentSpec> components = new ArrayList<>();
                 for (EventMessageServerResponse message : messages) {
                     MessageUtilities.handleEvent(this.getClass(), TDSClient.this.getConfig(), message);
+                    components.add(TDSClient.this.getConfig().getComponent(message.getEventMessage().getFunction(), message.getEventMessage().getNumber()));
+                }
+                if (!components.isEmpty()) {
+                    for (StateChangeListener stateChangeListener : TDSClient.this.stateChangeListeners) {
+                        stateChangeListener.event(components);
+                    }
                 }
             } catch (Exception e) {
                 LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
@@ -497,5 +511,9 @@ public final class TDSClient {
 
     public Timer getEventListenerTimer() {
         return this.eventListenerTimer;
+    }
+
+    public List<StateChangeListener> getStateChangeListeners() {
+        return this.stateChangeListeners;
     }
 }
