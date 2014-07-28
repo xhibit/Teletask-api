@@ -33,7 +33,8 @@ public class StateChangeListenerEndpoint {
             @Override
             public void event(List<ComponentSpec> components) {
                 try {
-                    sendAll(new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(ClientHolder.getClient().getConfig()));
+//                    sendAll(components);
+                    sendAll(ClientHolder.getClient().getConfig());
                 } catch (JsonProcessingException e) {
                     LOG.error("Exception ({}) caught in event: {}", e.getClass().getName(), e.getMessage(), e);
                 }
@@ -60,7 +61,8 @@ public class StateChangeListenerEndpoint {
         CURRENT_CLIENTS.remove(session);
     }
 
-    private static void sendAll(String msg) {
+    private static void sendAll(Object data) throws JsonProcessingException {
+        String msg = new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(data);
         try {
             Collection<Session> closedSessions = new ArrayList<>();
             for (Session session : CURRENT_CLIENTS) {
