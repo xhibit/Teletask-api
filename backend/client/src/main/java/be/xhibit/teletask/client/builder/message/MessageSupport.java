@@ -1,36 +1,28 @@
 package be.xhibit.teletask.client.builder.message;
 
 import be.xhibit.teletask.client.builder.ByteUtilities;
-import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
-import be.xhibit.teletask.client.builder.message.response.AcknowledgeServerResponse;
-import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
-import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
-import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public abstract class MessageSupport<R> {
+public abstract class MessageSupport {
     /**
      * Logger responsible for logging and debugging statements.
      */
@@ -45,8 +37,7 @@ public abstract class MessageSupport<R> {
         this.clientConfig = clientConfig;
     }
 
-    protected R execute(OutputStream outputStream, InputStream inputStream) {
-        R response = null;
+    protected void execute(OutputStream outputStream) {
         MessageHandler messageHandler = this.getMessageHandler();
         if (this.isValid()) {
             if (messageHandler.knows(this.getCommand())) {
@@ -54,8 +45,6 @@ public abstract class MessageSupport<R> {
 
                 try {
                     this.send(outputStream, message);
-
-//                    response = this.receive(inputStream); //This is only needed when not using event log
                 } catch (Exception e) {
                     LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
                 }
@@ -65,47 +54,14 @@ public abstract class MessageSupport<R> {
         } else {
             LOG.warn("Invalid request: {}", this);
         }
-
-        return response;
     }
 
-    private R receive(InputStream inputStream) throws Exception {
-        return MessageUtilities.receive(this.getClass(), inputStream, this.getClientConfig(), this.getMessageHandler(), new MessageUtilities.StopCondition() {
-            @Override
-            public boolean isComplete(List<ServerResponse> responses, byte[] overflow) {
-                return responses.size() == MessageSupport.this.getExpectedResultCount();
-            }
-        }, new MessageUtilities.ResponseConverter<R>() {
-            @Override
-            public R convert(List<ServerResponse> responses) {
-                if (responses.size() > MessageSupport.this.getExpectedResultCount()) {
-                    LOG.warn("More results than expected, assuming the stream sent some log commands.");
-                }
-
-                return MessageSupport.this.convertResponse(responses);
-            }
-        });
-    }
-
-    private void send(OutputStream outputStream, byte[] message) throws IOException {
-        //Send data over socket
-        if (Boolean.getBoolean("production")) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Sending: {}", this.getLogInfo(message));
-            }
-            MessageUtilities.send(outputStream, message);
-        } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Test mode send: {}", this.getLogInfo(message));
-            }
+    protected void send(OutputStream outputStream, byte[] message) throws IOException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Sending: {}", this.getLogInfo(message));
         }
+        MessageUtilities.send(outputStream, message);
     }
-
-    protected int getExpectedResultCount() {
-        return 1;
-    }
-
-    protected abstract R convertResponse(List<ServerResponse> serverResponses);
 
     protected boolean isValid() {
         return true;
@@ -216,26 +172,6 @@ public abstract class MessageSupport<R> {
             outputs.add("Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)) + ")");
         }
         return Joiner.on(", ").join(outputs);
-    }
-
-    protected SendResult expectSingleAcknowledge(List<ServerResponse> serverResponses) {
-        SendResult result = null;
-        if (serverResponses.size() == 1 && serverResponses.get(0) instanceof AcknowledgeServerResponse) {
-            result = SendResult.SUCCESS;
-        } else {
-            throw new RuntimeException("No acknowledge received");
-        }
-        return result;
-    }
-
-    protected ComponentSpec expectSingleEventMessage(Iterable<ServerResponse> serverResponses) {
-        EventMessageServerResponse serverResponse = (EventMessageServerResponse) Iterables.find(serverResponses, new Predicate<ServerResponse>() {
-            @Override
-            public boolean apply(ServerResponse input) {
-                return input instanceof EventMessageServerResponse;
-            }
-        });
-        return MessageUtilities.handleEvent(this.getClass(), this.getClientConfig(), serverResponse);
     }
 
     /**

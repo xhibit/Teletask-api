@@ -1,13 +1,10 @@
 package be.xhibit.teletask.client.builder.message;
 
-import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
-import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GroupGetMessage extends GetMessageSupport<List<ComponentSpec>> {
@@ -26,15 +23,4 @@ public class GroupGetMessage extends GetMessageSupport<List<ComponentSpec>> {
         return name == null ? this.getMessageHandler().getOutputLogHeaderName(index) : name;
     }
 
-    @Override
-    protected List<ComponentSpec> convertResponse(List<ServerResponse> serverResponses) {
-        List<ComponentSpec> componentSpecs = new ArrayList<>();
-        for (ServerResponse serverResponse : serverResponses) {
-            if (serverResponse instanceof EventMessageServerResponse) {
-                ComponentSpec component = MessageUtilities.handleEvent(this.getClass(), this.getClientConfig(), (EventMessageServerResponse) serverResponse);
-                componentSpecs.add(component);
-            }
-        }
-        return componentSpecs;
-    }
 }

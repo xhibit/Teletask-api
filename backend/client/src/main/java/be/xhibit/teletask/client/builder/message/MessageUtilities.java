@@ -2,9 +2,6 @@ package be.xhibit.teletask.client.builder.message;
 
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
-import be.xhibit.teletask.client.builder.message.response.AcknowledgeServerResponse;
-import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
-import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import com.google.common.primitives.Bytes;
@@ -23,12 +20,17 @@ public final class MessageUtilities {
      * Logger responsible for logging and debugging statements.
      */
     private static final Logger LOG = LoggerFactory.getLogger(MessageUtilities.class);
+    private static final MessageParser DEFAULT_MESSAGE_PARSER = new DelegatingMessageParser();
 
     private MessageUtilities() {
     }
 
-    public static <T> T receive(Class origin, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler, StopCondition stopCondition, ResponseConverter<T> converter) throws Exception {
-        List<ServerResponse> responses = new ArrayList<>();
+    public static List<MessageSupport> receive(Class origin, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler, StopCondition stopCondition) throws Exception {
+        return receive(origin, inputStream, config, messageHandler, stopCondition, DEFAULT_MESSAGE_PARSER);
+    }
+
+    public static List<MessageSupport> receive(Class origin, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler, StopCondition stopCondition, MessageParser messageParser) throws Exception {
+        List<MessageSupport> responses = new ArrayList<>();
 
         byte[] overflow = new byte[1];
         long startTime = System.currentTimeMillis();
@@ -41,17 +43,17 @@ public final class MessageUtilities {
                 byte[] read = new byte[available];
                 inputStream.read(read, 0, available);
                 byte[] data = Bytes.concat(overflow, read);
-                overflow = extractResponses(origin, config, messageHandler, responses, data);
+                overflow = extractMessages(origin, config, messageHandler, responses, data, messageParser);
             } else {
                 overflow = new byte[0];
             }
             Thread.sleep(10);
         }
 
-        return converter.convert(responses);
+        return responses;
     }
 
-    private static byte[] extractResponses(Class origin, ClientConfigSpec config, MessageHandler messageHandler, Collection<ServerResponse> responses, byte[] data) throws Exception {
+    private static byte[] extractMessages(Class origin, ClientConfigSpec config, MessageHandler messageHandler, Collection<MessageSupport> responses, byte[] data, MessageParser messageParser) throws Exception {
         LOG.debug("Receive({}) - Raw bytes: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(data));
         byte[] overflow = new byte[0];
         for (int i = 0; i < data.length; i++) {
@@ -72,15 +74,18 @@ public final class MessageUtilities {
 
                     i += eventLengthInclChkSum - 1;
 
-                    LOG.debug("Receive({}) - Found event bytes: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(event));
+                    LOG.debug("Receive({}) - Found message bytes: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(event));
                     try {
-                        responses.add(new EventMessageServerResponse(messageHandler.parseEvent(config, event)));
+                        MessageSupport parse = messageParser.parse(config, messageHandler, event);
+                        if (parse != null) {
+                            responses.add(parse);
+                        }
                     } catch (Exception e) {
                         LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
                     }
                 }
             } else if (b == messageHandler.getAcknowledgeValue()) {
-                responses.add(new AcknowledgeServerResponse());
+                responses.add(new AcknowledgeMessage(config));
             } else {
                 LOG.warn("Receive({}) - Found byte, but don't know how to handle it: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(b));
             }
@@ -88,13 +93,16 @@ public final class MessageUtilities {
         return overflow;
     }
 
+    public interface MessageParser {
+        MessageSupport parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] event);
+    }
+
     public static void send(OutputStream outputStream, byte[] message) throws IOException {
         outputStream.write(message);
         outputStream.flush();
     }
 
-    public static ComponentSpec handleEvent(Class origin, ClientConfigSpec config, EventMessageServerResponse serverResponse) {
-        EventMessage eventMessage = serverResponse.getEventMessage();
+    public static ComponentSpec handleEvent(Class origin, ClientConfigSpec config, EventMessage eventMessage) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Event({}): {}", origin.getSimpleName(), eventMessage.getLogInfo(eventMessage.getRawBytes()));
         }
@@ -104,10 +112,6 @@ public final class MessageUtilities {
     }
 
     public interface StopCondition {
-        boolean isComplete(List<ServerResponse> responses, byte[] overflow);
-    }
-
-    public interface ResponseConverter<T> {
-        T convert(List<ServerResponse> responses);
+        boolean isComplete(List<MessageSupport> responses, byte[] overflow);
     }
 }

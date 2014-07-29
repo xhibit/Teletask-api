@@ -9,5 +9,5 @@ import java.io.OutputStream;
 import java.util.List;
 
 public interface GroupGetStrategy {
-    List<ComponentSpec> execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception;
+    void execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception;
 }

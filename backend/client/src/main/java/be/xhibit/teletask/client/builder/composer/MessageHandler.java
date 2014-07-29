@@ -4,6 +4,7 @@ import be.xhibit.teletask.client.builder.composer.config.configurables.CommandCo
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
+import be.xhibit.teletask.client.builder.message.MessageSupport;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.builder.message.EventMessage;
@@ -15,7 +16,7 @@ import be.xhibit.teletask.model.spec.State;
 public interface MessageHandler {
     byte[] compose(Command command, byte[] payload);
 
-    CommandConfigurable getCommandConfig(Command command);
+    CommandConfigurable<?> getCommandConfig(Command command);
 
     StateConfigurable getStateConfig(State state);
 
@@ -25,7 +26,7 @@ public interface MessageHandler {
 
     int getStxValue();
 
-    EventMessage parseEvent(ClientConfigSpec config, byte[] eventData);
+    EventMessage parseEvent(ClientConfigSpec config, byte[] message);
 
     Function getFunction(int function);
 
@@ -46,4 +47,8 @@ public interface MessageHandler {
     int getAcknowledgeValue();
 
     GroupGetStrategy getGroupGetStrategy();
+
+    MessageSupport parse(ClientConfigSpec config, byte[] message);
+
+    int getOutputByteSize();
 }

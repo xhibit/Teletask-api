@@ -1,16 +1,14 @@
 package be.xhibit.teletask.client;
 
-import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
+import be.xhibit.teletask.client.builder.message.EventMessage;
 import be.xhibit.teletask.client.builder.message.GetMessage;
 import be.xhibit.teletask.client.builder.message.LogMessage;
 import be.xhibit.teletask.client.builder.message.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.MessageSupport;
 import be.xhibit.teletask.client.builder.message.MessageUtilities;
 import be.xhibit.teletask.client.builder.message.SetMessage;
-import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
-import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.listener.StateChangeListener;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
@@ -18,6 +16,7 @@ import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import be.xhibit.teletask.model.spec.StateEnum;
+import be.xhibit.teletask.server.TeletaskTestServer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -188,17 +186,15 @@ public final class TDSClient {
         this.stateChangeListeners.add(listener);
     }
 
-    public SendResult set(ComponentSpec component, State state) {
-        return this.set(component.getFunction(), component.getNumber(), state);
+    public void set(ComponentSpec component, State state) {
+        this.set(component.getFunction(), component.getNumber(), state);
     }
 
-    public SendResult set(Function function, int number, State state) {
-        SendResult sendResult = null;
-
+    public void set(Function function, int number, State state) {
         Preconditions.checkNotNull(state, "Given state not found");
 
         try {
-            sendResult = this.execute(new SetMessage(this.getConfig(), function, number, state));
+            this.execute(new SetMessage(this.getConfig(), function, number, state));
 
             ComponentSpec component = this.getConfig().getComponent(function, number);
             Long start = System.currentTimeMillis();
@@ -215,17 +211,18 @@ public final class TDSClient {
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
-
-        return sendResult;
     }
 
-    public List<ComponentSpec> groupGet(final Function function, final int... numbers) {
-        List<ComponentSpec> componentSpecs = null;
+    public void groupGet(final Function function, final int... numbers) {
         try {
-            componentSpecs = this.getExecutorService().submit(new Callable<List<ComponentSpec>>() {
+            this.getExecutorService().submit(new Runnable() {
                 @Override
-                public List<ComponentSpec> call() throws Exception {
-                    return TDSClient.this.getMessageHandler().getGroupGetStrategy().execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream(), function, numbers);
+                public void run() {
+                    try {
+                        TDSClient.this.getMessageHandler().getGroupGetStrategy().execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream(), function, numbers);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }).get();
         } catch (InterruptedException e) {
@@ -233,22 +230,16 @@ public final class TDSClient {
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
-        return componentSpecs;
     }
 
-    public List<ComponentSpec> groupGet() {
-        List<ComponentSpec> componentSpecs = new ArrayList<>();
+    public void groupGet() {
         for (Function function : Function.values()) {
-            List<ComponentSpec> groupGet = this.groupGet(function);
-            if (groupGet != null) {
-                componentSpecs.addAll(groupGet);
-            }
+            this.groupGet(function);
         }
-        return componentSpecs;
     }
 
-    public List<ComponentSpec> groupGet(Function function) {
-        return this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
+    public void groupGet(Function function) {
+        this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
             @Override
             public Integer apply(ComponentSpec input) {
                 return input.getNumber();
@@ -256,18 +247,16 @@ public final class TDSClient {
         })));
     }
 
-    public ComponentSpec get(Function function, int number) {
-        return this.get(this.getConfig().getComponent(function, number));
+    public void get(Function function, int number) {
+        this.get(this.getConfig().getComponent(function, number));
     }
 
-    public ComponentSpec get(ComponentSpec component) {
-        ComponentSpec result = null;
+    public void get(ComponentSpec component) {
         try {
-            result = this.execute(new GetMessage(this.getConfig(), component.getFunction(), component.getNumber()));
+            this.execute(new GetMessage(this.getConfig(), component.getFunction(), component.getNumber()));
         } catch (ExecutionException e) {
             LOG.error("Exception ({}) caught in get: {}", e.getClass().getName(), e.getMessage(), e);
         }
-        return result;
     }
 
     public void stop() {
@@ -332,14 +321,12 @@ public final class TDSClient {
 
     // ################################################ PRIVATE API FUNCTIONS
 
-    private <R> R execute(MessageSupport<R> message) throws ExecutionException {
-        R sendResult = null;
+    private <R> void execute(MessageSupport message) throws ExecutionException {
         try {
-            sendResult = this.getExecutorService().submit(MessageExecutor.of(message, this.getOutputStream(), this.getInputStream())).get();
+            this.getExecutorService().submit(MessageExecutor.of(message, this.getOutputStream())).get();
         } catch (InterruptedException e) {
             LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
         }
-        return sendResult;
     }
 
     private void sendLogEventMessages(StateEnum state) {
@@ -354,6 +341,8 @@ public final class TDSClient {
         String host = this.getConfig().getHost();
         int port = this.getConfig().getPort();
 
+        host = this.startTestServer(host, port);
+
         this.connect(host, port);
 
         this.groupGet();
@@ -363,6 +352,18 @@ public final class TDSClient {
         this.sendLogEventMessages(StateEnum.ON);
 
         this.startEventListener();
+    }
+
+    private String startTestServer(String host, int port) {
+        if (!Boolean.getBoolean("production")) {
+            LOG.debug("Starting test server...");
+            host = "localhost";
+
+            new Thread(new TeletaskTestServer(port, this.getConfig(), this.getMessageHandler())).start();
+
+            LOG.debug("Started test server!");
+        }
+        return host;
     }
 
     private void startEventListener() {
@@ -442,11 +443,14 @@ public final class TDSClient {
         @Override
         public void run() {
             try {
-                List<EventMessageServerResponse> messages = this.getEventMessageServerResponses();
+                List<MessageSupport> messages = this.getEventMessageServerResponses();
                 List<ComponentSpec> components = new ArrayList<>();
-                for (EventMessageServerResponse message : messages) {
-                    MessageUtilities.handleEvent(this.getClass(), TDSClient.this.getConfig(), message);
-                    components.add(TDSClient.this.getConfig().getComponent(message.getEventMessage().getFunction(), message.getEventMessage().getNumber()));
+                for (MessageSupport message : messages) {
+                    if (message instanceof EventMessage) {
+                        EventMessage eventMessage = (EventMessage) message;
+                        MessageUtilities.handleEvent(this.getClass(), TDSClient.this.getConfig(), eventMessage);
+                        components.add(TDSClient.this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
+                    }
                 }
                 if (!components.isEmpty()) {
                     for (StateChangeListener stateChangeListener : TDSClient.this.stateChangeListeners) {
@@ -458,22 +462,11 @@ public final class TDSClient {
             }
         }
 
-        private List<EventMessageServerResponse> getEventMessageServerResponses() throws Exception {
+        private List<MessageSupport> getEventMessageServerResponses() throws Exception {
             return MessageUtilities.receive(this.getClass(), TDSClient.this.getInputStream(), TDSClient.this.getConfig(), TDSClient.this.getMessageHandler(), new MessageUtilities.StopCondition() {
                 @Override
-                public boolean isComplete(List<ServerResponse> responses, byte[] overflow) {
+                public boolean isComplete(List<MessageSupport> responses, byte[] overflow) {
                     return overflow != null && overflow.length == 0;
-                }
-            }, new MessageUtilities.ResponseConverter<List<EventMessageServerResponse>>() {
-                @Override
-                public List<EventMessageServerResponse> convert(List<ServerResponse> responses) {
-                    List<EventMessageServerResponse> messages = new ArrayList<>();
-                    for (ServerResponse response : responses) {
-                        if (response instanceof EventMessageServerResponse) {
-                            messages.add(((EventMessageServerResponse) response));
-                        }
-                    }
-                    return messages;
                 }
             });
         }

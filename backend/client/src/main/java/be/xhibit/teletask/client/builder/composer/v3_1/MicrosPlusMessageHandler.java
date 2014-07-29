@@ -66,16 +66,16 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public EventMessage parseEvent(ClientConfigSpec config, byte[] eventData) {
+    public EventMessage parseEvent(ClientConfigSpec config, byte[] message) {
         //02 09 10 01 01 00 03 00 00 20
         int counter = 3; //We skip first 4 since they are of no use to us at this time.
-        Function function = this.getFunction(eventData[++counter]);
-        int number = ByteBuffer.wrap(new byte[]{eventData[++counter], eventData[++counter]}).getShort();
+        Function function = this.getFunction(message[++counter]);
+        int number = ByteBuffer.wrap(new byte[]{message[++counter], message[++counter]}).getShort();
         ++counter; // This is the ErrorState, not used at this time
-        int stateValue = eventData[++counter];
+        int stateValue = message[++counter];
         State state = this.getState(new StateKey(function, stateValue == -1 ? 255 : stateValue));
 
-        return new EventMessage(config, eventData, function, number, state);
+        return new EventMessage(config, message, function, number, state);
     }
 
     @Override
@@ -93,6 +93,11 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         return GROUP_GET_STRATEGY;
     }
 
+    @Override
+    public int getOutputByteSize() {
+        return 2;
+    }
+
     private static class MicrosPlusKeepAliveStrategy implements KeepAliveStrategy {
         @Override
         public int getIntervalMinutes() {
@@ -101,14 +106,14 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
 
         @Override
         public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
-            MessageExecutor.of(new KeepAliveMessage(config), out, in).call();
+            MessageExecutor.of(new KeepAliveMessage(config), out).run();
         }
     }
 
     private static class MicrosPlusGroupGetStrategy implements GroupGetStrategy {
         @Override
-        public List<ComponentSpec> execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
-            return MessageExecutor.of(new GroupGetMessage(config, function, numbers), out, in).call();
+        public void execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
+            MessageExecutor.of(new GroupGetMessage(config, function, numbers), out).run();
         }
     }
 }

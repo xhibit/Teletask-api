@@ -1,26 +1,22 @@
 package be.xhibit.teletask.client.builder.message;
 
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.concurrent.Callable;
 
-public class MessageExecutor<R> implements Callable<R> {
-    private final MessageSupport<R> message;
+public class MessageExecutor<R> implements Runnable {
+    private final MessageSupport message;
     private final OutputStream out;
-    private final InputStream in;
 
-    private MessageExecutor(MessageSupport<R> message, OutputStream out, InputStream in) {
+    private MessageExecutor(MessageSupport message, OutputStream out) {
         this.message = message;
         this.out = out;
-        this.in = in;
     }
 
-    public static <S> MessageExecutor<S> of(MessageSupport<S> message, OutputStream out, InputStream in) {
-        return new MessageExecutor<>(message, out, in);
+    public static <S> MessageExecutor<S> of(MessageSupport message, OutputStream out) {
+        return new MessageExecutor<>(message, out);
     }
 
     @Override
-    public R call() throws Exception {
-        return this.message.execute(this.out, this.in);
+    public void run() {
+        this.message.execute(this.out);
     }
 }

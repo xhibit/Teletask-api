@@ -10,7 +10,6 @@ import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
-import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import be.xhibit.teletask.model.spec.StateEnum;
@@ -18,8 +17,6 @@ import com.google.common.primitives.Bytes;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MicrosMessageHandler extends MessageHandlerSupport {
     public static final MicrosKeepAliveStrategy KEEP_ALIVE_STRATEGY = new MicrosKeepAliveStrategy();
@@ -51,14 +48,14 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public EventMessage parseEvent(ClientConfigSpec config, byte[] eventData) {
+    public EventMessage parseEvent(ClientConfigSpec config, byte[] message) {
         //02 09 10 01 03 00 31
         int counter = 2; //We skip first 3 since they are of no use to us at this time.
-        Function function = this.getFunction(eventData[++counter]);
-        int number = eventData[++counter];
-        int stateValue = eventData[++counter];
+        Function function = this.getFunction(message[++counter]);
+        int number = message[++counter];
+        int stateValue = message[++counter];
         State state = this.getState(new StateKey(function, stateValue == -1 ? 255 : stateValue));
-        return new EventMessage(config, eventData, function, number, state);
+        return new EventMessage(config, message, function, number, state);
     }
 
     @Override
@@ -71,6 +68,11 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
         return GROUP_GET_STRATEGY;
     }
 
+    @Override
+    public int getOutputByteSize() {
+        return 1;
+    }
+
     private static class MicrosKeepAliveStrategy implements KeepAliveStrategy {
         @Override
         public int getIntervalMinutes() {
@@ -79,18 +81,16 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
         @Override
         public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
-            MessageExecutor.of(new LogMessage(config, Function.MOTOR, StateEnum.ON), out, in).call();
+            MessageExecutor.of(new LogMessage(config, Function.MOTOR, StateEnum.ON), out).run();
         }
     }
 
     private static class MicrosGroupGetStrategy implements GroupGetStrategy {
         @Override
-        public List<ComponentSpec> execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
-            List<ComponentSpec> componentSpecs = new ArrayList<>();
+        public void execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
             for (int number : numbers) {
-                componentSpecs.add(MessageExecutor.of(new GetMessage(config, function, number), out, in).call());
+                MessageExecutor.of(new GetMessage(config, function, number), out).run();
             }
-            return componentSpecs;
         }
     }
 }

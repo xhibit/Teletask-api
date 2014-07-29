@@ -6,7 +6,7 @@ import be.xhibit.teletask.model.spec.Function;
 import com.google.common.base.Joiner;
 import com.google.common.primitives.Bytes;
 
-public abstract class GetMessageSupport<R> extends FunctionBasedMessageSupport<R> {
+public abstract class GetMessageSupport<R> extends FunctionBasedMessageSupport {
     private final int[] numbers;
 
     protected GetMessageSupport(Function function, ClientConfigSpec clientConfig, int... numbers) {
@@ -33,8 +33,4 @@ public abstract class GetMessageSupport<R> extends FunctionBasedMessageSupport<R
         return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatOutput(this.getNumbers()));
     }
 
-    @Override
-    protected int getExpectedResultCount() {
-        return 1 + this.getNumbers().length;
-    }
 }
