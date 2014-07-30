@@ -1,7 +1,7 @@
 package be.xhibit.teletask.server;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
-import be.xhibit.teletask.client.builder.message.MessageSupport;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.client.builder.message.MessageUtilities;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import org.slf4j.Logger;
@@ -49,8 +49,7 @@ public class TeletaskTestServer implements Runnable {
                             }
                         });
                         for (MessageSupport message: messages) {
-                            //TODO: respond with test response!
-                            LOG.debug(message.toString());
+//                            message.respond(TeletaskTestServer.this.getConfig(), TeletaskTestServer.this.getMessageHandler());
                         }
                     } catch (Exception e) {
                         LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);

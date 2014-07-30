@@ -2,15 +2,14 @@ package be.xhibit.teletask.client.builder.composer.v3_1;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
-import be.xhibit.teletask.client.builder.message.EventMessage;
-import be.xhibit.teletask.client.builder.message.GroupGetMessage;
-import be.xhibit.teletask.client.builder.message.KeepAliveMessage;
-import be.xhibit.teletask.client.builder.message.MessageExecutor;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.GroupGetMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.KeepAliveMessage;
+import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
-import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.primitives.Bytes;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.List;
 
 public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     /**

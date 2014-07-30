@@ -1,8 +1,9 @@
-package be.xhibit.teletask.client.builder.message;
+package be.xhibit.teletask.client.builder.message.messages;
 
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
+import be.xhibit.teletask.client.builder.message.MessageUtilities;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
@@ -193,4 +194,6 @@ public abstract class MessageSupport {
         }
         return super.toString();
     }
+
+//    public abstract void respond(ClientConfigSpec config, MessageHandler messageHandler);
 }

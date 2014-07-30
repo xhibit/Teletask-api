@@ -1,5 +1,6 @@
-package be.xhibit.teletask.client.builder.message;
+package be.xhibit.teletask.client.builder.message.messages.impl;
 
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 

@@ -2,6 +2,11 @@ package be.xhibit.teletask.client.builder.message;
 
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
+import be.xhibit.teletask.client.builder.message.messages.impl.AcknowledgeMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
+import be.xhibit.teletask.client.builder.message.parser.DelegatingMessageParser;
+import be.xhibit.teletask.client.builder.message.parser.MessageParser;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import com.google.common.primitives.Bytes;
@@ -91,10 +96,6 @@ public final class MessageUtilities {
             }
         }
         return overflow;
-    }
-
-    public interface MessageParser {
-        MessageSupport parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] event);
     }
 
     public static void send(OutputStream outputStream, byte[] message) throws IOException {

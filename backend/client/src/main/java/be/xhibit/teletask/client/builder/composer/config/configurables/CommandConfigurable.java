@@ -2,7 +2,7 @@ package be.xhibit.teletask.client.builder.composer.config.configurables;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.config.Configurable;
-import be.xhibit.teletask.client.builder.message.MessageSupport;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import com.google.common.collect.ImmutableMap;

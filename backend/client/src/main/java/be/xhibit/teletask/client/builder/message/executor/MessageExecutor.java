@@ -1,4 +1,6 @@
-package be.xhibit.teletask.client.builder.message;
+package be.xhibit.teletask.client.builder.message.executor;
+
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 
 import java.io.OutputStream;
 

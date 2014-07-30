@@ -2,10 +2,10 @@ package be.xhibit.teletask.client.builder.composer.v2_8;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
-import be.xhibit.teletask.client.builder.message.EventMessage;
-import be.xhibit.teletask.client.builder.message.GetMessage;
-import be.xhibit.teletask.client.builder.message.LogMessage;
-import be.xhibit.teletask.client.builder.message.MessageExecutor;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.GetMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.LogMessage;
+import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;

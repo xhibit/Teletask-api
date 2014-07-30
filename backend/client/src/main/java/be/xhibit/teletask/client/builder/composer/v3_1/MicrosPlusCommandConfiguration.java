@@ -10,7 +10,7 @@ import be.xhibit.teletask.client.builder.composer.config.configurables.command.G
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.KeepAliveCommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.LogCommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.SetCommandConfigurable;
-import be.xhibit.teletask.client.builder.message.EventMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import com.google.common.collect.ImmutableList;

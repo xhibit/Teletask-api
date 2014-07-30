@@ -2,12 +2,11 @@ package be.xhibit.teletask.client.builder.composer.config.configurables.command;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
-import be.xhibit.teletask.client.builder.message.GroupGetMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.GroupGetMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class GroupGetCommandConfigurable extends CommandConfigurable<GroupGetMessage> {
     public GroupGetCommandConfigurable(int number, boolean needsCentralUnitParameter, String... paramNames) {

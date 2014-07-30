@@ -4,10 +4,10 @@ import be.xhibit.teletask.client.builder.composer.config.configurables.CommandCo
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
-import be.xhibit.teletask.client.builder.message.MessageSupport;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
-import be.xhibit.teletask.client.builder.message.EventMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
