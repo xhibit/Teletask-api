@@ -22,11 +22,11 @@ public class StateEnumImpl implements State {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || this.getClass() != o.getClass()) return false;
 
         StateEnumImpl stateEnum = (StateEnumImpl) o;
 
-        if (state != stateEnum.state) return false;
+        if (this.state != stateEnum.state) return false;
 
         return true;
     }
@@ -37,7 +37,7 @@ public class StateEnumImpl implements State {
 
     @Override
     public int hashCode() {
-        return state != null ? state.hashCode() : 0;
+        return this.state != null ? this.state.hashCode() : 0;
     }
 
     @Override

@@ -6,8 +6,6 @@
     app.controller('ConfigController', ['$rootScope', '$scope', '$http', function ($rootScope, $scope, $http) {
         $scope.config = [];
 
-//        $scope.roomStates = [];
-
         $http.get($rootScope.baseUrl + '/config').success(function (data, status, headers, config) {
             $scope.config = data;
         });
@@ -27,7 +25,25 @@
         var wsocket = new WebSocket($rootScope.baseWsUrl + '/state-changes');
         wsocket.onmessage = function (evt) {
             $scope.$apply(function () {
-                $scope.config = angular.fromJson(evt.data);
+                var components = angular.fromJson(evt.data);
+                angular.forEach($scope.config.rooms, function (room, key) {
+                    function changeComponentState(comps) {
+                        angular.forEach(comps, function (comp, key) {
+                            angular.forEach(components, function (component, key) {
+                                if (comp.number == component.number && comp.function == component.function) {
+                                    console.log('Changing state in room ' + room.name + ': ' + component.function + ':' + component.number + ' to ' + component.state.value);
+                                    comp.state.value = component.state.value;
+                                    comp.state.state = component.state.state;
+                                }
+                            });
+                        });
+                    }
+                    changeComponentState(room.relays);
+                    changeComponentState(room.localMoods);
+                    changeComponentState(room.motors);
+                    changeComponentState(room.generalMoods);
+                    changeComponentState(room.dimmers);
+                });
             });
         };
     }]);

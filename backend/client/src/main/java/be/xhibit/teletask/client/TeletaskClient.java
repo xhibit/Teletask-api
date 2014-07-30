@@ -1,16 +1,14 @@
 package be.xhibit.teletask.client;
 
-import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
-import be.xhibit.teletask.client.builder.message.GetMessage;
-import be.xhibit.teletask.client.builder.message.LogMessage;
-import be.xhibit.teletask.client.builder.message.MessageExecutor;
-import be.xhibit.teletask.client.builder.message.MessageSupport;
 import be.xhibit.teletask.client.builder.message.MessageUtilities;
-import be.xhibit.teletask.client.builder.message.SetMessage;
-import be.xhibit.teletask.client.builder.message.response.EventMessageServerResponse;
-import be.xhibit.teletask.client.builder.message.response.ServerResponse;
+import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.GetMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.LogMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.SetMessage;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.listener.StateChangeListener;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
@@ -18,6 +16,7 @@ import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import be.xhibit.teletask.model.spec.StateEnum;
+import be.xhibit.teletask.server.TeletaskTestServer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -138,11 +136,11 @@ import java.util.concurrent.TimeUnit;
  * - These reports are coming on the socket you open, so you have to check the bytes that are coming in, but you don't have to open a listener on a port.
  * - You can send a keep alive to make sure that the central unit don't close the port because there is no activity
  */
-public final class TDSClient {
+public final class TeletaskClient {
     /**
      * Logger responsible for logging and debugging statements.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(TDSClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TeletaskClient.class);
 
     private Socket socket;
     private OutputStream outputStream;
@@ -150,7 +148,7 @@ public final class TDSClient {
 
     private final ClientConfigSpec config;
 
-    private static TDSClient instance = null;
+    private static TeletaskClient instance = null;
 
     private final ExecutorService executorService;
 
@@ -158,12 +156,13 @@ public final class TDSClient {
     private final Timer eventListenerTimer = new Timer();
 
     private final List<StateChangeListener> stateChangeListeners = new ArrayList<>();
+    private TeletaskTestServer teletaskTestServer;
 
     /**
      * Default constructor.  Responsible for reading the client config (JSON).
      * Singleton class.  Private constructor to prevent new instance creations.
      */
-    private TDSClient(ClientConfigSpec config) {
+    private TeletaskClient(ClientConfigSpec config) {
         this.config = config;
         this.executorService = Executors.newSingleThreadExecutor();
     }
@@ -173,9 +172,9 @@ public final class TDSClient {
      *
      * @return a new or existing TDSClient instance.
      */
-    public static synchronized TDSClient getInstance(ClientConfigSpec clientConfig) {
+    public static synchronized TeletaskClient getInstance(ClientConfigSpec clientConfig) {
         if (instance == null) {
-            instance = new TDSClient(clientConfig);
+            instance = new TeletaskClient(clientConfig);
             instance.start();
         }
 
@@ -188,17 +187,15 @@ public final class TDSClient {
         this.stateChangeListeners.add(listener);
     }
 
-    public SendResult set(ComponentSpec component, State state) {
-        return this.set(component.getFunction(), component.getNumber(), state);
+    public void set(ComponentSpec component, State state) {
+        this.set(component.getFunction(), component.getNumber(), state);
     }
 
-    public SendResult set(Function function, int number, State state) {
-        SendResult sendResult = null;
-
+    public void set(Function function, int number, State state) {
         Preconditions.checkNotNull(state, "Given state not found");
 
         try {
-            sendResult = this.execute(new SetMessage(this.getConfig(), function, number, state));
+            this.execute(new SetMessage(this.getConfig(), function, number, state));
 
             ComponentSpec component = this.getConfig().getComponent(function, number);
             Long start = System.currentTimeMillis();
@@ -215,17 +212,18 @@ public final class TDSClient {
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
-
-        return sendResult;
     }
 
-    public List<ComponentSpec> groupGet(final Function function, final int... numbers) {
-        List<ComponentSpec> componentSpecs = null;
+    public void groupGet(final Function function, final int... numbers) {
         try {
-            componentSpecs = this.getExecutorService().submit(new Callable<List<ComponentSpec>>() {
+            this.getExecutorService().submit(new Runnable() {
                 @Override
-                public List<ComponentSpec> call() throws Exception {
-                    return TDSClient.this.getMessageHandler().getGroupGetStrategy().execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream(), function, numbers);
+                public void run() {
+                    try {
+                        TeletaskClient.this.getMessageHandler().getGroupGetStrategy().execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream(), function, numbers);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }).get();
         } catch (InterruptedException e) {
@@ -233,22 +231,16 @@ public final class TDSClient {
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
-        return componentSpecs;
     }
 
-    public List<ComponentSpec> groupGet() {
-        List<ComponentSpec> componentSpecs = new ArrayList<>();
+    public void groupGet() {
         for (Function function : Function.values()) {
-            List<ComponentSpec> groupGet = this.groupGet(function);
-            if (groupGet != null) {
-                componentSpecs.addAll(groupGet);
-            }
+            this.groupGet(function);
         }
-        return componentSpecs;
     }
 
-    public List<ComponentSpec> groupGet(Function function) {
-        return this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
+    public void groupGet(Function function) {
+        this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
             @Override
             public Integer apply(ComponentSpec input) {
                 return input.getNumber();
@@ -256,23 +248,38 @@ public final class TDSClient {
         })));
     }
 
-    public ComponentSpec get(Function function, int number) {
-        return this.get(this.getConfig().getComponent(function, number));
+    public void get(Function function, int number) {
+        this.get(this.getConfig().getComponent(function, number));
     }
 
-    public ComponentSpec get(ComponentSpec component) {
-        ComponentSpec result = null;
+    public void get(ComponentSpec component) {
         try {
-            result = this.execute(new GetMessage(this.getConfig(), component.getFunction(), component.getNumber()));
+            this.execute(new GetMessage(this.getConfig(), component.getFunction(), component.getNumber()));
         } catch (ExecutionException e) {
             LOG.error("Exception ({}) caught in get: {}", e.getClass().getName(), e.getMessage(), e);
         }
-        return result;
     }
 
     public void stop() {
-        LOG.debug("Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
 
+<<<<<<< HEAD:backend/client/src/main/java/be/xhibit/teletask/client/TDSClient.java
+        if (Boolean.getBoolean("production")) {
+            LOG.debug("Production mode enabled. Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
+
+            // close all log events to stop reporting
+            this.sendLogEventMessages(StateEnum.OFF);
+            this.stopEventListener();
+            this.stopKeepAliveService();
+            this.stopExecutorService();
+            this.closeInputStream();
+            this.closeOutputStream();
+            this.closeSocket();
+
+            LOG.debug("Disconnected successfully");
+        } else {
+            LOG.debug("Test mode enabled.  Skipping TDSClient disconnect.");
+        }
+=======
         // close all log events to stop reporting
         this.sendLogEventMessages(StateEnum.OFF);
         this.stopEventListener();
@@ -281,8 +288,15 @@ public final class TDSClient {
         this.closeInputStream();
         this.closeOutputStream();
         this.closeSocket();
+        this.stopTestServer();
+>>>>>>> FETCH_HEAD:backend/client/src/main/java/be/xhibit/teletask/client/TeletaskClient.java
 
-        LOG.debug("Disconnected successfully");
+    }
+
+    private void stopTestServer() {
+        if (this.getTeletaskTestServer() != null) {
+            this.getTeletaskTestServer().stop();
+        }
     }
 
     private void stopKeepAliveService() {
@@ -332,14 +346,12 @@ public final class TDSClient {
 
     // ################################################ PRIVATE API FUNCTIONS
 
-    private <R> R execute(MessageSupport<R> message) throws ExecutionException {
-        R sendResult = null;
+    private <R> void execute(MessageSupport message) throws ExecutionException {
         try {
-            sendResult = this.getExecutorService().submit(MessageExecutor.of(message, this.getOutputStream(), this.getInputStream())).get();
+            this.getExecutorService().submit(MessageExecutor.of(message, this.getOutputStream())).get();
         } catch (InterruptedException e) {
             LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
         }
-        return sendResult;
     }
 
     private void sendLogEventMessages(StateEnum state) {
@@ -351,25 +363,53 @@ public final class TDSClient {
     }
 
     private void start() {
+<<<<<<< HEAD:backend/client/src/main/java/be/xhibit/teletask/client/TDSClient.java
+=======
         String host = this.getConfig().getHost();
         int port = this.getConfig().getPort();
 
+        host = this.startTestServer(host, port);
+
         this.connect(host, port);
+>>>>>>> FETCH_HEAD:backend/client/src/main/java/be/xhibit/teletask/client/TeletaskClient.java
 
-        this.groupGet();
+        if (Boolean.getBoolean("production")) {
+            LOG.debug("Production mode enabled. Starting TDSClient connection.");
 
-        this.startKeepAlive();
+            this.connect(this.getConfig().getHost(), this.getConfig().getPort());
+            this.groupGet();
+            this.startKeepAlive();
+            this.sendLogEventMessages(StateEnum.ON);
+            this.startEventListener();
+        } else {
+            LOG.debug("Test mode enabled.  Skipping TDSClient connection.");
+        }
 
-        this.sendLogEventMessages(StateEnum.ON);
+    }
 
-        this.startEventListener();
+    private String startTestServer(String host, int port) {
+        if (!Boolean.getBoolean("production")) {
+            LOG.debug("Starting test server...");
+            host = "localhost";
+
+            this.teletaskTestServer = new TeletaskTestServer(port, this.getConfig(), this.getMessageHandler());
+
+            new Thread(this.getTeletaskTestServer()).start();
+
+            LOG.debug("Started test server!");
+        }
+        return host;
+    }
+
+    private TeletaskTestServer getTeletaskTestServer() {
+        return this.teletaskTestServer;
     }
 
     private void startEventListener() {
         this.getEventListenerTimer().schedule(new TimerTask() {
             @Override
             public void run() {
-                TDSClient.this.getExecutorService().submit(new EventMessageListener());
+                TeletaskClient.this.getExecutorService().submit(new EventMessageListener());
             }
         }, 0, 20);
     }
@@ -422,7 +462,7 @@ public final class TDSClient {
      * @throws CloneNotSupportedException when called.
      */
     @Override
-    public final TDSClient clone() throws CloneNotSupportedException {
+    public final TeletaskClient clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }
 
@@ -442,14 +482,17 @@ public final class TDSClient {
         @Override
         public void run() {
             try {
-                List<EventMessageServerResponse> messages = this.getEventMessageServerResponses();
+                List<MessageSupport> messages = this.getEventMessageServerResponses();
                 List<ComponentSpec> components = new ArrayList<>();
-                for (EventMessageServerResponse message : messages) {
-                    MessageUtilities.handleEvent(this.getClass(), TDSClient.this.getConfig(), message);
-                    components.add(TDSClient.this.getConfig().getComponent(message.getEventMessage().getFunction(), message.getEventMessage().getNumber()));
+                for (MessageSupport message : messages) {
+                    if (message instanceof EventMessage) {
+                        EventMessage eventMessage = (EventMessage) message;
+                        MessageUtilities.handleEvent(this.getClass(), TeletaskClient.this.getConfig(), eventMessage);
+                        components.add(TeletaskClient.this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
+                    }
                 }
                 if (!components.isEmpty()) {
-                    for (StateChangeListener stateChangeListener : TDSClient.this.stateChangeListeners) {
+                    for (StateChangeListener stateChangeListener : TeletaskClient.this.stateChangeListeners) {
                         stateChangeListener.event(components);
                     }
                 }
@@ -458,22 +501,11 @@ public final class TDSClient {
             }
         }
 
-        private List<EventMessageServerResponse> getEventMessageServerResponses() throws Exception {
-            return MessageUtilities.receive(this.getClass(), TDSClient.this.getInputStream(), TDSClient.this.getConfig(), TDSClient.this.getMessageHandler(), new MessageUtilities.StopCondition() {
+        private List<MessageSupport> getEventMessageServerResponses() throws Exception {
+            return MessageUtilities.receive(this.getClass(), TeletaskClient.this.getInputStream(), TeletaskClient.this.getConfig(), TeletaskClient.this.getMessageHandler(), new MessageUtilities.StopCondition() {
                 @Override
-                public boolean isComplete(List<ServerResponse> responses, byte[] overflow) {
+                public boolean isComplete(List<MessageSupport> responses, byte[] overflow) {
                     return overflow != null && overflow.length == 0;
-                }
-            }, new MessageUtilities.ResponseConverter<List<EventMessageServerResponse>>() {
-                @Override
-                public List<EventMessageServerResponse> convert(List<ServerResponse> responses) {
-                    List<EventMessageServerResponse> messages = new ArrayList<>();
-                    for (ServerResponse response : responses) {
-                        if (response instanceof EventMessageServerResponse) {
-                            messages.add(((EventMessageServerResponse) response));
-                        }
-                    }
-                    return messages;
                 }
             });
         }
@@ -489,11 +521,11 @@ public final class TDSClient {
         @Override
         public void run() {
             try {
-                TDSClient.this.getExecutorService().execute(new Runnable() {
+                TeletaskClient.this.getExecutorService().execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            keepAliveStrategy.execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream());
+                            keepAliveStrategy.execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream());
                         } catch (Exception e) {
                             LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
                         }

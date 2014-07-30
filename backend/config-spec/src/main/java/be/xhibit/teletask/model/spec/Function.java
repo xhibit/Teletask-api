@@ -33,12 +33,17 @@ public enum Function {
 
     private final String descr;
     private final Map<String, State> states;
+    private State defaultState;
 
     Function(String descr, StateEnum... states) {
         this.descr = descr;
         ImmutableMap.Builder<String, State> builder = ImmutableMap.builder();
         for (StateEnum state : states) {
-            builder.put(state.name().toUpperCase(), new StateEnumImpl(state, this));
+            State stateEnum = new StateEnumImpl(state, this);
+            if (this.defaultState == null) {
+                this.defaultState = stateEnum;
+            }
+            builder.put(state.name().toUpperCase(), stateEnum);
         }
         this.states = builder.build();
     }
@@ -47,9 +52,16 @@ public enum Function {
         this.descr = descr;
         ImmutableMap.Builder<String, State> builder = ImmutableMap.builder();
         for (State state : states) {
+            if (this.defaultState == null) {
+                this.defaultState = state;
+            }
             builder.put(state.getValue().toUpperCase(), state);
         }
         this.states = builder.build();
+    }
+
+    public State getDefaultState() {
+        return this.defaultState;
     }
 
     public String getDescription() {
