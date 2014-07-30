@@ -126,17 +126,13 @@
 <body>
 
     <%
-<<<<<<< HEAD
+
         //TDSClientConfig tdsConfig = TDSClientConfig.read(TDSClientConfig.class.getClassLoader().getResourceAsStream("tds-config.json"));
         //TDSClient client = TDSClient.getInstance(tdsConfig);
 
-        //LOG.debug("Trying to load the configFile '{}' as json...", configFile);
-        TDSClient client = ClientHolder.getClient();
+        TeletaskClient client = ClientHolder.getClient();
         TDSClientConfig tdsConfig = (TDSClientConfig) client.getConfig();
-=======
-        TDSClientConfig tdsConfig = TDSClientConfig.read(TDSClientConfig.class.getClassLoader().getResourceAsStream("tds-config.json"));
-        TeletaskClient client = TeletaskClient.getInstance(tdsConfig);
->>>>>>> FETCH_HEAD
+
         request.setAttribute("tds_relays", tdsConfig.getComponentsTypes().get(Function.RELAY));
         request.setAttribute("tds_locmoods", tdsConfig.getComponentsTypes().get(Function.LOCMOOD));
         request.setAttribute("tds_genmoods", tdsConfig.getComponentsTypes().get(Function.GENMOOD));

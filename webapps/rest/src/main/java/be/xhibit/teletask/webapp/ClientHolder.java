@@ -44,7 +44,7 @@ public final class ClientHolder {
         LOG.debug("Using config file {}", configFile);
 
         try (FileInputStream jsonData = new FileInputStream(configFile)) {
-            LOG.debug("Trying to load the configFile as json...");
+            LOG.debug("Trying to load the configFile '{}' as json...", configFile);
             clientConfig = TDSClientConfig.read(jsonData);
         } catch (Exception e) {
             LOG.debug("Trying to load the configFile as nbt printed text...");

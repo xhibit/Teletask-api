@@ -262,24 +262,6 @@ public final class TeletaskClient {
 
     public void stop() {
 
-<<<<<<< HEAD:backend/client/src/main/java/be/xhibit/teletask/client/TDSClient.java
-        if (Boolean.getBoolean("production")) {
-            LOG.debug("Production mode enabled. Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
-
-            // close all log events to stop reporting
-            this.sendLogEventMessages(StateEnum.OFF);
-            this.stopEventListener();
-            this.stopKeepAliveService();
-            this.stopExecutorService();
-            this.closeInputStream();
-            this.closeOutputStream();
-            this.closeSocket();
-
-            LOG.debug("Disconnected successfully");
-        } else {
-            LOG.debug("Test mode enabled.  Skipping TDSClient disconnect.");
-        }
-=======
         // close all log events to stop reporting
         this.sendLogEventMessages(StateEnum.OFF);
         this.stopEventListener();
@@ -289,7 +271,6 @@ public final class TeletaskClient {
         this.closeOutputStream();
         this.closeSocket();
         this.stopTestServer();
->>>>>>> FETCH_HEAD:backend/client/src/main/java/be/xhibit/teletask/client/TeletaskClient.java
 
     }
 
@@ -363,27 +344,13 @@ public final class TeletaskClient {
     }
 
     private void start() {
-<<<<<<< HEAD:backend/client/src/main/java/be/xhibit/teletask/client/TDSClient.java
-=======
+
         String host = this.getConfig().getHost();
         int port = this.getConfig().getPort();
 
         host = this.startTestServer(host, port);
 
         this.connect(host, port);
->>>>>>> FETCH_HEAD:backend/client/src/main/java/be/xhibit/teletask/client/TeletaskClient.java
-
-        if (Boolean.getBoolean("production")) {
-            LOG.debug("Production mode enabled. Starting TDSClient connection.");
-
-            this.connect(this.getConfig().getHost(), this.getConfig().getPort());
-            this.groupGet();
-            this.startKeepAlive();
-            this.sendLogEventMessages(StateEnum.ON);
-            this.startEventListener();
-        } else {
-            LOG.debug("Test mode enabled.  Skipping TDSClient connection.");
-        }
 
     }
 
