@@ -128,7 +128,6 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
             rawBytes[9] = checksum;
 
             ComponentSpec component = config.getComponent(function, number.getNumber());
-            component.setState(number.getState());
 
             eventMessages.add(new EventMessage(config, rawBytes, function, number.getNumber(), component.getState()));
         }
