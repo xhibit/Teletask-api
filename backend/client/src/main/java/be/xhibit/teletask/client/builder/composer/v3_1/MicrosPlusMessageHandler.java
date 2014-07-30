@@ -101,7 +101,7 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public List<EventMessage> createEventMessage(ClientConfigSpec config, Function function, OutputState... numbers) {
+    public List<EventMessage> createResponseEventMessage(ClientConfigSpec config, Function function, OutputState... numbers) {
         List<EventMessage> eventMessages = new ArrayList<>();
 
         for (OutputState number : numbers) {

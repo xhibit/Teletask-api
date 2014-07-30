@@ -54,7 +54,7 @@ public interface MessageHandler {
 
     int getOutputByteSize();
 
-    List<EventMessage> createEventMessage(ClientConfigSpec config, Function function, OutputState... numbers);
+    List<EventMessage> createResponseEventMessage(ClientConfigSpec config, Function function, OutputState... numbers);
 
     class OutputState {
         private final int number;
