@@ -271,24 +271,18 @@ public final class TDSClient {
     }
 
     public void stop() {
+        LOG.debug("Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
 
-        if (Boolean.getBoolean("production")) {
-            LOG.debug("Production mode enabled. Disconnecting from {}", this.socket.getInetAddress().getHostAddress());
+        // close all log events to stop reporting
+        this.sendLogEventMessages(StateEnum.OFF);
+        this.stopEventListener();
+        this.stopKeepAliveService();
+        this.stopExecutorService();
+        this.closeInputStream();
+        this.closeOutputStream();
+        this.closeSocket();
 
-            // close all log events to stop reporting
-            this.sendLogEventMessages(StateEnum.OFF);
-            this.stopEventListener();
-            this.stopKeepAliveService();
-            this.stopExecutorService();
-            this.closeInputStream();
-            this.closeOutputStream();
-            this.closeSocket();
-
-            LOG.debug("Disconnected successfully");
-        } else {
-            LOG.debug("Test mode enabled.  Skipping TDSClient disconnect.");
-        }
-
+        LOG.debug("Disconnected successfully");
     }
 
     private void stopKeepAliveService() {
@@ -357,19 +351,18 @@ public final class TDSClient {
     }
 
     private void start() {
+        String host = this.getConfig().getHost();
+        int port = this.getConfig().getPort();
 
-        if (Boolean.getBoolean("production")) {
-            LOG.debug("Production mode enabled. Starting TDSClient connection.");
+        this.connect(host, port);
 
-            this.connect(this.getConfig().getHost(), this.getConfig().getPort());
-            this.groupGet();
-            this.startKeepAlive();
-            this.sendLogEventMessages(StateEnum.ON);
-            this.startEventListener();
-        } else {
-            LOG.debug("Test mode enabled.  Skipping TDSClient connection.");
-        }
+        this.groupGet();
 
+        this.startKeepAlive();
+
+        this.sendLogEventMessages(StateEnum.ON);
+
+        this.startEventListener();
     }
 
     private void startEventListener() {
