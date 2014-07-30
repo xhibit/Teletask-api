@@ -1,6 +1,7 @@
 package be.xhibit.teletask.parser;
 
 import be.xhibit.teletask.model.nbt.CentralUnit;
+import be.xhibit.teletask.model.nbt.Condition;
 import be.xhibit.teletask.model.nbt.Dimmer;
 import be.xhibit.teletask.model.nbt.GeneralMood;
 import be.xhibit.teletask.model.nbt.Input;
@@ -29,6 +30,8 @@ public class FullNbtModelConsumerImpl implements Consumer {
 
     public FullNbtModelConsumerImpl() {
         this.centralUnit = new CentralUnit();
+        Room room = new Room(-2, "Conditions");
+        this.getCentralUnit().getRooms().add(room);
     }
 
     @Override
@@ -125,6 +128,15 @@ public class FullNbtModelConsumerImpl implements Consumer {
         GeneralMood generalMood = new GeneralMood(Integer.valueOf(id), room, type, description);
         room.getGeneralMoods().add(generalMood);
         this.getCentralUnit().getComponents().add(generalMood);
+    }
+
+    @Override
+    public void condition(String id, String description) {
+        this.getLogger().debug("condition: {} - {}", id, description);
+        Room room = this.getCentralUnit().findRoom("Conditions");
+        Condition condition = new Condition(Integer.valueOf(id), room, "CON", description);
+        room.getConditions().add(condition);
+        this.getCentralUnit().getComponents().add(condition);
     }
 
     @Override
