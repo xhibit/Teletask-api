@@ -76,7 +76,7 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public List<EventMessage> createEventMessage(ClientConfigSpec config, Function function, OutputState... numbers) {
+    public List<EventMessage> createResponseEventMessage(ClientConfigSpec config, Function function, OutputState... numbers) {
         byte[] rawBytes = new byte[]{
                 (byte) this.getStxValue(),
                 6,

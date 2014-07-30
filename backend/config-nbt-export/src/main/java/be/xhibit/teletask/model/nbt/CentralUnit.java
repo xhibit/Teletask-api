@@ -8,12 +8,10 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +20,7 @@ public class CentralUnit implements ClientConfigSpec {
 
     private static final Map<String, CentralUnitType> CENTRAL_UNIT_TYPE_MAP = ImmutableMap.<String, CentralUnitType>builder()
             .put("TDS 10010: MICROS", CentralUnitType.MICROS)
-            .put("TDS 10012: MICROS+", CentralUnitType.MICROS_PLUS)
+            .put("TDS 10012: MICROS+", CentralUnitType.MICROS)
             .build();
 
     private String principalSite;

@@ -9,6 +9,8 @@ import be.xhibit.teletask.client.builder.composer.config.configurables.command.G
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.LogCommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.SetCommandConfigurable;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.GetMessage;
+import be.xhibit.teletask.client.builder.message.messages.impl.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
@@ -18,8 +20,8 @@ import com.google.common.collect.ImmutableList;
 public class MicrosCommandConfiguration extends ConfigurationSupport<Command, CommandConfigurable<?>, Integer> {
     public MicrosCommandConfiguration() {
         super(ImmutableList.<CommandConfigurable<?>>builder()
-                .add(new SetCommandConfigurable(1, false, "Fnc", "Output", "State"))
-                .add(new GetCommandConfigurable(2, false, "Fnc", "Output"))
+                .add(new MicrosSetCommandConfigurable())
+                .add(new MicrosPlusGetCommandConfigurable())
                 .add(new LogCommandConfigurable(3, false, "Fnc", "Sate"))
                 .add(new MicrosEventCommandConfigurable())
                 .build());
@@ -41,6 +43,29 @@ public class MicrosCommandConfiguration extends ConfigurationSupport<Command, Co
             int number = this.getOutputNumber(messageHandler, payload, 1);
             State state = messageHandler.getState(new StateKey(function, payload[2]));
             return new EventMessage(config, rawBytes, function, number, state);
+        }
+    }
+
+    private static class MicrosPlusGetCommandConfigurable extends GetCommandConfigurable {
+        public MicrosPlusGetCommandConfigurable() {
+            super(2, false, "Fnc", "Output");
+        }
+
+        @Override
+        public GetMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
+            return new GetMessage(config, messageHandler.getFunction(payload[0]), this.getOutputNumber(messageHandler, payload, 1));
+        }
+    }
+
+    private static class MicrosSetCommandConfigurable extends SetCommandConfigurable {
+        public MicrosSetCommandConfigurable() {
+            super(1, false, "Fnc", "Output", "State");
+        }
+
+        @Override
+        public SetMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
+            Function function = messageHandler.getFunction(payload[0]);
+            return new SetMessage(config, function, this.getOutputNumber(messageHandler, payload, 1), messageHandler.getState(new StateKey(function, payload[messageHandler.getOutputByteSize() + 1])));
         }
     }
 }

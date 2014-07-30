@@ -42,7 +42,7 @@ public class SetMessage extends FunctionStateBasedMessageSupport<SendResult> {
 
     @Override
     public List<EventMessage> respond(ClientConfigSpec config, MessageHandler messageHandler) {
-        return messageHandler.createEventMessage(config, this.getFunction(), new MessageHandler.OutputState(this.getNumber(), this.getState()));
+        return messageHandler.createResponseEventMessage(config, this.getFunction(), new MessageHandler.OutputState(this.getNumber(), this.getState()));
     }
 
 }

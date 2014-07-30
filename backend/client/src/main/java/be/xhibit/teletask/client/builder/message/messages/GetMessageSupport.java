@@ -54,7 +54,7 @@ public abstract class GetMessageSupport extends FunctionBasedMessageSupport {
 
             states.add(new MessageHandler.OutputState(number, component.getState()));
         }
-        return messageHandler.createEventMessage(config, this.getFunction(), Iterables.toArray(states, MessageHandler.OutputState.class));
+        return messageHandler.createResponseEventMessage(config, this.getFunction(), Iterables.toArray(states, MessageHandler.OutputState.class));
     }
 
 }
