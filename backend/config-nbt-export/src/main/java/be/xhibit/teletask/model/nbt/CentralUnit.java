@@ -20,7 +20,7 @@ public class CentralUnit implements ClientConfigSpec {
 
     private static final Map<String, CentralUnitType> CENTRAL_UNIT_TYPE_MAP = ImmutableMap.<String, CentralUnitType>builder()
             .put("TDS 10010: MICROS", CentralUnitType.MICROS)
-            .put("TDS 10012: MICROS+", CentralUnitType.MICROS)
+            .put("TDS 10012: MICROS+", CentralUnitType.MICROS_PLUS)
             .build();
 
     private String principalSite;
