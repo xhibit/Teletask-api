@@ -50,12 +50,7 @@ public class TeletaskTestServer implements Runnable {
                 @Override
                 public void run() {
                     try {
-                        List<MessageSupport> messages = MessageUtilities.receive(TeletaskTestServer.class, TeletaskTestServer.this.inputStream, TeletaskTestServer.this.getConfig(), TeletaskTestServer.this.getMessageHandler(), new MessageUtilities.StopCondition() {
-                            @Override
-                            public boolean isComplete(List<MessageSupport> responses, byte[] overflow) {
-                                return overflow.length == 0;
-                            }
-                        });
+                        List<MessageSupport> messages = MessageUtilities.receive(LOG, TeletaskTestServer.this.inputStream, TeletaskTestServer.this.getConfig(), TeletaskTestServer.this.getMessageHandler());
                         for (MessageSupport message : messages) {
                             LOG.debug("Processing message: {}", message.toString());
                             TeletaskTestServer.this.outputStream.write(new byte[]{10});

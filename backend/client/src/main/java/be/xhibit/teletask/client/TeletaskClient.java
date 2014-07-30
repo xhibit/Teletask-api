@@ -463,7 +463,7 @@ public final class TeletaskClient {
                 for (MessageSupport message : messages) {
                     if (message instanceof EventMessage) {
                         EventMessage eventMessage = (EventMessage) message;
-                        MessageUtilities.handleEvent(this.getClass(), TeletaskClient.this.getConfig(), eventMessage);
+                        MessageUtilities.handleEvent(LOG, TeletaskClient.this.getConfig(), eventMessage);
                         components.add(TeletaskClient.this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
                     }
                 }
@@ -478,12 +478,7 @@ public final class TeletaskClient {
         }
 
         private List<MessageSupport> getEventMessageServerResponses() throws Exception {
-            return MessageUtilities.receive(this.getClass(), TeletaskClient.this.getInputStream(), TeletaskClient.this.getConfig(), TeletaskClient.this.getMessageHandler(), new MessageUtilities.StopCondition() {
-                @Override
-                public boolean isComplete(List<MessageSupport> responses, byte[] overflow) {
-                    return overflow != null && overflow.length == 0;
-                }
-            });
+            return MessageUtilities.receive(LOG, TeletaskClient.this.getInputStream(), TeletaskClient.this.getConfig(), TeletaskClient.this.getMessageHandler());
         }
     }
 
