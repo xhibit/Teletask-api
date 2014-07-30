@@ -27,7 +27,6 @@ public class TDSClientConfig implements ClientConfigSpec {
 
     private String host;
     private int port;
-    private boolean testMode;
     private Map<Function, List<TDSComponent>> componentsTypes;
     private List<Room> rooms;
 
@@ -60,13 +59,6 @@ public class TDSClientConfig implements ClientConfigSpec {
         this.port = port;
     }
 
-    public boolean isTestMode() {
-        return this.testMode;
-    }
-
-    public void setTestMode(boolean testMode) {
-        this.testMode = testMode;
-    }
 
     public Map<Function, List<TDSComponent>> getComponentsTypes() {
         return this.componentsTypes;
@@ -153,36 +145,18 @@ public class TDSClientConfig implements ClientConfigSpec {
     }
 
     public static TDSClientConfig read(InputStream jsonData) throws IOException {
-        TDSClientConfig clientConfig = null;
-        //TODO: find better way to load the config
-        // Should we load and parse the config to POJO from a URL using JAX-RS?
-        // This way the config can be loaded from webroot as a simple resource, or from any location.
-
-        //read json file data to String
-//            InputStream jsonData = this.getClass().getClassLoader().getResourceAsStream("tds-config.json");
 
         //create ObjectMapper instance
         ObjectMapper objectMapper = new ObjectMapper();
 
         //convert json string to object
-        clientConfig = objectMapper.readValue(jsonData, TDSClientConfig.class);
-        LOG.debug("Config loaded: TDS HOST: {}:{} - TESTMODE: {}", clientConfig.getHost(), clientConfig.getPort(), clientConfig.isTestMode());
+        TDSClientConfig clientConfig = objectMapper.readValue(jsonData, TDSClientConfig.class);
+        LOG.debug("JSON Config loaded: TDS HOST: {}:{}", clientConfig.getHost(), clientConfig.getPort());
 
         // until a better Jackson ObjectMapper implementation, loop through all rooms and replace component number by actual object reference
         clientConfig.initRooms();
 
-            /*
-            // don't connect to the TDS server if testMode is enabled in the JSON config; his enables us to test the UI.
-            if (!clientConfig.isTestMode()) {
-                // TODO: define timeout for connection attempt.
-                this.createSocket(clientConfig.getHost(), clientConfig.getPort());
-
-                // retrieve all initial component states
-                this.getInitialComponentStates();
-            }
-            */
-
-        LOG.debug("##### TDSClient initialization - END");
+        LOG.debug("TDSClientConfig initialized.");
 
         return clientConfig;
     }
