@@ -17,15 +17,15 @@ public class GroupGetCommandConfigurable extends CommandConfigurable<GroupGetMes
     public GroupGetMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
         int outputByteSize = messageHandler.getOutputByteSize();
 
-        int[] numbers = new int[(payload.length - 1) / outputByteSize];
+        int[] numbers = new int[(payload.length - 2) / outputByteSize];
 
         int numberCounter = 0;
-        for (int i = 1; i < numbers.length; i += outputByteSize) {
+        for (int i = 2; i < payload.length; i += outputByteSize) {
             byte[] bytes = new byte[4];
             System.arraycopy(payload, i, bytes, 4 - outputByteSize, outputByteSize);
             numbers[numberCounter++] = ByteBuffer.wrap(bytes).getInt();
         }
 
-        return new GroupGetMessage(config, messageHandler.getFunction(payload[0]), numbers);
+        return new GroupGetMessage(config, messageHandler.getFunction(payload[1]), numbers);
     }
 }

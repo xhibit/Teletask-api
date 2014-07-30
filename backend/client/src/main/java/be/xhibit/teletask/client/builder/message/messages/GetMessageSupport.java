@@ -1,12 +1,20 @@
 package be.xhibit.teletask.client.builder.message.messages;
 
+import be.xhibit.teletask.client.builder.composer.MessageHandler;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.google.common.primitives.Bytes;
 
-public abstract class GetMessageSupport<R> extends FunctionBasedMessageSupport {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+public abstract class GetMessageSupport extends FunctionBasedMessageSupport {
     private final int[] numbers;
 
     protected GetMessageSupport(Function function, ClientConfigSpec clientConfig, int... numbers) {
@@ -31,6 +39,22 @@ public abstract class GetMessageSupport<R> extends FunctionBasedMessageSupport {
     @Override
     protected String getPayloadLogInfo() {
         return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatOutput(this.getNumbers()));
+    }
+
+    @Override
+    public List<EventMessage> respond(ClientConfigSpec config, MessageHandler messageHandler) {
+        Collection<MessageHandler.OutputState> states = new ArrayList<>();
+        for (int number : this.getNumbers()) {
+
+            ComponentSpec component = config.getComponent(this.getFunction(), number);
+
+            if(component.getState() == null) {
+                component.setState(this.getFunction().getDefaultState());
+            }
+
+            states.add(new MessageHandler.OutputState(number, component.getState()));
+        }
+        return messageHandler.createEventMessage(config, this.getFunction(), Iterables.toArray(states, MessageHandler.OutputState.class));
     }
 
 }

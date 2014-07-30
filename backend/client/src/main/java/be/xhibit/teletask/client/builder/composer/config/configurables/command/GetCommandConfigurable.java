@@ -13,6 +13,6 @@ public class GetCommandConfigurable extends CommandConfigurable<GetMessage> {
 
     @Override
     public GetMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
-        return new GetMessage(config, messageHandler.getFunction(payload[0]), this.getOutputNumber(messageHandler, payload, 1));
+        return new GetMessage(config, messageHandler.getFunction(payload[1]), this.getOutputNumber(messageHandler, payload, 2));
     }
 }

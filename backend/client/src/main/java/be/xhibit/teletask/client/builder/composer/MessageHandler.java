@@ -5,13 +5,15 @@ import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionC
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
-import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
+
+import java.util.List;
 
 public interface MessageHandler {
     byte[] compose(Command command, byte[] payload);
@@ -51,4 +53,24 @@ public interface MessageHandler {
     MessageSupport parse(ClientConfigSpec config, byte[] message);
 
     int getOutputByteSize();
+
+    List<EventMessage> createEventMessage(ClientConfigSpec config, Function function, OutputState... numbers);
+
+    class OutputState {
+        private final int number;
+        private final State state;
+
+        public OutputState(int number, State state) {
+            this.number = number;
+            this.state = state;
+        }
+
+        public int getNumber() {
+            return this.number;
+        }
+
+        public State getState() {
+            return this.state;
+        }
+    }
 }

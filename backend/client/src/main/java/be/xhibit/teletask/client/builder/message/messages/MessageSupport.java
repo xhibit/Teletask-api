@@ -4,6 +4,7 @@ import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
 import be.xhibit.teletask.client.builder.message.MessageUtilities;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
@@ -38,7 +39,7 @@ public abstract class MessageSupport {
         this.clientConfig = clientConfig;
     }
 
-    protected void execute(OutputStream outputStream) {
+    public void execute(OutputStream outputStream) {
         MessageHandler messageHandler = this.getMessageHandler();
         if (this.isValid()) {
             if (messageHandler.knows(this.getCommand())) {
@@ -195,5 +196,7 @@ public abstract class MessageSupport {
         return super.toString();
     }
 
-//    public abstract void respond(ClientConfigSpec config, MessageHandler messageHandler);
+    public List<EventMessage> respond(ClientConfigSpec config, MessageHandler messageHandler) {
+        return null;
+    }
 }

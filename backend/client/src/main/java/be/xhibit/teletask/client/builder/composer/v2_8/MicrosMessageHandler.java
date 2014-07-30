@@ -2,10 +2,10 @@ package be.xhibit.teletask.client.builder.composer.v2_8;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
+import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.messages.impl.GetMessage;
 import be.xhibit.teletask.client.builder.message.messages.impl.LogMessage;
-import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
@@ -13,10 +13,12 @@ import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import be.xhibit.teletask.model.spec.StateEnum;
+import com.google.common.collect.Lists;
 import com.google.common.primitives.Bytes;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 public class MicrosMessageHandler extends MessageHandlerSupport {
     public static final MicrosKeepAliveStrategy KEEP_ALIVE_STRATEGY = new MicrosKeepAliveStrategy();
@@ -71,6 +73,28 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     @Override
     public int getOutputByteSize() {
         return 1;
+    }
+
+    @Override
+    public List<EventMessage> createEventMessage(ClientConfigSpec config, Function function, OutputState... numbers) {
+        byte[] rawBytes = new byte[]{
+                (byte) this.getStxValue(),
+                6,
+                (byte) this.getCommandConfig(Command.EVENT).getNumber(),
+                (byte) this.getFunctionConfig(function).getNumber(),
+                (byte) numbers[0].getNumber(),
+                (byte) this.getStateConfig(numbers[0].getState()).getNumber(),
+                0
+        };
+
+        byte checksum = 0;
+        for (byte rawByte : rawBytes) {
+            checksum += rawByte;
+        }
+
+        rawBytes[6] = checksum;
+
+        return Lists.newArrayList(new EventMessage(config, rawBytes, function, numbers[0].getNumber(), numbers[0].getState()));
     }
 
     private static class MicrosKeepAliveStrategy implements KeepAliveStrategy {

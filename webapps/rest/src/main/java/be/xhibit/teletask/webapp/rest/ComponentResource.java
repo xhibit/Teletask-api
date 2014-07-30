@@ -1,6 +1,6 @@
 package be.xhibit.teletask.webapp.rest;
 
-import be.xhibit.teletask.client.TDSClient;
+import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.webapp.ClientHolder;
@@ -28,7 +28,7 @@ public class ComponentResource {
      * The ComponentResource is loaded a a singleton.  This way we know only one instance of the TDSClient is created, and only one client is accessing
      * the TDS domotics central unit.
      */
-    private TDSClient client;
+    private TeletaskClient client;
 
     public ComponentResource() {
     }
@@ -227,14 +227,14 @@ public class ComponentResource {
         return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
     }
 
-    private TDSClient getClient() {
+    private TeletaskClient getClient() {
         while (this.client == null) {
             this.setClient(ClientHolder.getClient());
         }
         return this.client;
     }
 
-    private void setClient(TDSClient client) {
+    private void setClient(TeletaskClient client) {
         this.client = client;
     }
 }

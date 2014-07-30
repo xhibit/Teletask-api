@@ -2,12 +2,12 @@ package be.xhibit.teletask.client;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
+import be.xhibit.teletask.client.builder.message.MessageUtilities;
+import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.messages.impl.GetMessage;
 import be.xhibit.teletask.client.builder.message.messages.impl.LogMessage;
-import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
-import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
-import be.xhibit.teletask.client.builder.message.MessageUtilities;
 import be.xhibit.teletask.client.builder.message.messages.impl.SetMessage;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.listener.StateChangeListener;
@@ -136,11 +136,11 @@ import java.util.concurrent.TimeUnit;
  * - These reports are coming on the socket you open, so you have to check the bytes that are coming in, but you don't have to open a listener on a port.
  * - You can send a keep alive to make sure that the central unit don't close the port because there is no activity
  */
-public final class TDSClient {
+public final class TeletaskClient {
     /**
      * Logger responsible for logging and debugging statements.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(TDSClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TeletaskClient.class);
 
     private Socket socket;
     private OutputStream outputStream;
@@ -148,7 +148,7 @@ public final class TDSClient {
 
     private final ClientConfigSpec config;
 
-    private static TDSClient instance = null;
+    private static TeletaskClient instance = null;
 
     private final ExecutorService executorService;
 
@@ -161,7 +161,7 @@ public final class TDSClient {
      * Default constructor.  Responsible for reading the client config (JSON).
      * Singleton class.  Private constructor to prevent new instance creations.
      */
-    private TDSClient(ClientConfigSpec config) {
+    private TeletaskClient(ClientConfigSpec config) {
         this.config = config;
         this.executorService = Executors.newSingleThreadExecutor();
     }
@@ -171,9 +171,9 @@ public final class TDSClient {
      *
      * @return a new or existing TDSClient instance.
      */
-    public static synchronized TDSClient getInstance(ClientConfigSpec clientConfig) {
+    public static synchronized TeletaskClient getInstance(ClientConfigSpec clientConfig) {
         if (instance == null) {
-            instance = new TDSClient(clientConfig);
+            instance = new TeletaskClient(clientConfig);
             instance.start();
         }
 
@@ -219,7 +219,7 @@ public final class TDSClient {
                 @Override
                 public void run() {
                     try {
-                        TDSClient.this.getMessageHandler().getGroupGetStrategy().execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream(), function, numbers);
+                        TeletaskClient.this.getMessageHandler().getGroupGetStrategy().execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream(), function, numbers);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -370,7 +370,7 @@ public final class TDSClient {
         this.getEventListenerTimer().schedule(new TimerTask() {
             @Override
             public void run() {
-                TDSClient.this.getExecutorService().submit(new EventMessageListener());
+                TeletaskClient.this.getExecutorService().submit(new EventMessageListener());
             }
         }, 0, 20);
     }
@@ -423,7 +423,7 @@ public final class TDSClient {
      * @throws CloneNotSupportedException when called.
      */
     @Override
-    public final TDSClient clone() throws CloneNotSupportedException {
+    public final TeletaskClient clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }
 
@@ -448,12 +448,12 @@ public final class TDSClient {
                 for (MessageSupport message : messages) {
                     if (message instanceof EventMessage) {
                         EventMessage eventMessage = (EventMessage) message;
-                        MessageUtilities.handleEvent(this.getClass(), TDSClient.this.getConfig(), eventMessage);
-                        components.add(TDSClient.this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
+                        MessageUtilities.handleEvent(this.getClass(), TeletaskClient.this.getConfig(), eventMessage);
+                        components.add(TeletaskClient.this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
                     }
                 }
                 if (!components.isEmpty()) {
-                    for (StateChangeListener stateChangeListener : TDSClient.this.stateChangeListeners) {
+                    for (StateChangeListener stateChangeListener : TeletaskClient.this.stateChangeListeners) {
                         stateChangeListener.event(components);
                     }
                 }
@@ -463,7 +463,7 @@ public final class TDSClient {
         }
 
         private List<MessageSupport> getEventMessageServerResponses() throws Exception {
-            return MessageUtilities.receive(this.getClass(), TDSClient.this.getInputStream(), TDSClient.this.getConfig(), TDSClient.this.getMessageHandler(), new MessageUtilities.StopCondition() {
+            return MessageUtilities.receive(this.getClass(), TeletaskClient.this.getInputStream(), TeletaskClient.this.getConfig(), TeletaskClient.this.getMessageHandler(), new MessageUtilities.StopCondition() {
                 @Override
                 public boolean isComplete(List<MessageSupport> responses, byte[] overflow) {
                     return overflow != null && overflow.length == 0;
@@ -482,11 +482,11 @@ public final class TDSClient {
         @Override
         public void run() {
             try {
-                TDSClient.this.getExecutorService().execute(new Runnable() {
+                TeletaskClient.this.getExecutorService().execute(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            keepAliveStrategy.execute(TDSClient.this.getConfig(), TDSClient.this.getOutputStream(), TDSClient.this.getInputStream());
+                            keepAliveStrategy.execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream());
                         } catch (Exception e) {
                             LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
                         }

@@ -15,7 +15,7 @@ public class SetCommandConfigurable extends CommandConfigurable<SetMessage> {
 
     @Override
     public SetMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
-        Function function = messageHandler.getFunction(payload[0]);
-        return new SetMessage(config, function, this.getOutputNumber(messageHandler, payload, 1), messageHandler.getState(new StateKey(function, payload[messageHandler.getOutputByteSize() + 1])));
+        Function function = messageHandler.getFunction(payload[1]);
+        return new SetMessage(config, function, this.getOutputNumber(messageHandler, payload, 2), messageHandler.getState(new StateKey(function, payload[messageHandler.getOutputByteSize() + 2])));
     }
 }

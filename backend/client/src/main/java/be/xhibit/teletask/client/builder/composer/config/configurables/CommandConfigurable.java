@@ -38,8 +38,8 @@ public abstract class CommandConfigurable<M extends MessageSupport> extends Conf
     public abstract M parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload);
 
     public int getOutputNumber(MessageHandler messageHandler, byte[] payload, int fromByte) {
-        byte[] output = new byte[messageHandler.getOutputByteSize()];
-        System.arraycopy(payload, fromByte, output, 0, messageHandler.getOutputByteSize());
+        byte[] output = new byte[4];
+        System.arraycopy(payload, fromByte, output, 4 - messageHandler.getOutputByteSize(), messageHandler.getOutputByteSize());
         return ByteBuffer.wrap(output).getInt();
     }
 }

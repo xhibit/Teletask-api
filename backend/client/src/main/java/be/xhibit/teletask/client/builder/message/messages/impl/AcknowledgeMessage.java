@@ -35,7 +35,7 @@ public class AcknowledgeMessage extends MessageSupport {
     }
 
     @Override
-    protected void execute(OutputStream outputStream) {
+    public void execute(OutputStream outputStream) {
         try {
             this.send(outputStream, new byte[] { 10 });
         } catch (IOException e) {
