@@ -2,22 +2,23 @@ package be.xhibit.teletask.client.builder.composer.v2_8;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
-import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
-import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
-import be.xhibit.teletask.client.builder.message.messages.impl.GetMessage;
-import be.xhibit.teletask.client.builder.message.messages.impl.LogMessage;
+import be.xhibit.teletask.client.builder.message.EventMessage;
+import be.xhibit.teletask.client.builder.message.GetMessage;
+import be.xhibit.teletask.client.builder.message.LogMessage;
+import be.xhibit.teletask.client.builder.message.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import be.xhibit.teletask.model.spec.StateEnum;
-import com.google.common.collect.Lists;
 import com.google.common.primitives.Bytes;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MicrosMessageHandler extends MessageHandlerSupport {
@@ -50,14 +51,14 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     }
 
     @Override
-    public EventMessage parseEvent(ClientConfigSpec config, byte[] message) {
+    public EventMessage parseEvent(ClientConfigSpec config, byte[] eventData) {
         //02 09 10 01 03 00 31
         int counter = 2; //We skip first 3 since they are of no use to us at this time.
-        Function function = this.getFunction(message[++counter]);
-        int number = message[++counter];
-        int stateValue = message[++counter];
+        Function function = this.getFunction(eventData[++counter]);
+        int number = eventData[++counter];
+        int stateValue = eventData[++counter];
         State state = this.getState(new StateKey(function, stateValue == -1 ? 255 : stateValue));
-        return new EventMessage(config, message, function, number, state);
+        return new EventMessage(config, eventData, function, number, state);
     }
 
     @Override
@@ -70,33 +71,6 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
         return GROUP_GET_STRATEGY;
     }
 
-    @Override
-    public int getOutputByteSize() {
-        return 1;
-    }
-
-    @Override
-    public List<EventMessage> createEventMessage(ClientConfigSpec config, Function function, OutputState... numbers) {
-        byte[] rawBytes = new byte[]{
-                (byte) this.getStxValue(),
-                6,
-                (byte) this.getCommandConfig(Command.EVENT).getNumber(),
-                (byte) this.getFunctionConfig(function).getNumber(),
-                (byte) numbers[0].getNumber(),
-                (byte) this.getStateConfig(numbers[0].getState()).getNumber(),
-                0
-        };
-
-        byte checksum = 0;
-        for (byte rawByte : rawBytes) {
-            checksum += rawByte;
-        }
-
-        rawBytes[6] = checksum;
-
-        return Lists.newArrayList(new EventMessage(config, rawBytes, function, numbers[0].getNumber(), numbers[0].getState()));
-    }
-
     private static class MicrosKeepAliveStrategy implements KeepAliveStrategy {
         @Override
         public int getIntervalMinutes() {
@@ -105,16 +79,18 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
         @Override
         public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
-            MessageExecutor.of(new LogMessage(config, Function.MOTOR, StateEnum.ON), out).run();
+            MessageExecutor.of(new LogMessage(config, Function.MOTOR, StateEnum.ON), out, in).call();
         }
     }
 
     private static class MicrosGroupGetStrategy implements GroupGetStrategy {
         @Override
-        public void execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
+        public List<ComponentSpec> execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
+            List<ComponentSpec> componentSpecs = new ArrayList<>();
             for (int number : numbers) {
-                MessageExecutor.of(new GetMessage(config, function, number), out).run();
+                componentSpecs.add(MessageExecutor.of(new GetMessage(config, function, number), out, in).call());
             }
+            return componentSpecs;
         }
     }
 }

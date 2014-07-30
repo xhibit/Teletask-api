@@ -1,25 +1,36 @@
 package be.xhibit.teletask.webapp.rest;
 
-import be.xhibit.teletask.client.TeletaskClient;
+import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.webapp.ClientHolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * The ComponentResource lists all REST API methods available for the Teletask service.
  */
 @Path("/")
 public class ComponentResource {
+    /**
+     * Logger responsible for logging and debugging statements.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(ComponentResource.class);
+
     private static final ObjectWriter PRETTY_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
     private static final ObjectWriter WRITER = new ObjectMapper().writer();
 
@@ -28,7 +39,7 @@ public class ComponentResource {
      * The ComponentResource is loaded a a singleton.  This way we know only one instance of the TDSClient is created, and only one client is accessing
      * the TDS domotics central unit.
      */
-    private TeletaskClient client;
+    private TDSClient client;
 
     public ComponentResource() {
     }
@@ -208,6 +219,28 @@ public class ComponentResource {
         return this.set(functionEnum, number, state);
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/group")
+    public Response group() {
+        return this.buildGroupGetResponse(this.getClient().groupGet());
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/group/{function}")
+    public Response group(@PathParam("function") String function) {
+        return this.buildGroupGetResponse(this.getClient().groupGet(Function.valueOf(function.toUpperCase())));
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/group/{function}/for")
+    public Response group(String data, @PathParam("function") String function) throws IOException {
+        return this.buildGroupGetResponse(this.getClient().groupGet(Function.valueOf(function.toUpperCase()), new ObjectMapper().readValue(data, GroupGetParams.class).getNumbers()));
+    }
+
     private Response get(int number, Function function) {
         return this.buildGetResponse(this.getClient().getConfig().getComponent(function, number));
     }
@@ -216,6 +249,10 @@ public class ComponentResource {
         this.getClient().set(function, number, function.stateValue(state));
 
         return this.buildGetResponse(this.getClient().getConfig().getComponent(function, number));
+    }
+
+    private Response buildGroupGetResponse(List<ComponentSpec> componentSpecs) {
+        return this.buildGetResponse(componentSpecs.toArray(new ComponentSpec[componentSpecs.size()]));
     }
 
     private Response buildGetResponse(ComponentSpec... component) {
@@ -227,14 +264,14 @@ public class ComponentResource {
         return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
     }
 
-    private TeletaskClient getClient() {
+    private TDSClient getClient() {
         while (this.client == null) {
             this.setClient(ClientHolder.getClient());
         }
         return this.client;
     }
 
-    private void setClient(TeletaskClient client) {
+    private void setClient(TDSClient client) {
         this.client = client;
     }
 }

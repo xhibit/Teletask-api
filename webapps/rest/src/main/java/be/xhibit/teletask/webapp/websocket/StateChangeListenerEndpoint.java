@@ -33,25 +33,13 @@ public class StateChangeListenerEndpoint {
             @Override
             public void event(List<ComponentSpec> components) {
                 try {
-                    sendAll(components);
-//                    sendAll(ClientHolder.getClient().getConfig());
+//                    sendAll(components);
+                    sendAll(ClientHolder.getClient().getConfig());
                 } catch (JsonProcessingException e) {
                     LOG.error("Exception ({}) caught in event: {}", e.getClass().getName(), e.getMessage(), e);
                 }
             }
         });
-    }
-
-    private static class Data {
-        private final List<ComponentSpec> components;
-
-        private Data(List<ComponentSpec> components) {
-            this.components = components;
-        }
-
-        public List<ComponentSpec> getComponents() {
-            return this.components;
-        }
     }
 
     @OnMessage

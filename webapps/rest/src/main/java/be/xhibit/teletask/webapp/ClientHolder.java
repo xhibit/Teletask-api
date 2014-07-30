@@ -1,10 +1,11 @@
 package be.xhibit.teletask.webapp;
 
-import be.xhibit.teletask.client.TeletaskClient;
+import be.xhibit.teletask.client.TDSClient;
 import be.xhibit.teletask.config.model.json.TDSClientConfig;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.parser.FullNbtModelConsumerImpl;
 import be.xhibit.teletask.parser.PrintedFileVisitor;
+import be.xhibit.teletask.webapp.rest.TeletaskHttpServletDispatcher;
 import com.google.common.base.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,18 +19,18 @@ public final class ClientHolder {
      */
     private static final Logger LOG = LoggerFactory.getLogger(ClientHolder.class);
 
-    private static TeletaskClient client;
+    private static TDSClient client;
 
     private ClientHolder() {
     }
 
-    public static void setClient(TeletaskClient client) {
+    public static void setClient(TDSClient client) {
         ClientHolder.client = client;
     }
 
-    public static TeletaskClient getClient() {
+    public static TDSClient getClient() {
         if (client == null) {
-            setClient(TeletaskClient.getInstance(getClientConfig()));
+            setClient(TDSClient.getInstance(getClientConfig()));
         }
         return client;
     }

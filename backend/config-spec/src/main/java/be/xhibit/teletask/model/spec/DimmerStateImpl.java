@@ -24,18 +24,18 @@ public class DimmerStateImpl implements State {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || this.getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         DimmerStateImpl that = (DimmerStateImpl) o;
 
-        if (this.percentage != that.percentage) return false;
+        if (percentage != that.percentage) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return this.percentage;
+        return percentage;
     }
 
     @Override

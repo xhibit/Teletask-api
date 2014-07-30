@@ -1,13 +1,15 @@
-package be.xhibit.teletask.client.builder.message.messages.impl;
+package be.xhibit.teletask.client.builder.message;
 
 import be.xhibit.teletask.client.builder.SendResult;
-import be.xhibit.teletask.client.builder.message.messages.FunctionStateBasedMessageSupport;
+import be.xhibit.teletask.client.builder.message.response.ServerResponse;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.StateEnum;
 import be.xhibit.teletask.model.spec.StateEnumImpl;
 import com.google.common.base.Joiner;
+
+import java.util.List;
 
 public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     public LogMessage(ClientConfigSpec ClientConfig, Function function, StateEnum state) {
@@ -27,6 +29,11 @@ public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     @Override
     protected String getPayloadLogInfo() {
         return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatState(this.getState()));
+    }
+
+    @Override
+    protected SendResult convertResponse(List<ServerResponse> serverResponses) {
+        return this.expectSingleAcknowledge(serverResponses);
     }
 
     @Override

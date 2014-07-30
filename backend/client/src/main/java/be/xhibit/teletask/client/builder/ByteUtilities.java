@@ -14,6 +14,6 @@ public class ByteUtilities {
             hexChars[j * 3 + 1] = HEX_ARRAY[v & 0x0F];
             hexChars[j * 3 + 2] = ' ';
         }
-        return new String(hexChars).trim();
+        return new String(hexChars);
     }
 }

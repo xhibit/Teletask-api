@@ -8,7 +8,7 @@ public class StateKey {
 
     public StateKey(Function function, int value) {
         this.function = function;
-        this.value = value == -1 ? 255 : value;
+        this.value = value;
     }
 
     public Function getFunction() {

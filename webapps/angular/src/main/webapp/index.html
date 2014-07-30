@@ -9,6 +9,15 @@
     <link rel="stylesheet" href="css/bootstrap-theme.css">
     <link rel="stylesheet" href="bower_components/angular-toggle-switch/angular-toggle-switch-bootstrap.css">
     <link rel="stylesheet" href="bower_components/angular-toggle-switch/angular-toggle-switch.css">
+
+    <style>
+        /*.vcenter {*/
+        /*position: relative;*/
+        /*top: 50%;*/
+        /*transform: translateY(45%);*/
+        /*transform-style: preserve-3d;*/
+        /*}*/
+    </style>
 </head>
 <body ng-controller="ConfigController as configController">
 
@@ -27,7 +36,8 @@
                     {{room.name}}
                 </h3>
             </div>
-            <div id="collapsingPanel{{room.id}}" class="panel-collapse collapse">
+            <!--<div id="collapsingPanel{{room.id}}" class="panel-collapse collapse">-->
+            <div id="collapsingPanel{{room.id}}" class="panel-collapse">
                 <div class="panel-body">
                     <div ng-repeat="component in room.relays" class="container-fluid" style="margin-bottom: 5px;">
                         <div class="row">
