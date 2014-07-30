@@ -13,7 +13,6 @@ import be.xhibit.teletask.model.spec.State;
 import be.xhibit.teletask.model.spec.StateEnum;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,25 +22,21 @@ import java.util.Collection;
 import java.util.List;
 
 public final class MessageUtilities {
-    /**
-     * Logger responsible for logging and debugging statements.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(MessageUtilities.class);
     private static final MessageParser DEFAULT_MESSAGE_PARSER = new DelegatingMessageParser();
 
     private MessageUtilities() {
     }
 
-    public static List<MessageSupport> receive(Class origin, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler, StopCondition stopCondition) throws Exception {
-        return receive(origin, inputStream, config, messageHandler, stopCondition, DEFAULT_MESSAGE_PARSER);
+    public static List<MessageSupport> receive(Logger logger, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler) throws Exception {
+        return receive(logger, inputStream, config, messageHandler, DEFAULT_MESSAGE_PARSER);
     }
 
-    public static List<MessageSupport> receive(Class origin, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler, StopCondition stopCondition, MessageParser messageParser) throws Exception {
+    public static List<MessageSupport> receive(Logger logger, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler, MessageParser messageParser) throws Exception {
         List<MessageSupport> responses = new ArrayList<>();
 
-        byte[] overflow = new byte[1];
+        byte[] overflow = null;
         long startTime = System.currentTimeMillis();
-        while (!stopCondition.isComplete(responses, overflow)) {
+        while (overflow == null || overflow.length > 0) {
             if ((System.currentTimeMillis() - startTime) > 5000) {
                 throw new RuntimeException("Did not receive data in a timely fashion. This means either: \n\t- You sent wrong data to the server and hence did not get an acknowledge.\n\t- Or you requested information from the server that was not available to the server");
             }
@@ -49,8 +44,8 @@ public final class MessageUtilities {
             if (available > 0) {
                 byte[] read = new byte[available];
                 inputStream.read(read, 0, available);
-                byte[] data = Bytes.concat(overflow, read);
-                overflow = extractMessages(origin, config, messageHandler, responses, data, messageParser);
+                byte[] data = overflow == null ? read : Bytes.concat(overflow, read);
+                overflow = extractMessages(logger, config, messageHandler, responses, data, messageParser);
             } else {
                 overflow = new byte[0];
             }
@@ -60,12 +55,12 @@ public final class MessageUtilities {
         return responses;
     }
 
-    private static byte[] extractMessages(Class origin, ClientConfigSpec config, MessageHandler messageHandler, Collection<MessageSupport> responses, byte[] data, MessageParser messageParser) throws Exception {
-        LOG.debug("Receive({}) - Raw bytes: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(data));
+    private static byte[] extractMessages(Logger logger, ClientConfigSpec config, MessageHandler messageHandler, Collection<MessageSupport> responses, byte[] data, MessageParser messageParser) throws Exception {
+        logger.debug("Receive - Raw bytes: {}", ByteUtilities.bytesToHex(data));
         byte[] overflow = new byte[0];
         for (int i = 0; i < data.length; i++) {
             byte b = data[i];
-            LOG.debug("Receive({}) - Processing byte: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(b));
+            logger.debug("Receive - Processing byte: {}", ByteUtilities.bytesToHex(b));
             if (b == messageHandler.getStxValue()) {
                 int eventLengthInclChkSum = data[i + 1] + 1; // +1 for checksum
                 byte[] event = new byte[eventLengthInclChkSum];
@@ -75,26 +70,26 @@ public final class MessageUtilities {
                     System.arraycopy(data, i, event, 0, data.length - i);
                     i = data.length - 1;
 
-                    LOG.debug("Receive({}) - Overflowing following byte[]: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(overflow));
+                    logger.debug("Receive - Overflowing following byte[]: {}", ByteUtilities.bytesToHex(overflow));
                 } else {
                     System.arraycopy(data, i, event, 0, eventLengthInclChkSum);
 
                     i += eventLengthInclChkSum - 1;
 
-                    LOG.debug("Receive({}) - Found message bytes: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(event));
+                    logger.debug("Receive - Found message bytes: {}", ByteUtilities.bytesToHex(event));
                     try {
                         MessageSupport parse = messageParser.parse(config, messageHandler, event);
                         if (parse != null) {
                             responses.add(parse);
                         }
                     } catch (Exception e) {
-                        LOG.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
+                        logger.error("Exception ({}) caught in readLogResponse: {}", e.getClass().getName(), e.getMessage(), e);
                     }
                 }
             } else if (b == messageHandler.getAcknowledgeValue()) {
-                LOG.debug("Received acknowledge");
+                logger.debug("Received acknowledge");
             } else {
-                LOG.warn("Receive({}) - Found byte, but don't know how to handle it: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(b));
+                logger.warn("Receive - Found byte, but don't know how to handle it: {}", ByteUtilities.bytesToHex(b));
             }
         }
         return overflow;
@@ -105,9 +100,9 @@ public final class MessageUtilities {
         outputStream.flush();
     }
 
-    public static ComponentSpec handleEvent(Class origin, ClientConfigSpec config, EventMessage eventMessage) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Event({}): {}", origin.getSimpleName(), eventMessage.getLogInfo(eventMessage.getRawBytes()));
+    public static ComponentSpec handleEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Event: {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
         }
         ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
         State state = eventMessage.getState();
@@ -115,9 +110,5 @@ public final class MessageUtilities {
             component.setState(state);
         }
         return component;
-    }
-
-    public interface StopCondition {
-        boolean isComplete(List<MessageSupport> responses, byte[] overflow);
     }
 }
