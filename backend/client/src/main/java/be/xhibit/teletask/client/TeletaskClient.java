@@ -344,7 +344,6 @@ public final class TeletaskClient {
     }
 
     private void start() {
-
         String host = this.getConfig().getHost();
         int port = this.getConfig().getPort();
 
@@ -352,6 +351,13 @@ public final class TeletaskClient {
 
         this.connect(host, port);
 
+        this.groupGet();
+
+        this.startKeepAlive();
+
+        this.sendLogEventMessages(StateEnum.ON);
+
+        this.startEventListener();
     }
 
     private String startTestServer(String host, int port) {

@@ -8,6 +8,9 @@ import be.xhibit.teletask.client.builder.message.parser.DelegatingMessageParser;
 import be.xhibit.teletask.client.builder.message.parser.MessageParser;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
+import be.xhibit.teletask.model.spec.Function;
+import be.xhibit.teletask.model.spec.State;
+import be.xhibit.teletask.model.spec.StateEnum;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +110,10 @@ public final class MessageUtilities {
             LOG.debug("Event({}): {}", origin.getSimpleName(), eventMessage.getLogInfo(eventMessage.getRawBytes()));
         }
         ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
-        component.setState(eventMessage.getState());
+        State state = eventMessage.getState();
+        if (state.getFunction() != Function.MOTOR || StateEnum.valueOf(state.getValue().toUpperCase()) != StateEnum.STOP) {
+            component.setState(state);
+        }
         return component;
     }
 
