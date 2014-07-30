@@ -3,7 +3,6 @@ package be.xhibit.teletask.client.builder.message;
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
-import be.xhibit.teletask.client.builder.message.messages.impl.AcknowledgeMessage;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.parser.DelegatingMessageParser;
 import be.xhibit.teletask.client.builder.message.parser.MessageParser;
@@ -90,7 +89,7 @@ public final class MessageUtilities {
                     }
                 }
             } else if (b == messageHandler.getAcknowledgeValue()) {
-                responses.add(new AcknowledgeMessage(config));
+                LOG.debug("Received acknowledge");
             } else {
                 LOG.warn("Receive({}) - Found byte, but don't know how to handle it: {}", origin.getSimpleName(), ByteUtilities.bytesToHex(b));
             }
