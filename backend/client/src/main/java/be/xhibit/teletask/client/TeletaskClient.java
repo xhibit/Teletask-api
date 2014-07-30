@@ -240,12 +240,15 @@ public final class TeletaskClient {
     }
 
     public void groupGet(Function function) {
-        this.groupGet(function, Ints.toArray(Lists.transform(this.getConfig().getComponents(function), new com.google.common.base.Function<ComponentSpec, Integer>() {
-            @Override
-            public Integer apply(ComponentSpec input) {
-                return input.getNumber();
-            }
-        })));
+        List<? extends ComponentSpec> components = this.getConfig().getComponents(function);
+        if (components != null) {
+            this.groupGet(function, Ints.toArray(Lists.transform(components, new com.google.common.base.Function<ComponentSpec, Integer>() {
+                @Override
+                public Integer apply(ComponentSpec input) {
+                    return input.getNumber();
+                }
+            })));
+        }
     }
 
     public void get(Function function, int number) {
@@ -327,7 +330,7 @@ public final class TeletaskClient {
 
     // ################################################ PRIVATE API FUNCTIONS
 
-    private <R> void execute(MessageSupport message) throws ExecutionException {
+    private void execute(MessageSupport message) throws ExecutionException {
         try {
             this.getExecutorService().submit(MessageExecutor.of(message, this.getOutputStream())).get();
         } catch (InterruptedException e) {
