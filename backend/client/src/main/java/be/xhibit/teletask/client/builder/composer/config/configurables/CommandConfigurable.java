@@ -1,12 +1,16 @@
 package be.xhibit.teletask.client.builder.composer.config.configurables;
 
+import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.config.Configurable;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import com.google.common.collect.ImmutableMap;
 
+import java.nio.ByteBuffer;
 import java.util.Map;
 
-public class CommandConfigurable extends Configurable<Command> {
+public abstract class CommandConfigurable<M extends MessageSupport> extends Configurable<Command> {
     private final Map<Integer, String> paramNames;
     private final boolean needsCentralUnitParameter;
 
@@ -29,5 +33,13 @@ public class CommandConfigurable extends Configurable<Command> {
 
     public boolean needsCentralUnitParameter() {
         return this.needsCentralUnitParameter;
+    }
+
+    public abstract M parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload);
+
+    public int getOutputNumber(MessageHandler messageHandler, byte[] payload, int fromByte) {
+        byte[] output = new byte[4];
+        System.arraycopy(payload, fromByte, output, 4 - messageHandler.getOutputByteSize(), messageHandler.getOutputByteSize());
+        return ByteBuffer.wrap(output).getInt();
     }
 }

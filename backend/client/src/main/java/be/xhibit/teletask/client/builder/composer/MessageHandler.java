@@ -4,18 +4,21 @@ import be.xhibit.teletask.client.builder.composer.config.configurables.CommandCo
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
+import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
-import be.xhibit.teletask.client.builder.message.EventMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 
+import java.util.List;
+
 public interface MessageHandler {
     byte[] compose(Command command, byte[] payload);
 
-    CommandConfigurable getCommandConfig(Command command);
+    CommandConfigurable<?> getCommandConfig(Command command);
 
     StateConfigurable getStateConfig(State state);
 
@@ -25,7 +28,7 @@ public interface MessageHandler {
 
     int getStxValue();
 
-    EventMessage parseEvent(ClientConfigSpec config, byte[] eventData);
+    EventMessage parseEvent(ClientConfigSpec config, byte[] message);
 
     Function getFunction(int function);
 
@@ -46,4 +49,28 @@ public interface MessageHandler {
     int getAcknowledgeValue();
 
     GroupGetStrategy getGroupGetStrategy();
+
+    MessageSupport parse(ClientConfigSpec config, byte[] message);
+
+    int getOutputByteSize();
+
+    List<EventMessage> createEventMessage(ClientConfigSpec config, Function function, OutputState... numbers);
+
+    class OutputState {
+        private final int number;
+        private final State state;
+
+        public OutputState(int number, State state) {
+            this.number = number;
+            this.state = state;
+        }
+
+        public int getNumber() {
+            return this.number;
+        }
+
+        public State getState() {
+            return this.state;
+        }
+    }
 }

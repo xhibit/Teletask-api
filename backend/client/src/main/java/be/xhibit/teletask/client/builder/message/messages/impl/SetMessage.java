@@ -1,8 +1,9 @@
-package be.xhibit.teletask.client.builder.message;
+package be.xhibit.teletask.client.builder.message.messages.impl;
 
 import be.xhibit.teletask.client.builder.SendResult;
+import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
-import be.xhibit.teletask.client.builder.message.response.ServerResponse;
+import be.xhibit.teletask.client.builder.message.messages.FunctionStateBasedMessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
@@ -40,7 +41,8 @@ public class SetMessage extends FunctionStateBasedMessageSupport<SendResult> {
     }
 
     @Override
-    protected SendResult convertResponse(List<ServerResponse> serverResponses) {
-        return this.expectSingleAcknowledge(serverResponses);
+    public List<EventMessage> respond(ClientConfigSpec config, MessageHandler messageHandler) {
+        return messageHandler.createEventMessage(config, this.getFunction(), new MessageHandler.OutputState(this.getNumber(), this.getState()));
     }
+
 }
