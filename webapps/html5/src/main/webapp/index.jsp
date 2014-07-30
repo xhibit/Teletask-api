@@ -1,4 +1,4 @@
-<%@ page import="be.xhibit.teletask.client.TDSClient" %>
+<%@ page import="be.xhibit.teletask.client.TeletaskClient" %>
 <%@ page import="be.xhibit.teletask.config.model.json.TDSClientConfig" %>
 <%@ page import="be.xhibit.teletask.model.spec.Function" %>
 <%@ page import="be.xhibit.teletask.webapp.ClientHolder" %>
@@ -126,12 +126,17 @@
 <body>
 
     <%
+<<<<<<< HEAD
         //TDSClientConfig tdsConfig = TDSClientConfig.read(TDSClientConfig.class.getClassLoader().getResourceAsStream("tds-config.json"));
         //TDSClient client = TDSClient.getInstance(tdsConfig);
 
         //LOG.debug("Trying to load the configFile '{}' as json...", configFile);
         TDSClient client = ClientHolder.getClient();
         TDSClientConfig tdsConfig = (TDSClientConfig) client.getConfig();
+=======
+        TDSClientConfig tdsConfig = TDSClientConfig.read(TDSClientConfig.class.getClassLoader().getResourceAsStream("tds-config.json"));
+        TeletaskClient client = TeletaskClient.getInstance(tdsConfig);
+>>>>>>> FETCH_HEAD
         request.setAttribute("tds_relays", tdsConfig.getComponentsTypes().get(Function.RELAY));
         request.setAttribute("tds_locmoods", tdsConfig.getComponentsTypes().get(Function.LOCMOOD));
         request.setAttribute("tds_genmoods", tdsConfig.getComponentsTypes().get(Function.GENMOOD));

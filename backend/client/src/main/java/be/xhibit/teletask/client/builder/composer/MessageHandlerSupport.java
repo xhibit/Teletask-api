@@ -1,21 +1,24 @@
 package be.xhibit.teletask.client.builder.composer;
 
+import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.config.ConfigurationSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
+import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.google.common.primitives.Bytes;
 
 public abstract class MessageHandlerSupport implements MessageHandler {
-    private final ConfigurationSupport<Command, CommandConfigurable, Integer> commandConfiguration;
+    private final ConfigurationSupport<Command, CommandConfigurable<?>, Integer> commandConfiguration;
     private final ConfigurationSupport<State, StateConfigurable, StateKey> stateConfiguration;
     private final ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration;
 
-    protected MessageHandlerSupport(ConfigurationSupport<Command, CommandConfigurable, Integer> commandConfiguration, ConfigurationSupport<State, StateConfigurable, StateKey> stateConfiguration, ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration) {
+    protected MessageHandlerSupport(ConfigurationSupport<Command, CommandConfigurable<?>, Integer> commandConfiguration, ConfigurationSupport<State, StateConfigurable, StateKey> stateConfiguration, ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration) {
         this.commandConfiguration = commandConfiguration;
         this.stateConfiguration = stateConfiguration;
         this.functionConfiguration = functionConfiguration;
@@ -47,6 +50,29 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     }
 
     @Override
+    public MessageSupport parse(ClientConfigSpec config, byte[] message) {
+        int stx = message[0];
+        int length = message[1];
+        int command = message[2];
+
+        byte[] payload = new byte[length - 3];
+        System.arraycopy(message, 3, payload, 0, length - 3);
+
+        byte checksum = message[length];
+
+        byte sum = 0;
+        for (int i = 0; i < message.length - 1; i++) {
+            sum += message[i];
+        }
+
+        if (sum != checksum) {
+            throw new IllegalArgumentException("Checksum not correct. Received '" + ByteUtilities.bytesToHex(checksum) + "' but expected '" + ByteUtilities.bytesToHex(sum) + "'");
+        }
+
+        return this.getCommandConfig(this.getCommand(command)).parse(config, this, message, payload);
+    }
+
+    @Override
     public CommandConfigurable getCommandConfig(Command command) {
         return this.getCommandConfiguration().getConfigurable(command);
     }
@@ -61,7 +87,7 @@ public abstract class MessageHandlerSupport implements MessageHandler {
         return this.getFunctionConfiguration().getConfigurable(function);
     }
 
-    public ConfigurationSupport<Command, CommandConfigurable, Integer> getCommandConfiguration() {
+    public ConfigurationSupport<Command, CommandConfigurable<?>, Integer> getCommandConfiguration() {
         return this.commandConfiguration;
     }
 

@@ -1,7 +1,6 @@
-package be.xhibit.teletask.client.builder.message;
+package be.xhibit.teletask.client.builder.message.messages.impl;
 
-import be.xhibit.teletask.client.builder.SendResult;
-import be.xhibit.teletask.client.builder.message.response.ServerResponse;
+import be.xhibit.teletask.client.builder.message.messages.FunctionBasedMessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
@@ -10,9 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Joiner;
 import com.google.common.primitives.Bytes;
 
-import java.util.List;
-
-public class EventMessage extends FunctionBasedMessageSupport<SendResult> {
+public class EventMessage extends FunctionBasedMessageSupport {
     private final int number;
     private final State state;
     private final byte[] rawBytes;
@@ -52,8 +49,4 @@ public class EventMessage extends FunctionBasedMessageSupport<SendResult> {
         return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatOutput(this.getNumber()), this.formatState(this.getState()));
     }
 
-    @Override
-    protected SendResult convertResponse(List<ServerResponse> serverResponses) {
-        return this.expectSingleAcknowledge(serverResponses);
-    }
 }
