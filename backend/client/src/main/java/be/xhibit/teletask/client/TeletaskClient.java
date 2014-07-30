@@ -156,6 +156,7 @@ public final class TeletaskClient {
     private final Timer eventListenerTimer = new Timer();
 
     private final List<StateChangeListener> stateChangeListeners = new ArrayList<>();
+    private TeletaskTestServer teletaskTestServer;
 
     /**
      * Default constructor.  Responsible for reading the client config (JSON).
@@ -270,8 +271,15 @@ public final class TeletaskClient {
         this.closeInputStream();
         this.closeOutputStream();
         this.closeSocket();
+        this.stopTestServer();
 
         LOG.debug("Disconnected successfully");
+    }
+
+    private void stopTestServer() {
+        if (this.getTeletaskTestServer() != null) {
+            this.getTeletaskTestServer().stop();
+        }
     }
 
     private void stopKeepAliveService() {
@@ -359,11 +367,17 @@ public final class TeletaskClient {
             LOG.debug("Starting test server...");
             host = "localhost";
 
-            new Thread(new TeletaskTestServer(port, this.getConfig(), this.getMessageHandler())).start();
+            this.teletaskTestServer = new TeletaskTestServer(port, this.getConfig(), this.getMessageHandler());
+
+            new Thread(this.getTeletaskTestServer()).start();
 
             LOG.debug("Started test server!");
         }
         return host;
+    }
+
+    private TeletaskTestServer getTeletaskTestServer() {
+        return this.teletaskTestServer;
     }
 
     private void startEventListener() {
