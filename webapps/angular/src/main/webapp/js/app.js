@@ -6,8 +6,11 @@
 
     app.run(function ($rootScope) {
         $rootScope.baseUrl = './api';
-        $rootScope.baseWsUrl = document.URL.replace("http://", "ws://");
-        $rootScope.baseWsUrl = $rootScope.baseWsUrl.replace("https://", "ws://");
+        if (document.URL.indexOf('http:') == 0) {
+            $rootScope.baseWsUrl = document.URL.replace("http://", "ws://");
+        } else {
+            $rootScope.baseWsUrl = document.URL.replace("https://", "wss://");
+        }
 //        $rootScope.baseUrl = 'https://raspberry-pi.griffin.lan:7070/teletask/api';
 //        $rootScope.baseUrl = 'http://stewie.griffin.lan:7070/teletask/api';
     });
