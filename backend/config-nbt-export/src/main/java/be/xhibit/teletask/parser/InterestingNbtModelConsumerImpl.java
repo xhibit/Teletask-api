@@ -45,6 +45,11 @@ public class InterestingNbtModelConsumerImpl extends FullNbtModelConsumerImpl {
     }
 
     @Override
+    public void condition(String id, String description) {
+        super.condition(id, description);
+    }
+
+    @Override
     public void room(String id, String name) {
         super.room(id, name);
     }

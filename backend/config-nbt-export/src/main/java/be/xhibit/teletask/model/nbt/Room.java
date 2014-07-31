@@ -3,7 +3,6 @@ package be.xhibit.teletask.model.nbt;
 import be.xhibit.teletask.model.spec.RoomSpec;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 public class Room implements RoomSpec {
@@ -14,6 +13,7 @@ public class Room implements RoomSpec {
     private List<Motor> motors;
     private List<GeneralMood> generalMoods;
     private List<Dimmer> dimmers;
+    private List<Condition> conditions;
 
     public Room(int id, String name) {
         this.id = id;
@@ -68,6 +68,18 @@ public class Room implements RoomSpec {
             this.setDimmers(new ArrayList<Dimmer>());
         }
         return this.dimmers;
+    }
+
+    @Override
+    public List<Condition> getConditions() {
+        if (this.conditions == null) {
+            this.setConditions(new ArrayList<Condition>());
+        }
+        return this.conditions;
+    }
+
+    public void setConditions(List<Condition> conditions) {
+        this.conditions = conditions;
     }
 
     public void setDimmers(List<Dimmer> dimmers) {

@@ -1,14 +1,15 @@
 package be.xhibit.teletask.parser;
 
 import be.xhibit.teletask.parser.handler.CentralUnitLineHandler;
+import be.xhibit.teletask.parser.handler.ConditionLineHandler;
 import be.xhibit.teletask.parser.handler.DimmerLineHandler;
 import be.xhibit.teletask.parser.handler.GeneralMoodLineHandler;
-import be.xhibit.teletask.parser.handler.InputLineHandler;
 import be.xhibit.teletask.parser.handler.InputInterfaceLineHandler;
+import be.xhibit.teletask.parser.handler.InputLineHandler;
+import be.xhibit.teletask.parser.handler.LineHandler;
 import be.xhibit.teletask.parser.handler.LocalMoodLineHandler;
 import be.xhibit.teletask.parser.handler.MotorLineHandler;
 import be.xhibit.teletask.parser.handler.OutputInterfaceLineHandler;
-import be.xhibit.teletask.parser.handler.LineHandler;
 import be.xhibit.teletask.parser.handler.RelayLineHandler;
 import be.xhibit.teletask.parser.handler.RoomLineHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +43,7 @@ public class PrintedFileVisitor {
             .put(MotorLineHandler.getInstance().getStartPattern(), MotorLineHandler.getInstance())
             .put(GeneralMoodLineHandler.getInstance().getStartPattern(), GeneralMoodLineHandler.getInstance())
             .put(DimmerLineHandler.getInstance().getStartPattern(), DimmerLineHandler.getInstance())
+            .put(ConditionLineHandler.getInstance().getStartPattern(), ConditionLineHandler.getInstance())
             .build();
 
     private PrintedFileVisitor() {

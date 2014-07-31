@@ -9,12 +9,19 @@ import be.xhibit.teletask.model.spec.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.primitives.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public abstract class GetMessageSupport extends FunctionBasedMessageSupport {
+    /**
+     * Logger responsible for logging and debugging statements.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(GetMessageSupport.class);
+
     private final int[] numbers;
 
     protected GetMessageSupport(Function function, ClientConfigSpec clientConfig, int... numbers) {
@@ -48,11 +55,15 @@ public abstract class GetMessageSupport extends FunctionBasedMessageSupport {
 
             ComponentSpec component = config.getComponent(this.getFunction(), number);
 
-            if(component.getState() == null) {
-                component.setState(this.getFunction().getDefaultState());
-            }
+            if (component != null) {
+                if(component.getState() == null) {
+                    component.setState(this.getFunction().getDefaultState());
+                }
 
-            states.add(new MessageHandler.OutputState(number, component.getState()));
+                states.add(new MessageHandler.OutputState(number, component.getState()));
+            } else {
+                LOG.debug("Component {}:{} not found.", this.getFunction(), number);
+            }
         }
         return messageHandler.createResponseEventMessage(config, this.getFunction(), Iterables.toArray(states, MessageHandler.OutputState.class));
     }

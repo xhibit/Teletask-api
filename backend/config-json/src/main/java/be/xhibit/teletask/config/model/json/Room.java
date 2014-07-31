@@ -76,6 +76,11 @@ public class Room implements RoomSpec {
         return this.getComponents().get(Function.DIMMER);
     }
 
+    @Override
+    public List<? extends ComponentSpec> getConditions() {
+        return this.getComponents().get(Function.COND);
+    }
+
     public void setComponents(Map<Function, List<TDSComponent>> components) {
         this.components = components;
     }
