@@ -3,16 +3,12 @@ package be.xhibit.teletask.client.builder.message;
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
-import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.parser.DelegatingMessageParser;
 import be.xhibit.teletask.client.builder.message.parser.MessageParser;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
-import be.xhibit.teletask.model.spec.ComponentSpec;
-import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
-import be.xhibit.teletask.model.spec.StateEnum;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +18,11 @@ import java.util.Collection;
 import java.util.List;
 
 public final class MessageUtilities {
+    /**
+     * Logger responsible for logging and debugging statements.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(MessageUtilities.class);
+
     private static final MessageParser DEFAULT_MESSAGE_PARSER = new DelegatingMessageParser();
 
     private MessageUtilities() {
@@ -98,17 +99,5 @@ public final class MessageUtilities {
     public static void send(OutputStream outputStream, byte[] message) throws IOException {
         outputStream.write(message);
         outputStream.flush();
-    }
-
-    public static ComponentSpec handleEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Event: {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
-        }
-        ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
-        State state = eventMessage.getState();
-        if (state.getFunction() != Function.MOTOR || StateEnum.valueOf(state.getValue().toUpperCase()) != StateEnum.STOP) {
-            component.setState(state);
-        }
-        return component;
     }
 }

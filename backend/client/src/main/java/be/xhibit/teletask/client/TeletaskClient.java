@@ -463,7 +463,7 @@ public final class TeletaskClient {
                 for (MessageSupport message : messages) {
                     if (message instanceof EventMessage) {
                         EventMessage eventMessage = (EventMessage) message;
-                        MessageUtilities.handleEvent(LOG, TeletaskClient.this.getConfig(), eventMessage);
+                        this.handleEvent(LOG, TeletaskClient.this.getConfig(), eventMessage);
                         components.add(TeletaskClient.this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
                     }
                 }
@@ -474,6 +474,21 @@ public final class TeletaskClient {
                 }
             } catch (Exception e) {
                 LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
+            }
+        }
+
+        private void handleEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Event: {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
+            }
+            ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
+            if (component != null) {
+                State state = eventMessage.getState();
+                if (state.getFunction() != Function.MOTOR || StateEnum.valueOf(state.getValue().toUpperCase()) != StateEnum.STOP) {
+                    component.setState(state);
+                }
+            } else {
+                logger.debug("Component {}:{} not found.", eventMessage.getFunction(), eventMessage.getNumber());
             }
         }
 
