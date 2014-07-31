@@ -77,6 +77,7 @@ public class TeletaskTestServer implements Runnable {
     public void stop() {
         LOG.debug("Stopping test server...");
         try {
+            this.timer.purge();
             this.timer.cancel();
             this.inputStream.close();
             this.outputStream.close();
