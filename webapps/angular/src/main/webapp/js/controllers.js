@@ -43,6 +43,7 @@
                     changeComponentState(room.motors);
                     changeComponentState(room.generalMoods);
                     changeComponentState(room.dimmers);
+                    changeComponentState(room.conditions);
                 });
             });
         };

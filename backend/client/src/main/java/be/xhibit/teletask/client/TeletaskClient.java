@@ -344,6 +344,7 @@ public final class TeletaskClient {
         this.sendLogEventMessage(Function.GENMOOD, state);
         this.sendLogEventMessage(Function.MOTOR, state);
         this.sendLogEventMessage(Function.DIMMER, state);
+        this.sendLogEventMessage(Function.COND, state);
     }
 
     private void start() {
@@ -511,7 +512,7 @@ public final class TeletaskClient {
                     @Override
                     public void run() {
                         try {
-                            keepAliveStrategy.execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream());
+                            KeepAliveService.this.keepAliveStrategy.execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream());
                         } catch (Exception e) {
                             LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
                         }
