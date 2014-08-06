@@ -8,7 +8,6 @@ import be.xhibit.teletask.client.builder.message.parser.MessageParser;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +17,6 @@ import java.util.Collection;
 import java.util.List;
 
 public final class MessageUtilities {
-    /**
-     * Logger responsible for logging and debugging statements.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(MessageUtilities.class);
-
     private static final MessageParser DEFAULT_MESSAGE_PARSER = new DelegatingMessageParser();
 
     private MessageUtilities() {

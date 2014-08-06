@@ -112,9 +112,24 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     private static class MicrosGroupGetStrategy implements GroupGetStrategy {
         @Override
         public void execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
-            for (int number : numbers) {
-                MessageExecutor.of(new GetMessage(config, function, number), out).run();
+            // For some reason the microsplus does not always send an event after requesting the state of a component.
+            // As a workaround, we keep trying until we get the state of all components.
+            // Sleeping between get messages seems to decrease the amount of failures.
+            // Problem with this appraoch is that we have no idea when the server actually will be able to completely start.
+            while (this.stateEmptyCount(config, function, numbers) > 0) {
+                for (int number : numbers) {
+                    MessageExecutor.of(new GetMessage(config, function, number), out).run();
+                    Thread.sleep(150);
+                }
             }
+        }
+
+        private int stateEmptyCount(ClientConfigSpec config, Function function, int... numbers) {
+            int counter = 0;
+            for (int number : numbers) {
+                counter += config.getComponent(function, number).getState() == null ? 1 : 0;
+            }
+            return counter;
         }
     }
 }
