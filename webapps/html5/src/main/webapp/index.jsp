@@ -26,8 +26,8 @@
     <script>
         $(document).ready(function () {
             //TODO: define URL globally: must match the SERVER's IP in order to work for AJAX call!!!
-            //var base_url = 'http://192.168.1.10:8080/teletask/api/';
-            var base_url = 'http://localhost:8080/teletask/api/';
+            //var base_url = 'http://192.168.1.10:8181/teletask/api/';
+            var base_url = 'http://localhost:8181/teletask/api/';
 
             $(document).bind("mobileinit", function() {
                 $.mobile.page.prototype.options.addBackBtn = true;
