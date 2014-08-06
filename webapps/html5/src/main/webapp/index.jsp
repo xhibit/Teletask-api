@@ -4,12 +4,7 @@
 <%@ page import="be.xhibit.teletask.webapp.ClientHolder" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%--
-  Created by IntelliJ IDEA.
-  User: bruno
-  Date: 26/05/14
-  Time: 11:53
---%>
+
 <html>
 <head>
     <title>Teletask UI</title>
@@ -18,16 +13,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.css" />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 
     <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script>
         $(document).ready(function () {
-            //TODO: define URL globally: must match the SERVER's IP in order to work for AJAX call!!!
-            //var base_url = 'http://192.168.1.10:8181/teletask/api/';
-            var base_url = 'http://localhost:8181/teletask/api/';
+            var base_url = '${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/';
 
             $(document).bind("mobileinit", function() {
                 $.mobile.page.prototype.options.addBackBtn = true;
@@ -40,7 +33,7 @@
             .done(function(json) {
                 console.log( "process json: " +json);
                 //TODO: parse JSON and compose HTML DOM
-                //TODO: better look into Backbone.js: http://demos.jquerymobile.com/1.4.2/backbone-requirejs/
+                //TODO: better look into Backbone.js: http://demos.jquerymobile.com/1.4.3/backbone-requirejs/
             })
             .fail(function() {
                 console.log( "init error" );
@@ -51,40 +44,44 @@
 
             /**
              * SWITCH RELAY STATE
-             * URI: PUT <base_url>/relay/{number}/state/{off/on}
+             * URI: PUT <base_url>/api/relay/{number}/state/{off/on}
              *
              * SWITCH MOTOR STATE
-             * URI: PUT <base_url>/motor/{number}/state/{down/up}
+             * URI: PUT <base_url>/api/motor/{number}/state/{down/up}
              */
             $( ".stateSwitch" ).bind( "change", function(event) {
 
                 var componentValue = $(this).data('tds-number');
                 var componentType = $(this).data('tds-type');
                 var stateValue;
-                if (componentType === "relay") {
+                if (componentType === "relay" || componentType === "locmood" || componentType === "genmood") {
                     // relay needs to send 1 for "on"
                     stateValue = $(this).is(':checked') ? "on" : "off";
                 } else if (componentType === "motor") {
                     // motor needs to send 0 for "down"
-                    stateValue = $(this).is(':checked') ? "up" : "down";
+                    stateValue = $(this).is(':checked') ? "down" : "up";
                 }
 
-                var url = base_url +componentType +"/" +componentValue +"/state/" +stateValue
-                console.log("TDS REST call: " +url);
+                var url = base_url +'api/component/' +componentType +"/" +componentValue +"/state/" +stateValue
+
                 $.ajax({
                      type: "PUT"
                     ,url: url
-                    ,done: function (data) {
-                        //sample response: {"response":{"success": "true","status": "1","relay": "41"}}
-                        //alert('success: ' +data.response.success);
-                        console.log(data);
+                })
+                .done(function (data, textStatus, jqXHR) {
+                    //sample response: {"response":{"success": "true","status": "1","relay": "41"}}
+                    if ( console && console.log ) {
+                        console.log( "Data returned:", data );
                     }
-                    ,fail: function (data) {
-                        //alert('data: ' +data);
-                        console.log( "component switch call failed" );
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    if ( console && console.log ) {
+                        console.log( "Component switch call failed. Error:", errorThrown );
                     }
-                    ,always: function() {
-                        console.log( "component switch call complete" );
+                })
+                .always(function(data, textStatus) {
+                    if ( console && console.log ) {
+                        console.log( "Component switch call success. Data returned:", data );
                     }
                 });
 
@@ -121,15 +118,11 @@
 
         });
     </script>
-    <script src="http://code.jquery.com/mobile/1.4.0/jquery.mobile-1.4.0.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
 </head>
 <body>
 
     <%
-
-        //TDSClientConfig tdsConfig = TDSClientConfig.read(TDSClientConfig.class.getClassLoader().getResourceAsStream("tds-config.json"));
-        //TDSClient client = TDSClient.getInstance(tdsConfig);
-
         TeletaskClient client = ClientHolder.getClient();
         TDSClientConfig tdsConfig = (TDSClientConfig) client.getConfig();
 
@@ -139,16 +132,6 @@
         request.setAttribute("tds_screens", tdsConfig.getComponentsTypes().get(Function.MOTOR));
         request.setAttribute("tds_rooms", tdsConfig.getRooms());
     %>
-
-    <%--<c:out value="${requestScope.tds_rooms}"></c:out>--%>
-
-    <%--
-    <c:forEach items="${requestScope.tds_relays}" var="relay">
-        <c:out value="${relay.description}" />
-        <c:out value="${relay.number}"></c:out>
-        <c:out value="${relay.state}"></c:out>
-    </c:forEach>
-    --%>
 
     <div data-role="header" data-position="fixed" data-theme="b">
         <h1>Teletask UI</h1>
@@ -174,7 +157,7 @@
             <p><a href="#page_lights" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-brightness-contrast">Lights</a></p>
             <p><a href="#page_moods" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer">Moods</a></p>
             <p><a href="#page_screens" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu">Screens</a></p>
-            <p><a href="#page_rooms" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-home">Rooms</a></p>
+            <!--<p><a href="#page_rooms" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-home">Rooms</a></p>-->
         </div>
 
     </div>
@@ -211,7 +194,7 @@
             <c:forEach items="${requestScope.tds_locmoods}" var="locmoods" varStatus="status">
                 <p>
                     <label for="locmood-flip-<c:out value="${status.index}" />"><c:out value="${locmoods.description}" />:</label>
-                    <input type="checkbox" data-role="flipswitch" name="locmood-flip-<c:out value="${status.index}" />" class="stateSwitch" id="locmood-flip-<c:out value="${status.index}" />" data-tds-type="relay" data-tds-number="<c:out value="${locmoods.number}" />">
+                    <input type="checkbox" data-role="flipswitch" name="locmood-flip-<c:out value="${status.index}" />" class="stateSwitch" id="locmood-flip-<c:out value="${status.index}" />" data-tds-type="locmood" data-tds-number="<c:out value="${locmoods.number}" />">
                 </p>
                 <%--TODO: check state: <c:out value="${screen.state}"></c:out> --%>
             </c:forEach>
@@ -223,7 +206,7 @@
             <c:forEach items="${requestScope.tds_genmoods}" var="genmoods" varStatus="status">
                 <p>
                     <label for="genmood-flip-<c:out value="${status.index}" />"><c:out value="${genmoods.description}" />:</label>
-                    <input type="checkbox" data-role="flipswitch" name="genmood-flip-<c:out value="${status.index}" />" class="stateSwitch" id="genmood-flip-<c:out value="${status.index}" />" data-tds-type="relay" data-tds-number="<c:out value="${genmoods.number}" />">
+                    <input type="checkbox" data-role="flipswitch" name="genmood-flip-<c:out value="${status.index}" />" class="stateSwitch" id="genmood-flip-<c:out value="${status.index}" />" data-tds-type="genmood" data-tds-number="<c:out value="${genmoods.number}" />">
                 </p>
                 <%--TODO: check state: <c:out value="${screen.state}"></c:out> --%>
             </c:forEach>
@@ -238,141 +221,27 @@
     <div data-role="page" data-theme="a" id="page_lights" data-add-back-btn="true">
 
         <div data-role="content">
-            <p>Verlichting: overzicht</p>
-            <ul data-role="listview" data-inset="true" data-filter="false">
-                <li><a href="#page_v_gelijkvloers">Gelijkvloers</a></li>
-                <li><a href="#page_v_verdiep1">Verdiep 1</a></li>
-                <li><a href="#page_v_verdiep2">Verdiep 2</a></li>
-                <li><a href="#page_v_buiten">Buiten</a></li>
-            </ul>
+
+            <div data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+            <c:forEach items="${requestScope.tds_rooms}" var="room">
+                <div data-role="collapsible">
+                    <h3><c:out value="${room.name}" /></h3>
+
+                    <!--<div class="ui-body ui-body-a ui-corner-all">-->
+                        <c:forEach items="${room.relays}" var="relay" varStatus="status">
+                        <p>
+                            <label for="flip-room-<c:out value="${room.id}" />-<c:out value="${room.level}" />-<c:out value="${status.index}" />"><c:out value="${relay.description}" /></label>
+                            <input type="checkbox" data-role="flipswitch" name="flip-room-<c:out value="${room.id}" />-<c:out value="${room.level}" />-<c:out value="${status.index}" />" class="stateSwitch" id="flip-room-<c:out value="${room.id}" />-<c:out value="${room.level}" />-<c:out value="${status.index}" />" data-tds-type="relay" data-tds-number="<c:out value="${relay.number}" />">
+                        </p>
+                        </c:forEach>
+                    <!--</div>-->
+                </div>
+            </c:forEach>
+            </div>
         </div>
 
     </div>
     <!-- ####################### /page:verlichting ####################### -->
-
-    <!-- ####################### page:verlichting:gelijkvloers ####################### -->
-    <div data-role="page" data-theme="a" id="page_v_gelijkvloers" data-add-back-btn="true">
-
-        <div data-role="content">
-            <p>Verlichting Gelijkvloers</p>
-            <ul data-role="listview" data-inset="true" data-filter="false">
-                <li><a href="#page_v_g_living">Living</a></li>
-                <li><a href="#page_v_g_zithoek">Zithoek</a></li>
-                <li><a href="#page_v_g_keuken">Keuken</a></li>
-                <li><a href="#page_v_g_berging">Berging</a></li>
-                <li><a href="#page_v_g_hal">Hal</a></li>
-                <li><a href="#page_v_g_wc">WC</a></li>
-            </ul>
-        </div>
-
-    </div>
-    <!-- ####################### /page:verlichting:gelijkvloers ####################### -->
-
-    <!-- ####################### page:verlichting:verdiep1 ####################### -->
-    <div data-role="page" data-theme="a" id="page_v_verdiep1" data-add-back-btn="true">
-
-        <div data-role="content">
-            <p>Verlichting Gelijkvloers</p>
-            <ul data-role="listview" data-inset="true" data-filter="false">
-                <li><a href="#page_v_v1_bureau">Bureau</a></li>
-            </ul>
-        </div>
-
-    </div>
-    <!-- ####################### /page:verlichting:verdiep1 ####################### -->
-
-    <!-- ####################### page:verlichting:gelijkvloers:zithoek ####################### -->
-    <div data-role="page" data-theme="a" id="page_v_g_zithoek" data-add-back-btn="true">
-
-
-        <div data-role="content">
-            <p>Verlichting: gelijkvloers: zithoek</p>
-
-            <p>
-                <label for="zithoek-flip-1">Spots zijde oprit</label>
-                <input type="checkbox" data-role="flipswitch" name="zithoek-flip-1" class="stateSwitch" id="zithoek-flip-1" data-tds-type="relay" data-tds-number="41">
-            </p>
-
-            <p>
-                <label for="zithoek-flip-2">Spots zijde berging</label>
-                <input type="checkbox" data-role="flipswitch" name="zithoek-flip-2" class="stateSwitch" id="zithoek-flip-2" data-tds-type="relay" data-tds-number="42">
-            </p>
-
-            <p>
-                <label for="zithoek-flip-3">LED's</label>
-                <input type="checkbox" data-role="flipswitch" name="zithoek-flip-3" class="stateSwitch" id="zithoek-flip-3" data-tds-type="relay" data-tds-number="16">
-            </p>
-
-            <p>
-                <label for="zithoek-flip-3">Screen cinema</label>
-                <input type="checkbox" data-role="flipswitch" name="zithoek-flip-4" class="stateSwitch" data-on-text="Down" data-off-text="Up" data-wrapper-class="custom-label-flipswitch" id="zithoek-flip-4"  data-tds-type="motor" data-tds-number="0">
-            </p>
-
-        </div>
-
-    </div>
-    <!-- ####################### /page:verlichting:gelijkvloers:zithoek ####################### -->
-
-    <!-- ####################### page:verlichting:gelijkvloers:keuken ####################### -->
-    <div data-role="page" data-theme="a" id="page_v_g_keuken" data-add-back-btn="true">
-
-        <div data-role="content">
-            <p>Verlichting: gelijkvloers: keuken</p>
-
-            <p>
-                <label for="flip-1">Spots kasten</label>
-                <input type="checkbox" data-role="flipswitch" name="flip-checkbox" class="stateSwitch" id="flip-1" data-tds-type="relay" data-tds-number="38">
-            </p>
-
-            <p>
-                <label for="flip-2">Kookeiland</label>
-                <input type="checkbox" data-role="flipswitch" name="flip-checkbox" class="stateSwitch" id="flip-2" data-tds-type="relay" data-tds-number="31">
-            </p>
-
-            <p>
-                <label for="flip-3">LED's</label>
-                <input type="checkbox" data-role="flipswitch" name="flip-checkbox" class="stateSwitch" id="flip-3" data-tds-type="relay" data-tds-number="20">
-            </p>
-
-            <p>
-                <label for="flip-4">Tafel</label>
-                <input type="checkbox" data-role="flipswitch" name="flip-checkbox" class="stateSwitch" id="flip-4" data-tds-type="relay" data-tds-number="23">
-            </p>
-
-        </div>
-
-
-    </div>
-    <!-- ####################### /page:verlichting:gelijkvloers:keuken ####################### -->
-
-    <!-- ####################### page:verlichting:gelijkvloers:bureau ####################### -->
-    <div data-role="page" data-theme="a" id="page_v_v1_bureau" data-add-back-btn="true">
-
-
-        <div data-role="content">
-            <p>Verlichting: gelijkvloers: bureau</p>
-
-            <p>
-                <label for="bureau-flip-1">Spots zijde muur</label>
-                <input type="checkbox" data-role="flipswitch" name="bureau-flip-1" class="stateSwitch" id="bureau-flip-1" data-tds-type="relay" data-tds-number="39">
-            </p>
-
-            <p>
-                <label for="bureau-flip-2">Spots zijde vide</label>
-                <input type="checkbox" data-role="flipswitch" name="bureau-flip-2" class="stateSwitch" id="bureau-flip-2" data-tds-type="relay" data-tds-number="40">
-            </p>
-
-            <p>
-                <label for="bureau-flip-3">Centrale lamp</label>
-                <input type="checkbox" data-role="flipswitch" name="bureau-flip-3" class="stateSwitch" id="bureau-flip-3" data-tds-type="relay" data-tds-number="19">
-            </p>
-
-        </div>
-
-
-    </div>
-    <!-- ####################### /page:verlichting:gelijkvloers:bureau ####################### -->
-
 
     <div data-role="footer" data-position="fixed" data-theme="b">
         <div data-role="navbar">
@@ -380,7 +249,7 @@
                 <li><a href="#page_lights" id="navbar_verlichting" class="ui-nodisc-icon ui-btn-icon-bottom icon-brightness-contrast"></a></li>
                 <li><a href="#page_moods" id="navbar_sfeer" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer"></a></li>
                 <li><a href="#page_screens" id="navbar_screens" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu"></a></li>
-                <li><a href="#page_rooms" id="navbar_allesuit" class="ui-nodisc-icon ui-btn-icon-bottom icon-home"></a></li>
+                <!--<li><a href="#page_rooms" id="navbar_allesuit" class="ui-nodisc-icon ui-btn-icon-bottom icon-home"></a></li>-->
             </ul>
         </div>
     </div>
