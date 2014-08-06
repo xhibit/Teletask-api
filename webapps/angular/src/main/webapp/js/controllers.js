@@ -11,7 +11,7 @@
         });
 
         this.changeState = function (component, newState) {
-            $http.get($rootScope.baseUrl + '/component/' + component.function + '/' + component.number + '/state/' + newState);
+            $http.put($rootScope.baseUrl + '/component/' + component.function + '/' + component.number + '/state/' + newState);
         };
 
         this.groupGet = function () {

@@ -8,10 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -123,7 +120,7 @@ public class ComponentResource {
      * @param state  The state you want to the relay to switch to, either 0 (off) or 1 (on) .
      * @return JSON response confirming if the switch request was successful.
      */
-    @GET
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/relay/{number}/state/{state}")
     public Response relay(@PathParam("number") int number, @PathParam("state") String state) {
@@ -138,7 +135,7 @@ public class ComponentResource {
      * @param state  The state you want to the relay to switch to, either 0 (up) or 1 (down) .
      * @return JSON response confirming if the switch request was successful.
      */
-    @GET
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/motor/{number}/state/{state}")
     public Response motor(@PathParam("number") int number, @PathParam("state") String state) {
@@ -154,7 +151,7 @@ public class ComponentResource {
      * @param state  The state you want to the mood to switch to, either 0 (off) or 1 (on) .
      * @return JSON response confirming if the switch request was successful.
      */
-    @GET
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/mood/{type}/{number}/state/{state}")
     public Response mood(@PathParam("type") String type, @PathParam("number") int number, @PathParam("state") String state) {
@@ -182,9 +179,9 @@ public class ComponentResource {
     @Path("/mood/{type}/{number}")
     public Response mood(@PathParam("type") String type, @PathParam("number") int number) {
         Function function = null;
-        if ("general".equals(type)) {
+        if ("general".equalsIgnoreCase(type)) {
             function = Function.GENMOOD;
-        } else if ("local".equals(type)) {
+        } else if ("local".equalsIgnoreCase(type)) {
             function = Function.LOCMOOD;
         }
 
@@ -199,7 +196,7 @@ public class ComponentResource {
         return this.buildsuccessResponse(response);
     }
 
-    @GET
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/component/{function}/{number}/state/{state}")
     public Response component(@PathParam("function") String function, @PathParam("number") int number, @PathParam("state") String state) {
