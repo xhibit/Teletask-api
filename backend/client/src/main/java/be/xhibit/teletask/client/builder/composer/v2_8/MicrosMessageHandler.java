@@ -118,8 +118,10 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
             // Problem with this appraoch is that we have no idea when the server actually will be able to completely start.
             while (this.stateEmptyCount(config, function, numbers) > 0) {
                 for (int number : numbers) {
-                    MessageExecutor.of(new GetMessage(config, function, number), out).run();
-                    Thread.sleep(150);
+                    if (config.getComponent(function, number).getState() == null) {
+                        MessageExecutor.of(new GetMessage(config, function, number), out).run();
+                        Thread.sleep(150);
+                    }
                 }
             }
         }
