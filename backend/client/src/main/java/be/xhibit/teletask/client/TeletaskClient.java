@@ -355,13 +355,13 @@ public final class TeletaskClient {
 
         this.connect(host, port);
 
+        this.startEventListener();
+
         this.groupGet();
 
         this.startKeepAlive();
 
         this.sendLogEventMessages(StateEnum.ON);
-
-        this.startEventListener();
     }
 
     private String startTestServer(String host, int port) {
@@ -386,7 +386,8 @@ public final class TeletaskClient {
         this.getEventListenerTimer().schedule(new TimerTask() {
             @Override
             public void run() {
-                TeletaskClient.this.getExecutorService().submit(new EventMessageListener());
+//                TeletaskClient.this.getExecutorService().submit(new EventMessageListener());
+                new EventMessageListener().run();
             }
         }, 0, 20);
     }

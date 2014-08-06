@@ -13,13 +13,19 @@ public abstract class ConfigurationSupport<T, C extends Configurable<T>, K> {
     }
 
     public T getConfigObject(K key) {
-        return this.getConfigByKey().get(key).getObject();
+        C configObject = this.getConfigByKey().get(key);
+
+        if (configObject == null) {
+            throw new IllegalStateException("Configuration " + this.getClass().getSimpleName() + " not found for key " + key);
+        }
+
+        return configObject.getObject();
     }
 
     public C getConfigurable(T configObject) {
         C state = this.getConfigByObject().get(configObject);
         if (state == null) {
-            throw new IllegalArgumentException("Illegal state requested: " + configObject);
+            throw new IllegalStateException("Configuration " + this.getClass().getSimpleName() + " not found for configObject " + configObject);
         }
         return state;
     }
