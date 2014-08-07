@@ -515,7 +515,8 @@ public final class TeletaskClient {
                         try {
                             KeepAliveService.this.keepAliveStrategy.execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream());
                         } catch (Exception e) {
-                            LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
+                            TeletaskClient.this.stop();
+                            TeletaskClient.this.start();
                         }
                     }
                 });
