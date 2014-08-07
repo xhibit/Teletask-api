@@ -515,6 +515,7 @@ public final class TeletaskClient {
                         try {
                             KeepAliveService.this.keepAliveStrategy.execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream());
                         } catch (Exception e) {
+                            LOG.error("Exception ({}) caught in run: {} - Restarting Teletask Client Sockets", e.getClass().getName(), e.getMessage());
                             TeletaskClient.this.stop();
                             TeletaskClient.this.start();
                         }
