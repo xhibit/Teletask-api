@@ -46,7 +46,7 @@ $(document).ready(function () {
         var url = base_url +'/api/component/' +componentType +"/" +componentValue +"/state/" +stateValue
 
         $.ajax({
-            type: "PUT"
+            type: "GET"
             ,url: url
         })
             .done(function (data, textStatus, jqXHR) {
