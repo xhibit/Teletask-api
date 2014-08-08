@@ -480,17 +480,19 @@ public final class TeletaskClient {
         }
 
         private void handleEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Event: {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
-            }
             ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
             if (component != null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Event: \nComponent: {}\nCurrent State: {} {}", component.getDescription(), component.getState(), eventMessage.getLogInfo(eventMessage.getRawBytes()));
+                }
                 State state = eventMessage.getState();
                 if (state.getFunction() != Function.MOTOR || StateEnum.valueOf(state.getValue().toUpperCase()) != StateEnum.STOP) {
                     component.setState(state);
                 }
             } else {
-                logger.debug("Component {}:{} not found.", eventMessage.getFunction(), eventMessage.getNumber());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Event: \nComponent: not found in configuration {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
+                }
             }
         }
 
@@ -515,7 +517,9 @@ public final class TeletaskClient {
                         try {
                             KeepAliveService.this.keepAliveStrategy.execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream());
                         } catch (Exception e) {
-                            LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
+                            LOG.error("Exception ({}) caught in run: {} - Restarting Teletask Client Sockets", e.getClass().getName(), e.getMessage());
+                            TeletaskClient.this.stop();
+                            TeletaskClient.this.start();
                         }
                     }
                 });

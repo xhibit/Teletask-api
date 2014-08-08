@@ -6,7 +6,6 @@ import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
@@ -44,8 +43,8 @@ public abstract class GetMessageSupport extends FunctionBasedMessageSupport {
     }
 
     @Override
-    protected String getPayloadLogInfo() {
-        return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatOutput(this.getNumbers()));
+    protected String[] getPayloadLogInfo() {
+        return new String[]{this.formatFunction(this.getFunction()), this.formatOutput(this.getNumbers())};
     }
 
     @Override

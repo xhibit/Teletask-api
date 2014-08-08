@@ -7,7 +7,6 @@ import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.StateEnum;
 import be.xhibit.teletask.model.spec.StateEnumImpl;
-import com.google.common.base.Joiner;
 
 public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     public LogMessage(ClientConfigSpec ClientConfig, Function function, StateEnum state) {
@@ -25,8 +24,8 @@ public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     }
 
     @Override
-    protected String getPayloadLogInfo() {
-        return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatState(this.getState()));
+    protected String[] getPayloadLogInfo() {
+        return new String[]{this.formatFunction(this.getFunction()), this.formatState(this.getState())};
     }
 
     @Override

@@ -115,7 +115,7 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
             // For some reason the microsplus does not always send an event after requesting the state of a component.
             // As a workaround, we keep trying until we get the state of all components.
             // Sleeping between get messages seems to decrease the amount of failures.
-            // Problem with this appraoch is that we have no idea when the server actually will be able to completely start.
+            // Problem with this approach is that we have no idea when the server actually will be able to completely start.
             while (this.stateEmptyCount(config, function, numbers) > 0) {
                 for (int number : numbers) {
                     if (config.getComponent(function, number).getState() == null) {
