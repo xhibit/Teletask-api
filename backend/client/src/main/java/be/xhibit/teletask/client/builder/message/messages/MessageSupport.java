@@ -93,7 +93,7 @@ public abstract class MessageSupport {
         table.append(System.lineSeparator()).append(seperatorLine);
 
         return System.lineSeparator() + "Command: " + this.getCommand() + System.lineSeparator() +
-                "Payload: " + this.getPayloadLogInfo() + System.lineSeparator() +
+                "Payload: " + System.lineSeparator() + "\t" + Joiner.on(System.lineSeparator() + "\t").join(this.getPayloadLogInfo()) + System.lineSeparator() +
                 "Length: " + message[1] + System.lineSeparator() +
                 "Checksum calculation steps: " + this.getMessageChecksumCalculationSteps(message) + " = " + message[message.length - 1] + System.lineSeparator() +
                 "Raw Bytes: " + ByteUtilities.bytesToHex(message) + System.lineSeparator() +
@@ -101,7 +101,7 @@ public abstract class MessageSupport {
                 table.toString();
     }
 
-    protected abstract String getPayloadLogInfo();
+    protected abstract String[] getPayloadLogInfo();
 
     private String getMessageChecksumCalculationSteps(byte[] message) {
         StringBuilder builder = new StringBuilder(100);
@@ -155,7 +155,7 @@ public abstract class MessageSupport {
     protected String formatState(State... states) {
         Collection<String> log = new ArrayList<>();
         for (State state : states) {
-            log.add("State( " + state + " | " + (state == null ? null : this.getMessageHandler().getStateConfig(state).getNumber()) + " | " + (state == null ? null : ByteUtilities.bytesToHex((byte) this.getMessageHandler().getStateConfig(state).getNumber())) + ")");
+            log.add("State: " + state + " | " + (state == null ? null : this.getMessageHandler().getStateConfig(state).getNumber()) + " | " + (state == null ? null : ByteUtilities.bytesToHex((byte) this.getMessageHandler().getStateConfig(state).getNumber())));
         }
         return Joiner.on(", ").join(log);
     }
@@ -165,13 +165,13 @@ public abstract class MessageSupport {
     }
 
     protected String formatFunction(Function function) {
-        return "Function( " + function + " | " + this.getMessageHandler().getFunctionConfig(function).getNumber() + " | " + ByteUtilities.bytesToHex((byte) this.getMessageHandler().getFunctionConfig(function).getNumber()) + ")";
+        return "Function: " + function + " | " + this.getMessageHandler().getFunctionConfig(function).getNumber() + " | " + ByteUtilities.bytesToHex((byte) this.getMessageHandler().getFunctionConfig(function).getNumber());
     }
 
     protected String formatOutput(int... numbers) {
         Collection<String> outputs = new ArrayList<>();
         for (int number : numbers) {
-            outputs.add("Output( " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)) + ")");
+            outputs.add("Output: " + number + " | " + ByteUtilities.bytesToHex(this.getMessageHandler().composeOutput(number)));
         }
         return Joiner.on(", ").join(outputs);
     }

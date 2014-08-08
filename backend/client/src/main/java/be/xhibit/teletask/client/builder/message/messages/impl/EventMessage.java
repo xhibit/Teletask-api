@@ -6,7 +6,6 @@ import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.model.spec.State;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Joiner;
 import com.google.common.primitives.Bytes;
 
 public class EventMessage extends FunctionBasedMessageSupport {
@@ -45,8 +44,8 @@ public class EventMessage extends FunctionBasedMessageSupport {
     }
 
     @Override
-    protected String getPayloadLogInfo() {
-        return Joiner.on(", ").join(this.formatFunction(this.getFunction()), this.formatOutput(this.getNumber()), this.formatState(this.getState()));
+    protected String[] getPayloadLogInfo() {
+        return new String[]{this.formatFunction(this.getFunction()), this.formatOutput(this.getNumber()), this.formatState(this.getState())};
     }
 
 }

@@ -480,17 +480,19 @@ public final class TeletaskClient {
         }
 
         private void handleEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Event: {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
-            }
             ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
             if (component != null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Event: \nComponent: {}\nCurrent State: {} {}", component.getDescription(), component.getState(), eventMessage.getLogInfo(eventMessage.getRawBytes()));
+                }
                 State state = eventMessage.getState();
                 if (state.getFunction() != Function.MOTOR || StateEnum.valueOf(state.getValue().toUpperCase()) != StateEnum.STOP) {
                     component.setState(state);
                 }
             } else {
-                logger.debug("Component {}:{} not found.", eventMessage.getFunction(), eventMessage.getNumber());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Event: \nComponent: not found in configuration {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
+                }
             }
         }
 

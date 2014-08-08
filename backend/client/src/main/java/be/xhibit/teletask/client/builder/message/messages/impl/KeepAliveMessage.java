@@ -20,8 +20,8 @@ public class KeepAliveMessage extends MessageSupport {
     }
 
     @Override
-    protected String getPayloadLogInfo() {
-        return "None";
+    protected String[] getPayloadLogInfo() {
+        return new String[]{"None"};
     }
 
 }
