@@ -1,5 +1,5 @@
 <%@ page import="be.xhibit.teletask.client.TeletaskClient" %>
-<%@ page import="be.xhibit.teletask.config.model.json.TDSClientConfig" %>
+<%@ page import="be.xhibit.teletask.model.spec.ClientConfigSpec" %>
 <%@ page import="be.xhibit.teletask.model.spec.Function" %>
 <%@ page import="be.xhibit.teletask.webapp.ClientHolder" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
@@ -25,12 +25,12 @@
 
     <%
         TeletaskClient client = ClientHolder.getClient();
-        TDSClientConfig tdsConfig = (TDSClientConfig) client.getConfig();
+        ClientConfigSpec tdsConfig = client.getConfig();
 
-        request.setAttribute("tds_relays", tdsConfig.getComponentsTypes().get(Function.RELAY));
-        request.setAttribute("tds_locmoods", tdsConfig.getComponentsTypes().get(Function.LOCMOOD));
-        request.setAttribute("tds_genmoods", tdsConfig.getComponentsTypes().get(Function.GENMOOD));
-        request.setAttribute("tds_screens", tdsConfig.getComponentsTypes().get(Function.MOTOR));
+        request.setAttribute("tds_relays", tdsConfig.getComponents(Function.RELAY));
+        request.setAttribute("tds_locmoods", tdsConfig.getComponents(Function.LOCMOOD));
+        request.setAttribute("tds_genmoods", tdsConfig.getComponents(Function.GENMOOD));
+        request.setAttribute("tds_screens", tdsConfig.getComponents(Function.MOTOR));
         request.setAttribute("tds_rooms", tdsConfig.getRooms());
     %>
 
@@ -131,8 +131,8 @@
                     <!--<div class="ui-body ui-body-a ui-corner-all">-->
                         <c:forEach items="${room.relays}" var="relay" varStatus="status">
                         <p>
-                            <label for="flip-room-<c:out value="${room.id}" />-<c:out value="${room.level}" />-<c:out value="${status.index}" />"><c:out value="${relay.description}" /></label>
-                            <input type="checkbox" data-role="flipswitch" name="flip-room-<c:out value="${room.id}" />-<c:out value="${room.level}" />-<c:out value="${status.index}" />" class="stateSwitch" id="flip-room-<c:out value="${room.id}" />-<c:out value="${room.level}" />-<c:out value="${status.index}" />" data-tds-type="relay" data-tds-number="<c:out value="${relay.number}" />">
+                            <label for="flip-room-<c:out value="${room.id}" />-<c:out value="${status.index}" />"><c:out value="${relay.description}" /></label>
+                            <input type="checkbox" data-role="flipswitch" name="flip-room-<c:out value="${room.id}" />-<c:out value="${status.index}" />" class="stateSwitch" id="flip-room-<c:out value="${room.id}" />-<c:out value="${status.index}" />" data-tds-type="relay" data-tds-number="<c:out value="${relay.number}" />">
                         </p>
                         </c:forEach>
                     <!--</div>-->
