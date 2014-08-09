@@ -14,6 +14,7 @@ public class Room implements RoomSpec {
     private List<GeneralMood> generalMoods;
     private List<Dimmer> dimmers;
     private List<Condition> conditions;
+    private List<Sensor> sensors;
 
     public Room(int id, String name) {
         this.id = id;
@@ -76,6 +77,18 @@ public class Room implements RoomSpec {
             this.setConditions(new ArrayList<Condition>());
         }
         return this.conditions;
+    }
+
+    @Override
+    public List<Sensor> getSensors() {
+        if (this.sensors == null) {
+            this.setSensors(new ArrayList<Sensor>());
+        }
+        return this.sensors;
+    }
+
+    public void setSensors(List<Sensor> sensors) {
+        this.sensors = sensors;
     }
 
     public void setConditions(List<Condition> conditions) {

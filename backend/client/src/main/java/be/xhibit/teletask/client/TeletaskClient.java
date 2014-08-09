@@ -345,6 +345,7 @@ public final class TeletaskClient {
         this.sendLogEventMessage(Function.MOTOR, state);
         this.sendLogEventMessage(Function.DIMMER, state);
         this.sendLogEventMessage(Function.COND, state);
+        this.sendLogEventMessage(Function.SENSOR, state);
     }
 
     private void start() {

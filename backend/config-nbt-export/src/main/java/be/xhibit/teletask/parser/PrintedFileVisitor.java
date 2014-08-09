@@ -12,6 +12,7 @@ import be.xhibit.teletask.parser.handler.MotorLineHandler;
 import be.xhibit.teletask.parser.handler.OutputInterfaceLineHandler;
 import be.xhibit.teletask.parser.handler.RelayLineHandler;
 import be.xhibit.teletask.parser.handler.RoomLineHandler;
+import be.xhibit.teletask.parser.handler.SensorLineHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -44,6 +45,7 @@ public class PrintedFileVisitor {
             .put(GeneralMoodLineHandler.getInstance().getStartPattern(), GeneralMoodLineHandler.getInstance())
             .put(DimmerLineHandler.getInstance().getStartPattern(), DimmerLineHandler.getInstance())
             .put(ConditionLineHandler.getInstance().getStartPattern(), ConditionLineHandler.getInstance())
+            .put(SensorLineHandler.getInstance().getStartPattern(), SensorLineHandler.getInstance())
             .build();
 
     private PrintedFileVisitor() {
