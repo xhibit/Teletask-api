@@ -12,6 +12,7 @@ public class SensorLineHandler extends LineHandlerSupport {
     private static final Pattern START_PATTERN = Pattern.compile("\\s*SENSOR ZONES");
 
     private static final Pattern SENSOR_PATTERN = Pattern.compile("Sensor zone (\\d*): (.*)");
+    private static final Pattern SENSOR_TYPE_PATTERN = Pattern.compile("Type sensor: [^:]*:(.*)");
 
     private SensorLineHandler() {
     }
@@ -28,8 +29,9 @@ public class SensorLineHandler extends LineHandlerSupport {
     @Override
     protected void handle(String startLine, Consumer consumer, ListIterator<String> iterator, String line, int counter) {
         Matcher matcher = SENSOR_PATTERN.matcher(line);
-        if (matcher.find()) {
-            consumer.sensor(matcher.group(1), matcher.group(2).trim());
+        Matcher typeMatcher = SENSOR_TYPE_PATTERN.matcher(iterator.next());
+        if (matcher.find() && typeMatcher.find()) {
+            consumer.sensor(matcher.group(1), typeMatcher.group(1).trim(), matcher.group(2).trim());
         }
     }
 }

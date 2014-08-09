@@ -3,7 +3,6 @@ package be.xhibit.teletask.client.builder.composer.v3_1;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.config.ConfigurationSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
-import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.EventCommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.GetCommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.GroupGetCommandConfigurable;
@@ -16,7 +15,6 @@ import be.xhibit.teletask.client.builder.message.messages.impl.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 import com.google.common.collect.ImmutableList;
 
 public class MicrosPlusCommandConfiguration extends ConfigurationSupport<Command, CommandConfigurable<?>, Integer> {
@@ -38,14 +36,14 @@ public class MicrosPlusCommandConfiguration extends ConfigurationSupport<Command
 
     private static class MicrosPlusEventCommandConfigurable extends EventCommandConfigurable {
         public MicrosPlusEventCommandConfigurable() {
-            super(16, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "Err State", "State");
+            super(16, true, "Central Unit", "Fnc", "Output Part 1", "Output Part 2", "Err State", "State", "State");
         }
 
         @Override
         public EventMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
             Function function = messageHandler.getFunction(payload[1]);
             int number = this.getOutputNumber(messageHandler, payload, 2);
-            State state = messageHandler.getState(new StateKey(function, payload[5]));
+            String state = getState(messageHandler, config, function, number, payload, 5);
             return new EventMessage(config, rawBytes, function, number, state);
         }
     }
@@ -69,7 +67,9 @@ public class MicrosPlusCommandConfiguration extends ConfigurationSupport<Command
         @Override
         public SetMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
             Function function = messageHandler.getFunction(payload[1]);
-            return new SetMessage(config, function, this.getOutputNumber(messageHandler, payload, 2), messageHandler.getState(new StateKey(function, payload[messageHandler.getOutputByteSize() + 2])));
+            int number = this.getOutputNumber(messageHandler, payload, 2);
+            String state = getState(messageHandler, config, function, number, payload, messageHandler.getOutputByteSize() + 2);
+            return new SetMessage(config, function, number, state);
         }
     }
 }

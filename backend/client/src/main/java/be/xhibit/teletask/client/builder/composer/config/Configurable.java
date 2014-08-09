@@ -20,6 +20,10 @@ public abstract class Configurable<T> {
         return this.number;
     }
 
+    public byte[] getBytes() {
+        return new byte[]{(byte) this.number};
+    }
+
     @Override
     public String toString() {
         try {

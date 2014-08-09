@@ -41,8 +41,8 @@
                             </div>
                             <div class="col-xs-6">
                                 <div class="btn-group pull-right">
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
                                 </div>
                             </div>
                         </div>
@@ -54,8 +54,8 @@
                             </div>
                             <div class="col-xs-6">
                                 <div class="btn-group pull-right">
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
                                 </div>
                             </div>
                         </div>
@@ -67,9 +67,9 @@
                             </div>
                             <div class="col-xs-6t">
                                 <div class="btn-group pull-right">
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'UP' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'up')">Up</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'UP' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'up')">Up</button>
                                     <button type="button" style="width: 45px;" class="btn btn-default" ng-click="configController.changeState(component, 'stop')">Stop</button>
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'DOWN' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'down')">Down</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'DOWN' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'down')">Down</button>
                                 </div>
                             </div>
                         </div>
@@ -81,8 +81,8 @@
                             </div>
                             <div class="col-xs-6">
                                 <div class="btn-group pull-right">
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'ON' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'on')">On</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'OFF' ? 'primary' : 'default'}}" ng-click="configController.changeState(component, 'off')">Off</button>
                                 </div>
                             </div>
                         </div>
@@ -92,11 +92,11 @@
                             {{component.description}}
                         </div>
                         <div class="btn-group pull-right">
-                            <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 0 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '0')">0</button>
-                            <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 25 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '25')">25</button>
-                            <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 50 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '50')">50</button>
-                            <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 75 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '75')">75</button>
-                            <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 100 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '100')">100</button>
+                            <button type="button" style="width: 45px;" class="btn btn-{{component.state == 0 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '0')">0</button>
+                            <button type="button" style="width: 45px;" class="btn btn-{{component.state == 25 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '25')">25</button>
+                            <button type="button" style="width: 45px;" class="btn btn-{{component.state == 50 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '50')">50</button>
+                            <button type="button" style="width: 45px;" class="btn btn-{{component.state == 75 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '75')">75</button>
+                            <button type="button" style="width: 45px;" class="btn btn-{{component.state == 100 ? 'primary' : 'default'}}" ng-click="configController.changeState(component, '100')">100</button>
                         </div>
                     </div>
                     <div ng-repeat="component in room.conditions" style="margin-bottom: 5px;">
@@ -106,8 +106,20 @@
                             </div>
                             <div class="col-xs-6">
                                 <div class="btn-group pull-right">
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'ON' ? 'primary' : 'default'}}" disabled>On</button>
-                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state.value == 'OFF' ? 'primary' : 'default'}}" disabled>Off</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'ON' ? 'primary' : 'default'}}" disabled>On</button>
+                                    <button type="button" style="width: 45px;" class="btn btn-{{component.state == 'OFF' ? 'primary' : 'default'}}" disabled>Off</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-repeat="component in room.sensors" style="margin-bottom: 5px;">
+                        <div class="row">
+                            <div class="col-xs-6">
+                                {{component.description}}
+                            </div>
+                            <div class="col-xs-6">
+                                <div class="btn-group pull-right">
+                                    <button type="button" style="width: 45px;" class="btn btn-default" disabled>{{component.state}}</button>
                                 </div>
                             </div>
                         </div>

@@ -1,21 +1,23 @@
 package be.xhibit.teletask.client.builder.message.messages.impl;
 
-import be.xhibit.teletask.client.builder.SendResult;
+import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.message.messages.FunctionStateBasedMessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.StateEnum;
-import be.xhibit.teletask.model.spec.StateEnumImpl;
+import com.google.common.base.Joiner;
 
-public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
-    public LogMessage(ClientConfigSpec ClientConfig, Function function, StateEnum state) {
-        super(ClientConfig, function, new StateEnumImpl(state, function));
+import java.util.ArrayList;
+import java.util.Collection;
+
+public class LogMessage extends FunctionStateBasedMessageSupport {
+    public LogMessage(ClientConfigSpec ClientConfig, Function function, String state) {
+        super(ClientConfig, function, state);
     }
 
     @Override
     protected byte[] getPayload() {
-        return new byte[]{(byte) this.getMessageHandler().getFunctionConfig(this.getFunction()).getNumber(), (byte) this.getMessageHandler().getStateConfig(this.getState()).getNumber()};
+        return new byte[]{(byte) this.getMessageHandler().getFunctionConfig(this.getFunction()).getNumber(), this.getMessageHandler().getLogStateByte(this.getState())};
     }
 
     @Override
@@ -26,6 +28,14 @@ public class LogMessage extends FunctionStateBasedMessageSupport<SendResult> {
     @Override
     protected String[] getPayloadLogInfo() {
         return new String[]{this.formatFunction(this.getFunction()), this.formatState(this.getState())};
+    }
+
+    protected String formatState(String... states) {
+        Collection<String> log = new ArrayList<>();
+        for (String state : states) {
+            log.add("State: " + state + " | " + (state == null ? null : this.getMessageHandler().getLogStateByte(state)) + " | " + (state == null ? null : ByteUtilities.bytesToHex(this.getMessageHandler().getLogStateByte(state))));
+        }
+        return Joiner.on(", ").join(log);
     }
 
     @Override

@@ -1,23 +1,24 @@
 package be.xhibit.teletask.client.builder.message.messages;
 
+import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 
-public abstract class FunctionStateBasedMessageSupport<R> extends FunctionBasedMessageSupport {
-    private final State state;
+public abstract class FunctionStateBasedMessageSupport extends FunctionBasedMessageSupport {
+    private final String state;
 
-    protected FunctionStateBasedMessageSupport(ClientConfigSpec clientConfig, Function function, State state) {
+    protected FunctionStateBasedMessageSupport(ClientConfigSpec clientConfig, Function function, String state) {
         super(clientConfig, function);
-        this.state = state;
+        this.state = state.toUpperCase();
     }
 
-    public State getState() {
+    public String getState() {
         return this.state;
     }
 
     @Override
     protected boolean isValid() {
-        return this.getFunction().getStates().contains(this.getState());
+        FunctionConfigurable functionConfig = this.getMessageHandler().getFunctionConfig(this.getFunction());
+        return functionConfig.isValidState(this.getState());
     }
 }

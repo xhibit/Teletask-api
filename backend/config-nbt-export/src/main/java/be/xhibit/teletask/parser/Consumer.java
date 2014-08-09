@@ -35,5 +35,5 @@ public interface Consumer {
 
     void condition(String id, String description);
 
-    void sensor(String id, String description);
+    void sensor(String id, String type, String description);
 }

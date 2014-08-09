@@ -14,8 +14,6 @@ import be.xhibit.teletask.client.listener.StateChangeListener;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
-import be.xhibit.teletask.model.spec.StateEnum;
 import be.xhibit.teletask.server.TeletaskTestServer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -187,12 +185,12 @@ public final class TeletaskClient {
         this.stateChangeListeners.add(listener);
     }
 
-    public void set(ComponentSpec component, State state) {
+    public void set(ComponentSpec component, String state) {
         this.set(component.getFunction(), component.getNumber(), state);
     }
 
-    public void set(Function function, int number, State state) {
-        Preconditions.checkNotNull(state, "Given state not found");
+    public void set(Function function, int number, String state) {
+        Preconditions.checkNotNull(state, "Given state should not be null");
 
         try {
             this.execute(new SetMessage(this.getConfig(), function, number, state));
@@ -220,7 +218,7 @@ public final class TeletaskClient {
                 @Override
                 public void run() {
                     try {
-                        TeletaskClient.this.getMessageHandler().getGroupGetStrategy().execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream(), function, numbers);
+                        TeletaskClient.this.getMessageHandler().getGroupGetStrategy().execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), function, numbers);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -264,9 +262,8 @@ public final class TeletaskClient {
     }
 
     public void stop() {
-
         // close all log events to stop reporting
-        this.sendLogEventMessages(StateEnum.OFF);
+        this.sendLogEventMessages("OFF");
         this.stopEventListener();
         this.stopKeepAliveService();
         this.stopExecutorService();
@@ -338,7 +335,7 @@ public final class TeletaskClient {
         }
     }
 
-    private void sendLogEventMessages(StateEnum state) {
+    private void sendLogEventMessages(String state) {
         this.sendLogEventMessage(Function.RELAY, state);
         this.sendLogEventMessage(Function.LOCMOOD, state);
         this.sendLogEventMessage(Function.GENMOOD, state);
@@ -362,7 +359,7 @@ public final class TeletaskClient {
 
         this.startKeepAlive();
 
-        this.sendLogEventMessages(StateEnum.ON);
+        this.sendLogEventMessages("ON");
     }
 
     private String startTestServer(String host, int port) {
@@ -426,7 +423,7 @@ public final class TeletaskClient {
         return MessageHandlerFactory.getMessageHandler(this.getConfig().getCentralUnitType());
     }
 
-    private void sendLogEventMessage(Function function, StateEnum state) {
+    private void sendLogEventMessage(Function function, String state) {
         try {
             this.execute(new LogMessage(this.getConfig(), function, state));
         } catch (ExecutionException e) {
@@ -486,8 +483,8 @@ public final class TeletaskClient {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Event: \nComponent: {}\nCurrent State: {} {}", component.getDescription(), component.getState(), eventMessage.getLogInfo(eventMessage.getRawBytes()));
                 }
-                State state = eventMessage.getState();
-                if (state.getFunction() != Function.MOTOR || StateEnum.valueOf(state.getValue().toUpperCase()) != StateEnum.STOP) {
+                String state = eventMessage.getState();
+                if (component.getFunction() != Function.MOTOR || !"STOP".equals(state)) {
                     component.setState(state);
                 }
             } else {

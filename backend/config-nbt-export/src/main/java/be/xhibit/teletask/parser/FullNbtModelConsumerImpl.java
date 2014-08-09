@@ -143,10 +143,19 @@ public class FullNbtModelConsumerImpl implements Consumer {
     }
 
     @Override
-    public void sensor(String id, String description) {
+    public void sensor(String id, String type, String description) {
         this.getLogger().debug("sensor: {} - {}", id, description);
         Room room = this.getCentralUnit().findRoom("Sensors");
-        Sensor sensor = new Sensor(Integer.valueOf(id), room, description);
+
+        if (type.toUpperCase().contains("TEMPERATURE")) {
+            type = "TEMPERATURE";
+        } else if (type.toUpperCase().contains("LIGHT")) {
+            type = "LIGHT";
+        } else if (type.toUpperCase().contains("HUMIDITY")) {
+            type = "HUMIDITY";
+        }
+
+        Sensor sensor = new Sensor(Integer.valueOf(id), room, type, description);
         room.getSensors().add(sensor);
         this.getCentralUnit().getComponents().add(sensor);
     }

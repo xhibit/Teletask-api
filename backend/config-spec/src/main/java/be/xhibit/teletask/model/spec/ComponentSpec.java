@@ -4,13 +4,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @JsonSerialize(as=ComponentSpec.class)
 public interface ComponentSpec {
-    State getState();
+    String getState();
 
-    void setState(State state);
+    void setState(String state);
 
     Function getFunction();
 
     int getNumber();
 
     String getDescription();
+
+    String getType();
 }

@@ -1,26 +1,27 @@
 package be.xhibit.teletask.client.builder.message.messages.impl;
 
+import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.message.messages.FunctionBasedMessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.primitives.Bytes;
 
 public class EventMessage extends FunctionBasedMessageSupport {
     private final int number;
-    private final State state;
+    private final String state;
     private final byte[] rawBytes;
 
-    public EventMessage(ClientConfigSpec clientConfig, byte[] rawBytes, Function function, int number, State state) {
+    public EventMessage(ClientConfigSpec clientConfig, byte[] rawBytes, Function function, int number, String state) {
         super(clientConfig, function);
         this.rawBytes = rawBytes;
         this.number = number;
         this.state = state;
     }
 
-    public State getState() {
+    public String getState() {
         return this.state;
     }
 
@@ -35,7 +36,12 @@ public class EventMessage extends FunctionBasedMessageSupport {
 
     @Override
     protected byte[] getPayload() {
-        return Bytes.concat(new byte[]{(byte) this.getMessageHandler().getFunctionConfig(this.getFunction()).getNumber()}, this.getMessageHandler().composeOutput(this.getNumber()), new byte[]{(byte) this.getMessageHandler().getStateConfig(this.getState()).getNumber()});
+        FunctionConfigurable functionConfig = this.getMessageHandler().getFunctionConfig(this.getFunction());
+        ComponentSpec component = this.getClientConfig().getComponent(this.getFunction(), this.getNumber());
+        byte[] function = {(byte) functionConfig.getNumber()};
+        byte[] output = this.getMessageHandler().composeOutput(this.getNumber());
+        byte[] state = functionConfig.getStateCalculator().convertSet(component, this.getState());
+        return Bytes.concat(function, output, state);
     }
 
     @Override
@@ -45,7 +51,7 @@ public class EventMessage extends FunctionBasedMessageSupport {
 
     @Override
     protected String[] getPayloadLogInfo() {
-        return new String[]{this.formatFunction(this.getFunction()), this.formatOutput(this.getNumber()), this.formatState(this.getState())};
+        return new String[]{this.formatFunction(this.getFunction()), this.formatOutput(this.getNumber()), this.formatState(this.getFunction(), this.getNumber(), this.getState())};
     }
 
 }

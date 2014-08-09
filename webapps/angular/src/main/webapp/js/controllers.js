@@ -31,9 +31,8 @@
                         angular.forEach(comps, function (comp, key) {
                             angular.forEach(components, function (component, key) {
                                 if (comp.number == component.number && comp.function == component.function) {
-                                    console.log('Changing state in room ' + room.name + ': ' + component.function + ':' + component.number + ' to ' + component.state.value);
-                                    comp.state.value = component.state.value;
-                                    comp.state.state = component.state.state;
+                                    console.log('Changing state in room ' + room.name + ': ' + component.function + ':' + component.number + ' to ' + component.state);
+                                    comp.state = component.state;
                                 }
                             });
                         });
@@ -44,6 +43,7 @@
                     changeComponentState(room.generalMoods);
                     changeComponentState(room.dimmers);
                     changeComponentState(room.conditions);
+                    changeComponentState(room.sensors);
                 });
             });
         };

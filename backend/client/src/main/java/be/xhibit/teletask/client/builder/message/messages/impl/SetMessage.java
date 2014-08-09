@@ -1,21 +1,21 @@
 package be.xhibit.teletask.client.builder.message.messages.impl;
 
-import be.xhibit.teletask.client.builder.SendResult;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
+import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.message.messages.FunctionStateBasedMessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 import com.google.common.primitives.Bytes;
 
 import java.util.List;
 
-public class SetMessage extends FunctionStateBasedMessageSupport<SendResult> {
+public class SetMessage extends FunctionStateBasedMessageSupport {
     private final int number;
 
-    public SetMessage(ClientConfigSpec clientConfig, Function function, int number, State state) {
+    public SetMessage(ClientConfigSpec clientConfig, Function function, int number, String state) {
         super(clientConfig, function, state);
         this.number = number;
     }
@@ -26,7 +26,12 @@ public class SetMessage extends FunctionStateBasedMessageSupport<SendResult> {
 
     @Override
     protected byte[] getPayload() {
-        return Bytes.concat(new byte[]{(byte) this.getMessageHandler().getFunctionConfig(this.getFunction()).getNumber()}, MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).composeOutput(this.getNumber()), new byte[]{(byte) this.getMessageHandler().getStateConfig(this.getState()).getNumber()});
+        FunctionConfigurable functionConfig = this.getMessageHandler().getFunctionConfig(this.getFunction());
+        ComponentSpec component = this.getClientConfig().getComponent(this.getFunction(), this.getNumber());
+        byte[] function = {(byte) functionConfig.getNumber()};
+        byte[] output = MessageHandlerFactory.getMessageHandler(this.getClientConfig().getCentralUnitType()).composeOutput(this.getNumber());
+        byte[] state = functionConfig.getStateCalculator().convertSet(component, this.getState());
+        return Bytes.concat(function, output, state);
     }
 
     @Override
@@ -36,7 +41,7 @@ public class SetMessage extends FunctionStateBasedMessageSupport<SendResult> {
 
     @Override
     protected String[] getPayloadLogInfo() {
-        return new String[]{this.formatFunction(this.getFunction()), this.formatOutput(this.getNumber()), this.formatState(this.getState())};
+        return new String[]{this.formatFunction(this.getFunction()), this.formatOutput(this.getNumber()), this.formatState(this.getFunction(), this.getNumber(), this.getState())};
     }
 
     @Override
