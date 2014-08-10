@@ -1,4 +1,4 @@
-package be.xhibit.teletask.client.builder.composer.config.sensor;
+package be.xhibit.teletask.client.builder.composer.config.statecalculator;
 
 import be.xhibit.teletask.client.builder.composer.config.NumberConverter;
 import be.xhibit.teletask.model.spec.ComponentSpec;
@@ -32,7 +32,7 @@ public class SimpleStateCalculator implements StateCalculator {
     }
 
     @Override
-    public String getDefaultState() {
+    public String getDefaultState(ComponentSpec component) {
         return "0";
     }
 }

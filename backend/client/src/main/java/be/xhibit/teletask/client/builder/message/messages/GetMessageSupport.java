@@ -56,7 +56,7 @@ public abstract class GetMessageSupport extends FunctionBasedMessageSupport {
 
             if (component != null) {
                 if(component.getState() == null) {
-                    component.setState(messageHandler.getFunctionConfig(this.getFunction()).getStateCalculator().getDefaultState());
+                    component.setState(messageHandler.getFunctionConfig(this.getFunction()).getStateCalculator().getDefaultState(component));
                 }
 
                 states.add(new MessageHandler.OutputState(number, component.getState()));

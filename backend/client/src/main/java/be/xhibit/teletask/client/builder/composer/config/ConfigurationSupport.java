@@ -1,7 +1,7 @@
 package be.xhibit.teletask.client.builder.composer.config;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
-import be.xhibit.teletask.client.builder.composer.config.sensor.StateCalculator;
+import be.xhibit.teletask.client.builder.composer.config.statecalculator.StateCalculator;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;

@@ -1,4 +1,4 @@
-package be.xhibit.teletask.client.builder.composer.config.sensor;
+package be.xhibit.teletask.client.builder.composer.config.statecalculator;
 
 import be.xhibit.teletask.client.builder.composer.config.NumberConverter;
 import be.xhibit.teletask.model.spec.ComponentSpec;
@@ -24,5 +24,10 @@ public class LuxStateCalculator extends SimpleStateCalculator {
         double log10 = Math.log10(inBetween);
         double convertedValue = log10 * 40;
         return this.getNumberConverter().convert(Math.round(convertedValue));
+    }
+
+    @Override
+    public String getDefaultState(ComponentSpec component) {
+        return "3547";
     }
 }

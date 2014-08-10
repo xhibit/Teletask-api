@@ -1,7 +1,8 @@
-package be.xhibit.teletask.client.builder.composer.config.sensor;
+package be.xhibit.teletask.client.builder.composer.config.statecalculator;
 
 import be.xhibit.teletask.client.builder.composer.config.NumberConverter;
 import be.xhibit.teletask.model.spec.ComponentSpec;
+import com.google.common.collect.Iterables;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,5 +36,10 @@ public class MappingStateCalculator extends SimpleStateCalculator {
     @Override
     public boolean isValidState(String state) {
         return this.byName.keySet().contains(state.toUpperCase());
+    }
+
+    @Override
+    public String getDefaultState(ComponentSpec component) {
+        return Iterables.getFirst(this.byName.keySet(), null);
     }
 }

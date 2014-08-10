@@ -1,7 +1,7 @@
 package be.xhibit.teletask.client.builder.composer.config.configurables;
 
 import be.xhibit.teletask.client.builder.composer.config.Configurable;
-import be.xhibit.teletask.client.builder.composer.config.sensor.StateCalculator;
+import be.xhibit.teletask.client.builder.composer.config.statecalculator.StateCalculator;
 import be.xhibit.teletask.model.spec.Function;
 
 public class FunctionConfigurable extends Configurable<Function> {

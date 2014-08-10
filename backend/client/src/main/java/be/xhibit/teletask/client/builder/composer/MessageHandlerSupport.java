@@ -4,7 +4,7 @@ import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.config.ConfigurationSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
-import be.xhibit.teletask.client.builder.composer.config.sensor.StateCalculator;
+import be.xhibit.teletask.client.builder.composer.config.statecalculator.StateCalculator;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;

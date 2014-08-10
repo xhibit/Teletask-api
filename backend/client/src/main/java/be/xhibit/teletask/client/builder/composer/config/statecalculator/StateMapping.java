@@ -1,4 +1,4 @@
-package be.xhibit.teletask.client.builder.composer.config.sensor;
+package be.xhibit.teletask.client.builder.composer.config.statecalculator;
 
 public class StateMapping {
     private final String name;

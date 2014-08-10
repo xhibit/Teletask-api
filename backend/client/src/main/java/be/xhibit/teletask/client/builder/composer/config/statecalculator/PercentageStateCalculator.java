@@ -1,4 +1,4 @@
-package be.xhibit.teletask.client.builder.composer.config.sensor;
+package be.xhibit.teletask.client.builder.composer.config.statecalculator;
 
 import be.xhibit.teletask.client.builder.composer.config.NumberConverter;
 
