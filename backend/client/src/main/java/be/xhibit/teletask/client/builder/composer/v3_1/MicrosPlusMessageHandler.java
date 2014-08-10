@@ -1,7 +1,6 @@
 package be.xhibit.teletask.client.builder.composer.v3_1;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
-import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.messages.impl.GroupGetMessage;
@@ -12,10 +11,7 @@ import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 import com.google.common.primitives.Bytes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,30 +20,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MicrosPlusMessageHandler extends MessageHandlerSupport {
-    /**
-     * Logger responsible for logging and debugging statements.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(MicrosPlusMessageHandler.class);
     public static final MicrosPlusKeepAliveStrategy KEEP_ALIVE_STRATEGY = new MicrosPlusKeepAliveStrategy();
     public static final MicrosPlusGroupGetStrategy GROUP_GET_STRATEGY = new MicrosPlusGroupGetStrategy();
     public static final int CENTRAL_UNIT = 1;
 
     public MicrosPlusMessageHandler() {
-        super(new MicrosPlusCommandConfiguration(), new MicrosPlusStateConfiguration(), new MicrosPlusFunctionConfiguration());
+        super(new MicrosPlusCommandConfiguration(), new MicrosPlusFunctionConfiguration());
     }
 
     @Override
     public byte[] compose(Command command, byte[] payload) {
-        boolean cuParam = this.getCommandConfig(command).needsCentralUnitParameter();
+        boolean needsCentralUnitParam = this.getCommandConfig(command).needsCentralUnitParameter();
 
-        int msgStx = this.getStxValue();                                    // STX: is this value always fixed 02h?
-        int msgLength = (cuParam ? 4 : 3) + payload.length;                                 // Length: the length of the command without checksum
+        int msgStx = this.getStxValue();                                    // STX: This is the value indicating the start of a command/event
+        int msgLength = (needsCentralUnitParam ? 4 : 3) + payload.length;   // Length: the length of the command without checksum
         int msgCommand = this.getCommandConfig(command).getNumber();        // Command Number
-        int msgCentralUnit = CENTRAL_UNIT;                                             // Now we only support 1 central unit per
+        int msgCentralUnit = CENTRAL_UNIT;                                  // For now, we only support 1 central unit
 
         byte[] begin = {(byte) msgStx, (byte) msgLength, (byte) msgCommand};
         byte[] messageBytes = null;
-        if (cuParam) {
+        if (needsCentralUnitParam) {
             messageBytes = Bytes.concat(begin, new byte[]{(byte) msgCentralUnit}, payload);
         } else {
             messageBytes = Bytes.concat(begin, payload);
@@ -74,8 +66,8 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         Function function = this.getFunction(message[++counter]);
         int number = ByteBuffer.wrap(new byte[]{message[++counter], message[++counter]}).getShort();
         ++counter; // This is the ErrorState, not used at this time
-        int stateValue = message[++counter];
-        State state = this.getState(new StateKey(function, stateValue == -1 ? 255 : stateValue));
+
+        String state = this.parseState(message, ++counter, config, function, number);
 
         return new EventMessage(config, message, function, number, state);
     }
@@ -107,25 +99,16 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         for (OutputState number : numbers) {
             byte[] numberBytes = this.composeOutput(number.getNumber());
 
-            byte[] rawBytes = new byte[]{
-                    (byte) this.getStxValue(),
-                    9,
-                    (byte) this.getCommandConfig(Command.EVENT).getNumber(),
-                    CENTRAL_UNIT,
-                    (byte) this.getFunctionConfig(function).getNumber(),
-                    numberBytes[0],
-                    numberBytes[1],
-                    0,
-                    (byte) this.getStateConfig(number.getState()).getNumber(),
-                    0
-            };
+            byte[] rawBytes = new byte[]{(byte) this.getStxValue(), 0};
+            rawBytes = Bytes.concat(rawBytes, this.getCommandConfig(Command.EVENT).getBytes());
+            rawBytes = Bytes.concat(rawBytes, new byte[]{CENTRAL_UNIT});
+            rawBytes = Bytes.concat(rawBytes, this.getFunctionConfig(function).getBytes());
+            rawBytes = Bytes.concat(rawBytes, numberBytes);
+            rawBytes = Bytes.concat(rawBytes, new byte[]{0});
+            rawBytes = Bytes.concat(rawBytes, this.getStateBytes(config, function, number));
+            rawBytes = Bytes.concat(rawBytes, new byte[]{0});
 
-            byte checksum = 0;
-            for (byte rawByte : rawBytes) {
-                checksum += rawByte;
-            }
-
-            rawBytes[9] = checksum;
+            this.setLengthAndCheckSum(rawBytes);
 
             ComponentSpec component = config.getComponent(function, number.getNumber());
 
@@ -134,6 +117,11 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
 
 
         return eventMessages;
+    }
+
+    @Override
+    public byte getLogStateByte(String state) {
+        return MicrosPlusLogState.valueOf(state.toUpperCase()).getByteValue();
     }
 
     private static class MicrosPlusKeepAliveStrategy implements KeepAliveStrategy {
@@ -150,7 +138,7 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
 
     private static class MicrosPlusGroupGetStrategy implements GroupGetStrategy {
         @Override
-        public void execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
+        public void execute(ClientConfigSpec config, OutputStream out, Function function, int... numbers) throws Exception {
             MessageExecutor.of(new GroupGetMessage(config, function, numbers), out).run();
         }
     }

@@ -77,6 +77,11 @@ public class Room implements RoomSpec {
     }
 
     @Override
+    public List<? extends ComponentSpec> getSensors() {
+        return this.getComponents().get(Function.SENSOR);
+    }
+
+    @Override
     public List<? extends ComponentSpec> getConditions() {
         return this.getComponents().get(Function.COND);
     }

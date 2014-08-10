@@ -2,8 +2,6 @@ package be.xhibit.teletask.client.builder.composer;
 
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
-import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
-import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.strategy.GroupGetStrategy;
@@ -11,7 +9,6 @@ import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 
 import java.util.List;
 
@@ -19,8 +16,6 @@ public interface MessageHandler {
     byte[] compose(Command command, byte[] payload);
 
     CommandConfigurable<?> getCommandConfig(Command command);
-
-    StateConfigurable getStateConfig(State state);
 
     FunctionConfigurable getFunctionConfig(Function function);
 
@@ -34,13 +29,9 @@ public interface MessageHandler {
 
     Command getCommand(int command);
 
-    State getState(StateKey key);
-
     boolean knows(Command command);
 
     boolean knows(Function function);
-
-    boolean knows(State state);
 
     String getOutputLogHeaderName(int index);
 
@@ -56,11 +47,13 @@ public interface MessageHandler {
 
     List<EventMessage> createResponseEventMessage(ClientConfigSpec config, Function function, OutputState... numbers);
 
+    byte getLogStateByte(String state);
+
     class OutputState {
         private final int number;
-        private final State state;
+        private final String state;
 
-        public OutputState(int number, State state) {
+        public OutputState(int number, String state) {
             this.number = number;
             this.state = state;
         }
@@ -69,7 +62,7 @@ public interface MessageHandler {
             return this.number;
         }
 
-        public State getState() {
+        public String getState() {
             return this.state;
         }
     }

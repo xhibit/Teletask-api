@@ -3,12 +3,13 @@ package be.xhibit.teletask.client.builder.message.messages;
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
+import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
 import be.xhibit.teletask.client.builder.message.MessageUtilities;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
@@ -152,10 +153,12 @@ public abstract class MessageSupport {
         return this.getMessageHandler().getCommandConfig(this.getCommand()).getParamNames().get(index);
     }
 
-    protected String formatState(State... states) {
+    protected String formatState(Function function, int number, String... states) {
+        FunctionConfigurable functionConfig = this.getMessageHandler().getFunctionConfig(function);
+        ComponentSpec component = this.getClientConfig().getComponent(function, number);
         Collection<String> log = new ArrayList<>();
-        for (State state : states) {
-            log.add("State: " + state + " | " + (state == null ? null : this.getMessageHandler().getStateConfig(state).getNumber()) + " | " + (state == null ? null : ByteUtilities.bytesToHex((byte) this.getMessageHandler().getStateConfig(state).getNumber())));
+        for (String state : states) {
+            log.add("State: " + state + " | " + (state == null ? null : ByteUtilities.bytesToHex(functionConfig.getStateCalculator().convertSet(component, state))));
         }
         return Joiner.on(", ").join(log);
     }

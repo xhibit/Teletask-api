@@ -1,7 +1,6 @@
 package be.xhibit.teletask.client.builder.composer.v2_8;
 
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
-import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
 import be.xhibit.teletask.client.builder.message.messages.impl.GetMessage;
@@ -11,8 +10,6 @@ import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
-import be.xhibit.teletask.model.spec.StateEnum;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Bytes;
 
@@ -25,12 +22,12 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
     public static final MicrosGroupGetStrategy GROUP_GET_STRATEGY = new MicrosGroupGetStrategy();
 
     public MicrosMessageHandler() {
-        super(new MicrosCommandConfiguration(), new MicrosStateConfiguration(), new MicrosFunctionConfiguration());
+        super(new MicrosCommandConfiguration(), new MicrosFunctionConfiguration());
     }
 
     @Override
     public byte[] compose(Command command, byte[] payload) {
-        int msgStx = this.getStxValue();                                       // STX: is this value always fixed 02h?
+        int msgStx = this.getStxValue();                                    // STX: This is the value indicating the start of a command/event
         int msgLength = 3 + payload.length;                                 // Length: the length of the command without checksum
         int msgCommand = this.getCommandConfig(command).getNumber();        // Command Number
 
@@ -55,8 +52,9 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
         int counter = 2; //We skip first 3 since they are of no use to us at this time.
         Function function = this.getFunction(message[++counter]);
         int number = message[++counter];
-        int stateValue = message[++counter];
-        State state = this.getState(new StateKey(function, stateValue == -1 ? 255 : stateValue));
+
+        String state = this.parseState(message, ++counter, config, function, number);
+
         return new EventMessage(config, message, function, number, state);
     }
 
@@ -77,24 +75,18 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
     @Override
     public List<EventMessage> createResponseEventMessage(ClientConfigSpec config, Function function, OutputState... numbers) {
-        byte[] rawBytes = new byte[]{
-                (byte) this.getStxValue(),
-                6,
-                (byte) this.getCommandConfig(Command.EVENT).getNumber(),
-                (byte) this.getFunctionConfig(function).getNumber(),
-                (byte) numbers[0].getNumber(),
-                (byte) this.getStateConfig(numbers[0].getState()).getNumber(),
-                0
-        };
+        OutputState outputState = numbers[0];
 
-        byte checksum = 0;
-        for (byte rawByte : rawBytes) {
-            checksum += rawByte;
-        }
+        byte[] rawBytes = new byte[]{(byte) this.getStxValue(), 0};
+        rawBytes = Bytes.concat(rawBytes, this.getCommandConfig(Command.EVENT).getBytes());
+        rawBytes = Bytes.concat(rawBytes, this.getFunctionConfig(function).getBytes());
+        rawBytes = Bytes.concat(rawBytes, new byte[]{(byte) outputState.getNumber()});
+        rawBytes = Bytes.concat(rawBytes, this.getStateBytes(config, function, outputState));
+        rawBytes = Bytes.concat(rawBytes, new byte[]{0}); // The furture checksum
 
-        rawBytes[6] = checksum;
+        this.setLengthAndCheckSum(rawBytes);
 
-        return Lists.newArrayList(new EventMessage(config, rawBytes, function, numbers[0].getNumber(), numbers[0].getState()));
+        return Lists.newArrayList(new EventMessage(config, rawBytes, function, outputState.getNumber(), outputState.getState()));
     }
 
     private static class MicrosKeepAliveStrategy implements KeepAliveStrategy {
@@ -105,13 +97,18 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
 
         @Override
         public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
-            MessageExecutor.of(new LogMessage(config, Function.MOTOR, StateEnum.ON), out).run();
+            MessageExecutor.of(new LogMessage(config, Function.MOTOR, "ON"), out).run();
         }
+    }
+
+    @Override
+    public byte getLogStateByte(String state) {
+        return MicrosLogState.valueOf(state.toUpperCase()).getByteValue();
     }
 
     private static class MicrosGroupGetStrategy implements GroupGetStrategy {
         @Override
-        public void execute(ClientConfigSpec config, OutputStream out, InputStream in, Function function, int... numbers) throws Exception {
+        public void execute(ClientConfigSpec config, OutputStream out, Function function, int... numbers) throws Exception {
             // For some reason the microsplus does not always send an event after requesting the state of a component.
             // As a workaround, we keep trying until we get the state of all components.
             // Sleeping between get messages seems to decrease the amount of failures.

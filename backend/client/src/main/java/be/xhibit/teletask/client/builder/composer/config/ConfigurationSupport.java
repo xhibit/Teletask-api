@@ -1,5 +1,11 @@
 package be.xhibit.teletask.client.builder.composer.config;
 
+import be.xhibit.teletask.client.builder.composer.MessageHandler;
+import be.xhibit.teletask.client.builder.composer.config.statecalculator.StateCalculator;
+import be.xhibit.teletask.model.spec.ClientConfigSpec;
+import be.xhibit.teletask.model.spec.ComponentSpec;
+import be.xhibit.teletask.model.spec.Function;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +16,13 @@ public abstract class ConfigurationSupport<T, C extends Configurable<T>, K> {
 
     public ConfigurationSupport(Iterable<C> config) {
         this.config = config;
+    }
+
+    protected static String getState(MessageHandler messageHandler, ClientConfigSpec config, Function function, int number, byte[] payload, int startIndex) {
+        ComponentSpec component = config.getComponent(function, number);
+        StateCalculator stateCalculator = messageHandler.getFunctionConfig(function).getStateCalculator();
+        byte[] stateBytes = stateCalculator.getNumberConverter().read(payload, startIndex);
+        return stateCalculator.convertGet(component, stateBytes);
     }
 
     public T getConfigObject(K key) {

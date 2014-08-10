@@ -11,6 +11,7 @@ import be.xhibit.teletask.model.nbt.Motor;
 import be.xhibit.teletask.model.nbt.OutputInterface;
 import be.xhibit.teletask.model.nbt.Relay;
 import be.xhibit.teletask.model.nbt.Room;
+import be.xhibit.teletask.model.nbt.Sensor;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.base.Strings;
@@ -31,6 +32,8 @@ public class FullNbtModelConsumerImpl implements Consumer {
     public FullNbtModelConsumerImpl() {
         this.centralUnit = new CentralUnit();
         Room room = new Room(-2, "Conditions");
+        this.getCentralUnit().getRooms().add(room);
+        room = new Room(-3, "Sensors");
         this.getCentralUnit().getRooms().add(room);
     }
 
@@ -137,6 +140,24 @@ public class FullNbtModelConsumerImpl implements Consumer {
         Condition condition = new Condition(Integer.valueOf(id), room, "CON", description);
         room.getConditions().add(condition);
         this.getCentralUnit().getComponents().add(condition);
+    }
+
+    @Override
+    public void sensor(String id, String type, String description) {
+        this.getLogger().debug("sensor: {} - {}", id, description);
+        Room room = this.getCentralUnit().findRoom("Sensors");
+
+        if (type.toUpperCase().contains("TEMPERATURE")) {
+            type = "TEMPERATURE";
+        } else if (type.toUpperCase().contains("LIGHT")) {
+            type = "LIGHT";
+        } else if (type.toUpperCase().contains("HUMIDITY")) {
+            type = "HUMIDITY";
+        }
+
+        Sensor sensor = new Sensor(Integer.valueOf(id), room, type, description);
+        room.getSensors().add(sensor);
+        this.getCentralUnit().getComponents().add(sensor);
     }
 
     @Override

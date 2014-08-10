@@ -34,4 +34,6 @@ public interface Consumer {
     void generalMood(String id, String roomName, String type, String description);
 
     void condition(String id, String description);
+
+    void sensor(String id, String type, String description);
 }

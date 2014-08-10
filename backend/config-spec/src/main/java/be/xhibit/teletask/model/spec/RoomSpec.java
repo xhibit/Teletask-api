@@ -21,4 +21,6 @@ public interface RoomSpec {
     List<? extends ComponentSpec> getDimmers();
 
     List<? extends ComponentSpec> getConditions();
+
+    List<? extends ComponentSpec> getSensors();
 }

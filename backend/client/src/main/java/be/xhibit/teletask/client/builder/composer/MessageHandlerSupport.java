@@ -4,23 +4,20 @@ import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.config.ConfigurationSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
-import be.xhibit.teletask.client.builder.composer.config.configurables.StateConfigurable;
-import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
+import be.xhibit.teletask.client.builder.composer.config.statecalculator.StateCalculator;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
+import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 import com.google.common.primitives.Bytes;
 
 public abstract class MessageHandlerSupport implements MessageHandler {
     private final ConfigurationSupport<Command, CommandConfigurable<?>, Integer> commandConfiguration;
-    private final ConfigurationSupport<State, StateConfigurable, StateKey> stateConfiguration;
     private final ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration;
 
-    protected MessageHandlerSupport(ConfigurationSupport<Command, CommandConfigurable<?>, Integer> commandConfiguration, ConfigurationSupport<State, StateConfigurable, StateKey> stateConfiguration, ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration) {
+    protected MessageHandlerSupport(ConfigurationSupport<Command, CommandConfigurable<?>, Integer> commandConfiguration, ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration) {
         this.commandConfiguration = commandConfiguration;
-        this.stateConfiguration = stateConfiguration;
         this.functionConfiguration = functionConfiguration;
     }
 
@@ -51,7 +48,6 @@ public abstract class MessageHandlerSupport implements MessageHandler {
 
     @Override
     public MessageSupport parse(ClientConfigSpec config, byte[] message) {
-        int stx = message[0];
         int length = message[1];
         int command = message[2];
 
@@ -78,21 +74,12 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     }
 
     @Override
-    public StateConfigurable getStateConfig(State state) {
-        return this.getStateConfiguration().getConfigurable(state);
-    }
-
-    @Override
     public FunctionConfigurable getFunctionConfig(Function function) {
         return this.getFunctionConfiguration().getConfigurable(function);
     }
 
     public ConfigurationSupport<Command, CommandConfigurable<?>, Integer> getCommandConfiguration() {
         return this.commandConfiguration;
-    }
-
-    public ConfigurationSupport<State, StateConfigurable, StateKey> getStateConfiguration() {
-        return this.stateConfiguration;
     }
 
     public ConfigurationSupport<Function, FunctionConfigurable, Integer> getFunctionConfiguration() {
@@ -110,11 +97,6 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     }
 
     @Override
-    public State getState(StateKey key) {
-        return this.getStateConfiguration().getConfigObject(key);
-    }
-
-    @Override
     public boolean knows(Command command) {
         return this.getCommandConfiguration().knows(command);
     }
@@ -124,8 +106,31 @@ public abstract class MessageHandlerSupport implements MessageHandler {
         return this.getFunctionConfiguration().knows(function);
     }
 
-    @Override
-    public boolean knows(State state) {
-        return this.getStateConfiguration().knows(state);
+    protected void setLengthAndCheckSum(byte[] rawBytes) {
+        rawBytes[1] = (byte) (rawBytes.length - 1);
+
+        byte checksum = 0;
+        for (byte rawByte : rawBytes) {
+            checksum += rawByte;
+        }
+
+        rawBytes[rawBytes.length - 1] = checksum;
+    }
+
+    protected byte[] getStateBytes(ClientConfigSpec config, Function function, OutputState outputState) {
+        int number = outputState.getNumber();
+        FunctionConfigurable functionConfig = this.getFunctionConfig(function);
+        ComponentSpec component = config.getComponent(function, number);
+        return functionConfig.getStateCalculator().convertSet(component, outputState.getState());
+    }
+
+    protected String parseState(byte[] message, int counter, ClientConfigSpec config, Function function, int number) {
+        FunctionConfigurable functionConfig = this.getFunctionConfig(function);
+
+        ComponentSpec component = config.getComponent(function, number);
+
+        StateCalculator stateCalculator = functionConfig.getStateCalculator();
+
+        return stateCalculator.convertGet(component, stateCalculator.getNumberConverter().read(message, counter));
     }
 }

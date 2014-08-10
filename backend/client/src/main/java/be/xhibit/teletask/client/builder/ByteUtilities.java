@@ -16,4 +16,6 @@ public class ByteUtilities {
         }
         return new String(hexChars).trim();
     }
+
+
 }

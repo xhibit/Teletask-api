@@ -3,7 +3,6 @@ package be.xhibit.teletask.client.builder.composer.v2_8;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.config.ConfigurationSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
-import be.xhibit.teletask.client.builder.composer.config.configurables.StateKey;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.EventCommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.GetCommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.command.LogCommandConfigurable;
@@ -14,7 +13,6 @@ import be.xhibit.teletask.client.builder.message.messages.impl.SetMessage;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.model.spec.State;
 import com.google.common.collect.ImmutableList;
 
 public class MicrosCommandConfiguration extends ConfigurationSupport<Command, CommandConfigurable<?>, Integer> {
@@ -41,7 +39,7 @@ public class MicrosCommandConfiguration extends ConfigurationSupport<Command, Co
         public EventMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
             Function function = messageHandler.getFunction(payload[0]);
             int number = this.getOutputNumber(messageHandler, payload, 1);
-            State state = messageHandler.getState(new StateKey(function, payload[2]));
+            String state = getState(messageHandler, config, function, number, payload, 2);
             return new EventMessage(config, rawBytes, function, number, state);
         }
     }
@@ -65,7 +63,9 @@ public class MicrosCommandConfiguration extends ConfigurationSupport<Command, Co
         @Override
         public SetMessage parse(ClientConfigSpec config, MessageHandler messageHandler, byte[] rawBytes, byte[] payload) {
             Function function = messageHandler.getFunction(payload[0]);
-            return new SetMessage(config, function, this.getOutputNumber(messageHandler, payload, 1), messageHandler.getState(new StateKey(function, payload[messageHandler.getOutputByteSize() + 1])));
+            int number = this.getOutputNumber(messageHandler, payload, 1);
+            String state = getState(messageHandler, config, function, number, payload, messageHandler.getOutputByteSize() + 1);
+            return new SetMessage(config, function, number, state);
         }
     }
 }
