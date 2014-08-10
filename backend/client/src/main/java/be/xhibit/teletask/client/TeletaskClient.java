@@ -232,10 +232,9 @@ public final class TeletaskClient {
     }
 
     public void groupGet() {
-//        for (Function function : Function.values()) {
-//            this.groupGet(function);
-//        }
-        this.groupGet(Function.SENSOR);
+        for (Function function : Function.values()) {
+            this.groupGet(function);
+        }
     }
 
     public void groupGet(Function function) {
@@ -337,12 +336,12 @@ public final class TeletaskClient {
     }
 
     private void sendLogEventMessages(String state) {
-//        this.sendLogEventMessage(Function.RELAY, state);
-//        this.sendLogEventMessage(Function.LOCMOOD, state);
-//        this.sendLogEventMessage(Function.GENMOOD, state);
-//        this.sendLogEventMessage(Function.MOTOR, state);
-//        this.sendLogEventMessage(Function.DIMMER, state);
-//        this.sendLogEventMessage(Function.COND, state);
+        this.sendLogEventMessage(Function.RELAY, state);
+        this.sendLogEventMessage(Function.LOCMOOD, state);
+        this.sendLogEventMessage(Function.GENMOOD, state);
+        this.sendLogEventMessage(Function.MOTOR, state);
+        this.sendLogEventMessage(Function.DIMMER, state);
+        this.sendLogEventMessage(Function.COND, state);
         this.sendLogEventMessage(Function.SENSOR, state);
     }
 

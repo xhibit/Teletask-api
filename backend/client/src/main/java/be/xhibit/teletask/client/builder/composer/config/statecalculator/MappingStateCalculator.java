@@ -18,8 +18,10 @@ public class MappingStateCalculator extends SimpleStateCalculator {
 
     private void register(StateMapping... mappings) {
         for (StateMapping mapping : mappings) {
-            this.byName.put(mapping.getName().toUpperCase(), String.valueOf(mapping.getNumber()));
-            this.byNumber.put(mapping.getNumber(), mapping.getName().toUpperCase());
+            if (mapping.getNumber() != null) {
+                this.byName.put(mapping.getName().toUpperCase(), String.valueOf(mapping.getNumber()));
+                this.byNumber.put(mapping.getNumber(), mapping.getName().toUpperCase());
+            }
         }
     }
 

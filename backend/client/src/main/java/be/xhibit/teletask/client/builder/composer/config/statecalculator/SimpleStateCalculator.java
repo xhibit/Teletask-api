@@ -18,7 +18,7 @@ public class SimpleStateCalculator implements StateCalculator {
 
     @Override
     public byte[] convertSet(ComponentSpec component, String value) {
-        return this.numberConverter.convert(value);
+        return value == null ? null : this.numberConverter.convert(value);
     }
 
     @Override
