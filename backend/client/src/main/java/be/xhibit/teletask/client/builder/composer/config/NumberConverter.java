@@ -3,15 +3,15 @@ package be.xhibit.teletask.client.builder.composer.config;
 import java.nio.ByteBuffer;
 
 public enum NumberConverter {
-    BYTE(1, new Converter() {
+    UNSIGNED_BYTE(1, new Converter() {
         @Override
         public Number toNumber(ByteBuffer buffer) {
-            return buffer.get();
+            return buffer.get() & 0xff;
         }
 
         @Override
         public Number convert(String value) {
-            return value == null ? null : Byte.valueOf(value);
+            return value == null ? null : Short.valueOf(value);
         }
 
         @Override
@@ -21,13 +21,13 @@ public enum NumberConverter {
 
         @Override
         public ByteBuffer putBytes(ByteBuffer buffer, Number number) {
-            return buffer.put((Byte) number);
+            return buffer.put((byte) (number.shortValue() & 0xff));
         }
     }),
-    SHORT(2, new Converter() {
+    UNSIGNED_SHORT(2, new Converter() {
         @Override
         public Number toNumber(ByteBuffer buffer) {
-            return buffer.getShort();
+            return buffer.getShort() & 0xffff;
         }
 
         @Override
@@ -42,28 +42,7 @@ public enum NumberConverter {
 
         @Override
         public ByteBuffer putBytes(ByteBuffer buffer, Number number) {
-            return buffer.putShort((Short) number);
-        }
-    }),
-    INTEGER(4, new Converter() {
-        @Override
-        public Number toNumber(ByteBuffer buffer) {
-            return buffer.getInt();
-        }
-
-        @Override
-        public ByteBuffer putBytes(ByteBuffer buffer, Number number) {
-            return buffer.putInt((Integer) number);
-        }
-
-        @Override
-        public Number convert(String value) {
-            return value == null ? null : Integer.valueOf(value);
-        }
-
-        @Override
-        public Number cast(Number number) {
-            return number.intValue();
+            return buffer.putShort((short) (number.intValue() & 0xffff));
         }
     });
 

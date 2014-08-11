@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class MappingStateCalculator extends SimpleStateCalculator {
     private final Map<String, String> byName = new HashMap<>();
-    private final Map<Number, String> byNumber = new HashMap<>();
+    private final Map<Integer, String> byNumber = new HashMap<>();
 
     public MappingStateCalculator(NumberConverter numberConverter, StateMapping... mappings) {
         super(numberConverter);
@@ -20,14 +20,14 @@ public class MappingStateCalculator extends SimpleStateCalculator {
         for (StateMapping mapping : mappings) {
             if (mapping.getNumber() != null) {
                 this.byName.put(mapping.getName().toUpperCase(), String.valueOf(mapping.getNumber()));
-                this.byNumber.put(mapping.getNumber(), mapping.getName().toUpperCase());
+                this.byNumber.put(mapping.getNumber().intValue(), mapping.getName().toUpperCase());
             }
         }
     }
 
     @Override
     public String convertGet(ComponentSpec component, byte[] value) {
-        return this.byNumber.get(this.getNumberConverter().convert(value));
+        return this.byNumber.get(this.getNumberConverter().convert(value).intValue());
     }
 
     @Override

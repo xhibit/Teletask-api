@@ -47,7 +47,7 @@ public interface MessageHandler {
 
     List<EventMessage> createResponseEventMessage(ClientConfigSpec config, Function function, OutputState... numbers);
 
-    byte getLogStateByte(String state);
+    int getLogStateByte(String state);
 
     class OutputState {
         private final int number;

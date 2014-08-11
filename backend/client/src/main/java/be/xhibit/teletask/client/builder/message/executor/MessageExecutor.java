@@ -1,24 +1,19 @@
 package be.xhibit.teletask.client.builder.message.executor;
 
+import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 
-import java.io.OutputStream;
-
-public class MessageExecutor<R> implements Runnable {
+public class MessageExecutor implements Runnable {
     private final MessageSupport message;
-    private final OutputStream out;
+    private final TeletaskClient client;
 
-    private MessageExecutor(MessageSupport message, OutputStream out) {
+    public MessageExecutor(MessageSupport message, TeletaskClient client) {
         this.message = message;
-        this.out = out;
-    }
-
-    public static <S> MessageExecutor<S> of(MessageSupport message, OutputStream out) {
-        return new MessageExecutor<>(message, out);
+        this.client = client;
     }
 
     @Override
     public void run() {
-        this.message.execute(this.out);
+        this.message.execute(this.client);
     }
 }

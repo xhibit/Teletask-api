@@ -1,10 +1,9 @@
 package be.xhibit.teletask.client.builder.message;
 
+import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
-import be.xhibit.teletask.client.builder.message.parser.DelegatingMessageParser;
-import be.xhibit.teletask.client.builder.message.parser.MessageParser;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import com.google.common.primitives.Bytes;
 import org.slf4j.Logger;
@@ -17,17 +16,17 @@ import java.util.Collection;
 import java.util.List;
 
 public final class MessageUtilities {
-    private static final MessageParser DEFAULT_MESSAGE_PARSER = new DelegatingMessageParser();
-
     private MessageUtilities() {
     }
 
-    public static List<MessageSupport> receive(Logger logger, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler) throws Exception {
-        return receive(logger, inputStream, config, messageHandler, DEFAULT_MESSAGE_PARSER);
+    public static List<MessageSupport> receive(Logger logger, TeletaskClient client) throws Exception {
+        return receive(logger, client, null);
     }
 
-    public static List<MessageSupport> receive(Logger logger, InputStream inputStream, ClientConfigSpec config, MessageHandler messageHandler, MessageParser messageParser) throws Exception {
+    public static List<MessageSupport> receive(Logger logger, TeletaskClient client, MessageSupport currentlyRunningMessage) throws Exception {
         List<MessageSupport> responses = new ArrayList<>();
+
+        InputStream inputStream = client.getInputStream();
 
         byte[] overflow = null;
         long startTime = System.currentTimeMillis();
@@ -40,7 +39,7 @@ public final class MessageUtilities {
                 byte[] read = new byte[available];
                 inputStream.read(read, 0, available);
                 byte[] data = overflow == null ? read : Bytes.concat(overflow, read);
-                overflow = extractMessages(logger, config, messageHandler, responses, data, messageParser);
+                overflow = extractMessages(logger, client, responses, data, currentlyRunningMessage);
             } else {
                 overflow = new byte[0];
             }
@@ -50,8 +49,10 @@ public final class MessageUtilities {
         return responses;
     }
 
-    private static byte[] extractMessages(Logger logger, ClientConfigSpec config, MessageHandler messageHandler, Collection<MessageSupport> responses, byte[] data, MessageParser messageParser) throws Exception {
+    private static byte[] extractMessages(Logger logger, TeletaskClient client, Collection<MessageSupport> responses, byte[] data, MessageSupport currentlyRunningMessage) throws Exception {
         logger.debug("Receive - Raw bytes: {}", ByteUtilities.bytesToHex(data));
+        MessageHandler messageHandler = client.getMessageHandler();
+        ClientConfigSpec config = client.getConfig();
         byte[] overflow = new byte[0];
         for (int i = 0; i < data.length; i++) {
             byte b = data[i];
@@ -73,7 +74,7 @@ public final class MessageUtilities {
 
                     logger.debug("Receive - Found message bytes: {}", ByteUtilities.bytesToHex(event));
                     try {
-                        MessageSupport parse = messageParser.parse(config, messageHandler, event);
+                        MessageSupport parse = messageHandler.parse(config, event);
                         if (parse != null) {
                             responses.add(parse);
                         }
@@ -83,6 +84,11 @@ public final class MessageUtilities {
                 }
             } else if (b == messageHandler.getAcknowledgeValue()) {
                 logger.debug("Received acknowledge");
+                if (currentlyRunningMessage != null) {
+                    currentlyRunningMessage.acknowledge();
+                } else {
+                    throw new IllegalStateException("Received an acknowledge, but there is no currently running message");
+                }
             } else {
                 logger.warn("Receive - Found byte, but don't know how to handle it: {}", ByteUtilities.bytesToHex(b));
             }

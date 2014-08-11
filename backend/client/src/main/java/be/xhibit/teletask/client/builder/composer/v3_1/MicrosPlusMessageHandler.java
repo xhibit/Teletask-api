@@ -1,5 +1,6 @@
 package be.xhibit.teletask.client.builder.composer.v3_1;
 
+import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
@@ -13,8 +14,6 @@ import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.primitives.Bytes;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,11 +118,6 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         return eventMessages;
     }
 
-    @Override
-    public byte getLogStateByte(String state) {
-        return MicrosPlusLogState.valueOf(state.toUpperCase()).getByteValue();
-    }
-
     private static class MicrosPlusKeepAliveStrategy implements KeepAliveStrategy {
         @Override
         public int getIntervalMinutes() {
@@ -131,15 +125,15 @@ public class MicrosPlusMessageHandler extends MessageHandlerSupport {
         }
 
         @Override
-        public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
-            MessageExecutor.of(new KeepAliveMessage(config), out).run();
+        public void execute(TeletaskClient client) throws Exception {
+            new MessageExecutor(new KeepAliveMessage(client.getConfig()), client).run();
         }
     }
 
     private static class MicrosPlusGroupGetStrategy implements GroupGetStrategy {
         @Override
-        public void execute(ClientConfigSpec config, OutputStream out, Function function, int... numbers) throws Exception {
-            MessageExecutor.of(new GroupGetMessage(config, function, numbers), out).run();
+        public void execute(TeletaskClient client, Function function, int... numbers) throws Exception {
+            new MessageExecutor(new GroupGetMessage(client.getConfig(), function, numbers), client).run();
         }
     }
 }
