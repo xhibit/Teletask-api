@@ -1,5 +1,6 @@
 package be.xhibit.teletask.server;
 
+import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.message.MessageUtilities;
@@ -25,18 +26,16 @@ public class TeletaskTestServer implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(TeletaskTestServer.class);
 
     private final int port;
-    private final ClientConfigSpec config;
-    private final MessageHandler messageHandler;
+    private final TeletaskClient client;
     private ServerSocket server;
     private Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
     private final Timer timer = new Timer();
 
-    public TeletaskTestServer(int port, ClientConfigSpec config, MessageHandler messageHandler) {
+    public TeletaskTestServer(int port, TeletaskClient client) {
         this.port = port;
-        this.config = config;
-        this.messageHandler = messageHandler;
+        this.client = client;
     }
 
     @Override
@@ -50,7 +49,7 @@ public class TeletaskTestServer implements Runnable {
                 @Override
                 public void run() {
                     try {
-                        List<MessageSupport> messages = MessageUtilities.receive(LOG, TeletaskTestServer.this.inputStream, TeletaskTestServer.this.getConfig(), TeletaskTestServer.this.getMessageHandler());
+                        List<MessageSupport> messages = MessageUtilities.receive(LOG, TeletaskTestServer.this.getClient());
                         for (MessageSupport message : messages) {
                             LOG.debug("Processing message: {}", message.toString());
                             TeletaskTestServer.this.outputStream.write(new byte[]{10});
@@ -93,11 +92,14 @@ public class TeletaskTestServer implements Runnable {
         return this.port;
     }
 
+    public TeletaskClient getClient() {
+        return this.client;
+    }
     public ClientConfigSpec getConfig() {
-        return this.config;
+        return this.getClient().getConfig();
     }
 
     public MessageHandler getMessageHandler() {
-        return this.messageHandler;
+        return this.getClient().getMessageHandler();
     }
 }

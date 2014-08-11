@@ -1,12 +1,9 @@
 package be.xhibit.teletask.client.builder.message.strategy;
 
-import be.xhibit.teletask.model.spec.ClientConfigSpec;
-
-import java.io.InputStream;
-import java.io.OutputStream;
+import be.xhibit.teletask.client.TeletaskClient;
 
 public interface KeepAliveStrategy {
     int getIntervalMinutes();
 
-    void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception;
+    void execute(TeletaskClient client) throws Exception;
 }

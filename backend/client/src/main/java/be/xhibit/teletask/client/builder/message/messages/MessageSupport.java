@@ -1,5 +1,6 @@
 package be.xhibit.teletask.client.builder.message.messages;
 
+import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
@@ -33,21 +34,31 @@ public abstract class MessageSupport {
 
     private static final Pattern REMOVE_NAMES = Pattern.compile("[^\\|]");
     private static final Pattern INSERT_PLACEHOLDERS = Pattern.compile("\\|   ");
+    public static final int ACK_WAIT_TIME = 1000;
+    public static final int MAX_RETRY = 5;
 
     private final ClientConfigSpec clientConfig;
+
+    private boolean acknowledged = false;
 
     protected MessageSupport(ClientConfigSpec clientConfig) {
         this.clientConfig = clientConfig;
     }
 
-    public void execute(OutputStream outputStream) {
+    public void execute(TeletaskClient client) {
+        this.execute(client, 1);
+    }
+
+    private void execute(TeletaskClient client, int counter) {
         MessageHandler messageHandler = this.getMessageHandler();
         if (this.isValid()) {
             if (messageHandler.knows(this.getCommand())) {
                 byte[] message = messageHandler.compose(this.getCommand(), this.getPayload());
 
                 try {
-                    this.send(outputStream, message);
+                    this.send(client.getOutputStream(), message);
+
+                    this.waitForAcknowledge(client, counter);
                 } catch (Exception e) {
                     LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
                 }
@@ -56,6 +67,34 @@ public abstract class MessageSupport {
             }
         } else {
             LOG.warn("Invalid request: {}", this);
+        }
+    }
+
+    private void waitForAcknowledge(TeletaskClient client, int counter) {
+        long start = System.currentTimeMillis();
+        while (!this.isAcknowledged() && (System.currentTimeMillis() - start) < ACK_WAIT_TIME) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
+            }
+            try {
+                client.handleEvents(MessageUtilities.receive(LOG, client, this));
+            } catch (Exception e) {
+                LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
+            }
+        }
+
+        if (!this.isAcknowledged()) {
+            LOG.warn("Did not receive an acknowledgement within " + ACK_WAIT_TIME + " milliseconds.");
+            if (counter < MAX_RETRY) {
+                counter++;
+                LOG.warn("Retrying: attempt {} of {}", counter, MAX_RETRY);
+                this.execute(client, counter);
+            } else {
+                LOG.error("We tried {} times to execute this message and never received an acknowledge from the central unit. Something is wrong", MAX_RETRY);
+                throw new RuntimeException("Could not get the message to execute within the given amount of time.");
+            }
         }
     }
 
@@ -158,7 +197,8 @@ public abstract class MessageSupport {
         ComponentSpec component = this.getClientConfig().getComponent(function, number);
         Collection<String> log = new ArrayList<>();
         for (String state : states) {
-            log.add("State: " + state + " | " + (state == null ? null : ByteUtilities.bytesToHex(functionConfig.getStateCalculator().convertSet(component, state))));
+            byte[] bytes = functionConfig.getStateCalculator().convertSet(component, state);
+            log.add("State: " + state + " | " + functionConfig.getStateCalculator().getNumberConverter().convert(bytes) + " | " + (state == null ? null : ByteUtilities.bytesToHex(bytes)));
         }
         return Joiner.on(", ").join(log);
     }
@@ -201,5 +241,13 @@ public abstract class MessageSupport {
 
     public List<EventMessage> respond(ClientConfigSpec config, MessageHandler messageHandler) {
         return null;
+    }
+
+    public boolean isAcknowledged() {
+        return this.acknowledged;
+    }
+
+    public void acknowledge() {
+        this.acknowledged = true;
     }
 }

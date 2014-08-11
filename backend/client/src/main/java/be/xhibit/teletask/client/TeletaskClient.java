@@ -155,6 +155,7 @@ public final class TeletaskClient {
 
     private final List<StateChangeListener> stateChangeListeners = new ArrayList<>();
     private TeletaskTestServer teletaskTestServer;
+    private EventMessageListener eventMessageListener;
 
     /**
      * Default constructor.  Responsible for reading the client config (JSON).
@@ -194,19 +195,6 @@ public final class TeletaskClient {
 
         try {
             this.execute(new SetMessage(this.getConfig(), function, number, state));
-
-            ComponentSpec component = this.getConfig().getComponent(function, number);
-            Long start = System.currentTimeMillis();
-            while (!state.equals(component.getState()) && (System.currentTimeMillis() - start) < 5000) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    LOG.error("Exception ({}) caught in set: {}", e.getClass().getName(), e.getMessage(), e);
-                }
-            }
-            if (!state.equals(component.getState())) {
-                throw new RuntimeException("Did not receive a state change within 5 seconds. Assuming the state change did not succeed");
-            }
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -218,7 +206,7 @@ public final class TeletaskClient {
                 @Override
                 public void run() {
                     try {
-                        TeletaskClient.this.getMessageHandler().getGroupGetStrategy().execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), function, numbers);
+                        TeletaskClient.this.getMessageHandler().getGroupGetStrategy().execute(TeletaskClient.this, function, numbers);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -228,12 +216,6 @@ public final class TeletaskClient {
             LOG.error("Exception ({}) caught in groupGet: {}", e.getClass().getName(), e.getMessage(), e);
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public void groupGet() {
-        for (Function function : Function.values()) {
-            this.groupGet(function);
         }
     }
 
@@ -247,6 +229,23 @@ public final class TeletaskClient {
                 }
             })));
         }
+    }
+
+    public void groupGet() {
+        for (Function function : Function.values()) {
+            this.groupGet(function);
+        }
+//        this.groupGet(Function.LOCMOOD);
+    }
+
+    private void sendLogEventMessages(String state) {
+        this.sendLogEventMessage(Function.RELAY, state);
+        this.sendLogEventMessage(Function.LOCMOOD, state);
+        this.sendLogEventMessage(Function.GENMOOD, state);
+        this.sendLogEventMessage(Function.MOTOR, state);
+        this.sendLogEventMessage(Function.DIMMER, state);
+        this.sendLogEventMessage(Function.COND, state);
+        this.sendLogEventMessage(Function.SENSOR, state);
     }
 
     public void get(Function function, int number) {
@@ -329,20 +328,10 @@ public final class TeletaskClient {
 
     private void execute(MessageSupport message) throws ExecutionException {
         try {
-            this.getExecutorService().submit(MessageExecutor.of(message, this.getOutputStream())).get();
+            this.getExecutorService().submit(new MessageExecutor(message, this)).get();
         } catch (InterruptedException e) {
             LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
         }
-    }
-
-    private void sendLogEventMessages(String state) {
-        this.sendLogEventMessage(Function.RELAY, state);
-        this.sendLogEventMessage(Function.LOCMOOD, state);
-        this.sendLogEventMessage(Function.GENMOOD, state);
-        this.sendLogEventMessage(Function.MOTOR, state);
-        this.sendLogEventMessage(Function.DIMMER, state);
-        this.sendLogEventMessage(Function.COND, state);
-        this.sendLogEventMessage(Function.SENSOR, state);
     }
 
     private void start() {
@@ -367,7 +356,7 @@ public final class TeletaskClient {
             LOG.debug("Starting test server...");
             host = "localhost";
 
-            this.teletaskTestServer = new TeletaskTestServer(port, this.getConfig(), this.getMessageHandler());
+            this.teletaskTestServer = new TeletaskTestServer(port, this);
 
             new Thread(this.getTeletaskTestServer()).start();
 
@@ -381,11 +370,12 @@ public final class TeletaskClient {
     }
 
     private void startEventListener() {
+        this.setEventMessageListener(new EventMessageListener());
         this.getEventListenerTimer().schedule(new TimerTask() {
             @Override
             public void run() {
-//                TeletaskClient.this.getExecutorService().submit(new EventMessageListener());
-                new EventMessageListener().run();
+                TeletaskClient.this.getExecutorService().submit(TeletaskClient.this.getEventMessageListener());
+//                TeletaskClient.this.getEventMessageListener().run();
             }
         }, 0, 20);
     }
@@ -419,7 +409,7 @@ public final class TeletaskClient {
         this.getKeepAliveTimer().schedule(new KeepAliveService(keepAliveStrategy), 0, keepAliveStrategy.getIntervalMinutes() * 60 * 1000);
     }
 
-    private MessageHandler getMessageHandler() {
+    public MessageHandler getMessageHandler() {
         return MessageHandlerFactory.getMessageHandler(this.getConfig().getCentralUnitType());
     }
 
@@ -454,48 +444,47 @@ public final class TeletaskClient {
         return this.inputStream;
     }
 
-    private class EventMessageListener implements Runnable {
+    public class EventMessageListener implements Runnable {
         @Override
         public void run() {
             try {
-                List<MessageSupport> messages = this.getEventMessageServerResponses();
-                List<ComponentSpec> components = new ArrayList<>();
-                for (MessageSupport message : messages) {
-                    if (message instanceof EventMessage) {
-                        EventMessage eventMessage = (EventMessage) message;
-                        this.handleEvent(LOG, TeletaskClient.this.getConfig(), eventMessage);
-                        components.add(TeletaskClient.this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
-                    }
-                }
-                if (!components.isEmpty()) {
-                    for (StateChangeListener stateChangeListener : TeletaskClient.this.stateChangeListeners) {
-                        stateChangeListener.event(components);
-                    }
-                }
+                TeletaskClient.this.handleEvents(MessageUtilities.receive(LOG, TeletaskClient.this));
             } catch (Exception e) {
                 LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
             }
         }
+    }
 
-        private void handleEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
-            ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
-            if (component != null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Event: \nComponent: {}\nCurrent State: {} {}", component.getDescription(), component.getState(), eventMessage.getLogInfo(eventMessage.getRawBytes()));
-                }
-                String state = eventMessage.getState();
-                if (component.getFunction() != Function.MOTOR || !"STOP".equals(state)) {
-                    component.setState(state);
-                }
-            } else {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Event: \nComponent: not found in configuration {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
-                }
+    public void handleEvents(List<MessageSupport> messages) {
+        List<ComponentSpec> components = new ArrayList<>();
+        for (MessageSupport message : messages) {
+            if (message instanceof EventMessage) {
+                EventMessage eventMessage = (EventMessage) message;
+                this.handleEvent(LOG, this.getConfig(), eventMessage);
+                components.add(this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
             }
         }
+        if (!components.isEmpty()) {
+            for (StateChangeListener stateChangeListener : this.getStateChangeListeners()) {
+                stateChangeListener.event(components);
+            }
+        }
+    }
 
-        private List<MessageSupport> getEventMessageServerResponses() throws Exception {
-            return MessageUtilities.receive(LOG, TeletaskClient.this.getInputStream(), TeletaskClient.this.getConfig(), TeletaskClient.this.getMessageHandler());
+    public void handleEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
+        ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
+        if (component != null) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Event: \nComponent: {}\nCurrent State: {} {}", component.getDescription(), component.getState(), eventMessage.getLogInfo(eventMessage.getRawBytes()));
+            }
+            String state = eventMessage.getState();
+            if (component.getFunction() != Function.MOTOR || !"STOP".equals(state)) {
+                component.setState(state);
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Event: \nComponent: not found in configuration {}", eventMessage.getLogInfo(eventMessage.getRawBytes()));
+            }
         }
     }
 
@@ -513,7 +502,7 @@ public final class TeletaskClient {
                     @Override
                     public void run() {
                         try {
-                            KeepAliveService.this.keepAliveStrategy.execute(TeletaskClient.this.getConfig(), TeletaskClient.this.getOutputStream(), TeletaskClient.this.getInputStream());
+                            KeepAliveService.this.keepAliveStrategy.execute(TeletaskClient.this);
                         } catch (Exception e) {
                             LOG.error("Exception ({}) caught in run: {} - Restarting Teletask Client Sockets", e.getClass().getName(), e.getMessage());
                             TeletaskClient.this.stop();
@@ -537,5 +526,13 @@ public final class TeletaskClient {
 
     public List<StateChangeListener> getStateChangeListeners() {
         return this.stateChangeListeners;
+    }
+
+    public EventMessageListener getEventMessageListener() {
+        return this.eventMessageListener;
+    }
+
+    private void setEventMessageListener(EventMessageListener eventMessageListener) {
+        this.eventMessageListener = eventMessageListener;
     }
 }

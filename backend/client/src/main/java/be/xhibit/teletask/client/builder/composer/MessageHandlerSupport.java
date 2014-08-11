@@ -4,15 +4,21 @@ import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.config.ConfigurationSupport;
 import be.xhibit.teletask.client.builder.composer.config.configurables.CommandConfigurable;
 import be.xhibit.teletask.client.builder.composer.config.configurables.FunctionConfigurable;
-import be.xhibit.teletask.client.builder.composer.config.statecalculator.StateCalculator;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.Command;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import com.google.common.primitives.Bytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class MessageHandlerSupport implements MessageHandler {
+    /**
+     * Logger responsible for logging and debugging statements.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(MessageHandlerSupport.class);
+
     private final ConfigurationSupport<Command, CommandConfigurable<?>, Integer> commandConfiguration;
     private final ConfigurationSupport<Function, FunctionConfigurable, Integer> functionConfiguration;
 
@@ -125,12 +131,11 @@ public abstract class MessageHandlerSupport implements MessageHandler {
     }
 
     protected String parseState(byte[] message, int counter, ClientConfigSpec config, Function function, int number) {
-        FunctionConfigurable functionConfig = this.getFunctionConfig(function);
+        return ConfigurationSupport.getState(this, config, function, number, message, counter);
+    }
 
-        ComponentSpec component = config.getComponent(function, number);
-
-        StateCalculator stateCalculator = functionConfig.getStateCalculator();
-
-        return stateCalculator.convertGet(component, stateCalculator.getNumberConverter().read(message, counter));
+    @Override
+    public int getLogStateByte(String state) {
+        return LogState.valueOf(state.toUpperCase()).getByteValue();
     }
 }

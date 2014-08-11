@@ -1,5 +1,6 @@
 package be.xhibit.teletask.client.builder.composer.v2_8;
 
+import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerSupport;
 import be.xhibit.teletask.client.builder.message.executor.MessageExecutor;
 import be.xhibit.teletask.client.builder.message.messages.impl.EventMessage;
@@ -13,8 +14,6 @@ import be.xhibit.teletask.model.spec.Function;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Bytes;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 public class MicrosMessageHandler extends MessageHandlerSupport {
@@ -96,27 +95,22 @@ public class MicrosMessageHandler extends MessageHandlerSupport {
         }
 
         @Override
-        public void execute(ClientConfigSpec config, OutputStream out, InputStream in) throws Exception {
-            MessageExecutor.of(new LogMessage(config, Function.MOTOR, "ON"), out).run();
+        public void execute(TeletaskClient client) throws Exception {
+            new MessageExecutor(new LogMessage(client.getConfig(), Function.MOTOR, "ON"), client).run();
         }
-    }
-
-    @Override
-    public byte getLogStateByte(String state) {
-        return MicrosLogState.valueOf(state.toUpperCase()).getByteValue();
     }
 
     private static class MicrosGroupGetStrategy implements GroupGetStrategy {
         @Override
-        public void execute(ClientConfigSpec config, OutputStream out, Function function, int... numbers) throws Exception {
+        public void execute(TeletaskClient client, Function function, int... numbers) throws Exception {
             // For some reason the microsplus does not always send an event after requesting the state of a component.
             // As a workaround, we keep trying until we get the state of all components.
             // Sleeping between get messages seems to decrease the amount of failures.
             // Problem with this approach is that we have no idea when the server actually will be able to completely start.
-            while (this.stateEmptyCount(config, function, numbers) > 0) {
+            while (this.stateEmptyCount(client.getConfig(), function, numbers) > 0) {
                 for (int number : numbers) {
-                    if (config.getComponent(function, number).getState() == null) {
-                        MessageExecutor.of(new GetMessage(config, function, number), out).run();
+                    if (client.getConfig().getComponent(function, number).getState() == null) {
+                        new MessageExecutor(new GetMessage(client.getConfig(), function, number), client).run();
                         Thread.sleep(150);
                     }
                 }

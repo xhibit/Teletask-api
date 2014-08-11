@@ -19,7 +19,7 @@ public class MicrosCommandConfiguration extends ConfigurationSupport<Command, Co
     public MicrosCommandConfiguration() {
         super(ImmutableList.<CommandConfigurable<?>>builder()
                 .add(new MicrosSetCommandConfigurable())
-                .add(new MicrosPlusGetCommandConfigurable())
+                .add(new MicrosGetCommandConfigurable())
                 .add(new LogCommandConfigurable(3, false, "Fnc", "Sate"))
                 .add(new MicrosEventCommandConfigurable())
                 .build());
@@ -44,8 +44,8 @@ public class MicrosCommandConfiguration extends ConfigurationSupport<Command, Co
         }
     }
 
-    private static class MicrosPlusGetCommandConfigurable extends GetCommandConfigurable {
-        public MicrosPlusGetCommandConfigurable() {
+    private static class MicrosGetCommandConfigurable extends GetCommandConfigurable {
+        public MicrosGetCommandConfigurable() {
             super(2, false, "Fnc", "Output");
         }
 
