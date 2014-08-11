@@ -31,6 +31,7 @@
         request.setAttribute("tds_locmoods", tdsConfig.getComponents(Function.LOCMOOD));
         request.setAttribute("tds_genmoods", tdsConfig.getComponents(Function.GENMOOD));
         request.setAttribute("tds_screens", tdsConfig.getComponents(Function.MOTOR));
+        request.setAttribute("tds_sensors", tdsConfig.getComponents(Function.SENSOR));
         request.setAttribute("tds_rooms", tdsConfig.getRooms());
     %>
 
@@ -58,6 +59,8 @@
             <p><a href="#page_lights" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-brightness-contrast">Lights</a></p>
             <p><a href="#page_moods" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer">Moods</a></p>
             <p><a href="#page_screens" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu">Screens</a></p>
+            <p><a href="#page_sensors" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-eye">Sensors</a></p>
+
             <!--<p><a href="#page_rooms" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-home">Rooms</a></p>-->
         </div>
 
@@ -144,12 +147,31 @@
     </div>
     <!-- ####################### /page:verlichting ####################### -->
 
+    <!-- ####################### page:sensor ####################### -->
+    <div data-role="page" data-theme="a" id="page_sensors" data-add-back-btn="true">
+
+        <div data-role="content">
+
+            <div data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+                <c:forEach items="${requestScope.tds_sensors}" var="sensor" varStatus="status">
+                    <h3 class="ui-bar ui-bar-a ui-corner-all"><c:out value="${sensor.description}" /></h3>
+                    <div class="ui-body">
+                        <p><c:out value="${screen.status}" />&nbsp;</p>
+                    </div>
+                </c:forEach>
+            </div>
+        </div>
+
+    </div>
+    <!-- ####################### /page:sensor ####################### -->
+
     <div data-role="footer" data-position="fixed" data-theme="b">
         <div data-role="navbar">
             <ul>
                 <li><a href="#page_lights" id="navbar_verlichting" class="ui-nodisc-icon ui-btn-icon-bottom icon-brightness-contrast"></a></li>
                 <li><a href="#page_moods" id="navbar_sfeer" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer"></a></li>
                 <li><a href="#page_screens" id="navbar_screens" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu"></a></li>
+                <li><a href="#page_sensors" id="navbar_sensors" class="ui-nodisc-icon ui-btn-icon-bottom icon-eye"></a></li>
                 <!--<li><a href="#page_rooms" id="navbar_allesuit" class="ui-nodisc-icon ui-btn-icon-bottom icon-home"></a></li>-->
             </ul>
         </div>
