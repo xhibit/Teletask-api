@@ -96,5 +96,52 @@ $(document).ready(function () {
          });*/
     });
 
+    if(!("WebSocket" in window)){
+        $('<p>Oh no, you need a browser that supports WebSockets.</p>').appendTo('#page_start');
+    }else {
+        //The user has WebSockets
+        $().openWebSocket();
+    }
 
 });
+
+(function( $ ){
+    $.fn.openWebSocket = function() {
+        if (document.URL.indexOf('http:') == 0) {
+            var baseWsUrl = document.URL.replace("http://", "ws://");
+        } else {
+            var baseWsUrl = document.URL.replace("https://", "wss://");
+        }
+        var wsocket = new WebSocket(baseWsUrl + '/state-changes');
+        console.log("Opening WebSocket connection: " +wsocket);
+
+        wsocket.onmessage = function (evt) {
+
+            console.log("WebSocket msg: " +evt.data);
+
+            /*$scope.$apply(function () {
+                var components = angular.fromJson(evt.data);
+                angular.forEach($scope.config.rooms, function (room, key) {
+                    function changeComponentState(comps) {
+                        angular.forEach(comps, function (comp, key) {
+                            angular.forEach(components, function (component, key) {
+                                if (comp.number == component.number && comp.function == component.function) {
+                                    console.log('Changing state in room ' + room.name + ': ' + component.function + ':' + component.number + ' to ' + component.state.value);
+                                    comp.state.value = component.state.value;
+                                    comp.state.state = component.state.state;
+                                }
+                            });
+                        });
+                    }
+                    changeComponentState(room.relays);
+                    changeComponentState(room.localMoods);
+                    changeComponentState(room.motors);
+                    changeComponentState(room.generalMoods);
+                    changeComponentState(room.dimmers);
+                    changeComponentState(room.conditions);
+                });
+            });*/
+        };
+        //return this;
+    };
+})( jQuery );
