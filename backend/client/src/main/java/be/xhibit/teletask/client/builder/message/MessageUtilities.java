@@ -1,6 +1,6 @@
 package be.xhibit.teletask.client.builder.message;
 
-import be.xhibit.teletask.client.TeletaskClient;
+import be.xhibit.teletask.TeletaskReceiver;
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.message.messages.MessageSupport;
@@ -19,14 +19,14 @@ public final class MessageUtilities {
     private MessageUtilities() {
     }
 
-    public static List<MessageSupport> receive(Logger logger, TeletaskClient client) throws Exception {
-        return receive(logger, client, null);
+    public static List<MessageSupport> receive(Logger logger, TeletaskReceiver teletaskReceiver) throws Exception {
+        return receive(logger, teletaskReceiver, null);
     }
 
-    public static List<MessageSupport> receive(Logger logger, TeletaskClient client, MessageSupport currentlyRunningMessage) throws Exception {
+    public static List<MessageSupport> receive(Logger logger, TeletaskReceiver teletaskReceiver, MessageSupport currentlyRunningMessage) throws Exception {
         List<MessageSupport> responses = new ArrayList<>();
 
-        InputStream inputStream = client.getInputStream();
+        InputStream inputStream = teletaskReceiver.getInputStream();
 
         byte[] overflow = null;
         long startTime = System.currentTimeMillis();
@@ -39,7 +39,7 @@ public final class MessageUtilities {
                 byte[] read = new byte[available];
                 inputStream.read(read, 0, available);
                 byte[] data = overflow == null ? read : Bytes.concat(overflow, read);
-                overflow = extractMessages(logger, client, responses, data, currentlyRunningMessage);
+                overflow = extractMessages(logger, teletaskReceiver, responses, data, currentlyRunningMessage);
             } else {
                 overflow = new byte[0];
             }
@@ -49,10 +49,10 @@ public final class MessageUtilities {
         return responses;
     }
 
-    private static byte[] extractMessages(Logger logger, TeletaskClient client, Collection<MessageSupport> responses, byte[] data, MessageSupport currentlyRunningMessage) throws Exception {
+    private static byte[] extractMessages(Logger logger, TeletaskReceiver teletaskReceiver, Collection<MessageSupport> responses, byte[] data, MessageSupport currentlyRunningMessage) throws Exception {
         logger.debug("Receive - Raw bytes: {}", ByteUtilities.bytesToHex(data));
-        MessageHandler messageHandler = client.getMessageHandler();
-        ClientConfigSpec config = client.getConfig();
+        MessageHandler messageHandler = teletaskReceiver.getMessageHandler();
+        ClientConfigSpec config = teletaskReceiver.getConfig();
         byte[] overflow = new byte[0];
         for (int i = 0; i < data.length; i++) {
             byte b = data[i];
