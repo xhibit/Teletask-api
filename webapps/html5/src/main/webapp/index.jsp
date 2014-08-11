@@ -153,10 +153,10 @@
         <div data-role="content">
 
             <div data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
-                <c:forEach items="${requestScope.tds_sensors}" var="sensor" varStatus="status">
+                <c:forEach items="${requestScope.tds_sensors}" var="sensor">
                     <h3 class="ui-bar ui-bar-a ui-corner-all"><c:out value="${sensor.description}" /></h3>
                     <div class="ui-body">
-                        <p><c:out value="${screen.status}" />&nbsp;</p>
+                        <p><c:out value="${sensor.state}" />&nbsp;</p>
                     </div>
                 </c:forEach>
             </div>

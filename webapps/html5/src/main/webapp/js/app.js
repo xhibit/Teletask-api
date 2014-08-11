@@ -112,7 +112,7 @@ $(document).ready(function () {
         } else {
             var baseWsUrl = document.URL.replace("https://", "wss://");
         }
-        var wsocket = new WebSocket(baseWsUrl + '/state-changes');
+        var wsocket = new WebSocket(baseWsUrl + 'state-changes');
         console.log("Opening WebSocket connection: " +wsocket);
 
         wsocket.onmessage = function (evt) {
