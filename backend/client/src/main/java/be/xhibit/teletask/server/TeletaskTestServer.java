@@ -1,5 +1,6 @@
 package be.xhibit.teletask.server;
 
+import be.xhibit.teletask.TeletaskReceiver;
 import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.client.builder.ByteUtilities;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class TeletaskTestServer implements Runnable {
+public class TeletaskTestServer implements Runnable, TeletaskReceiver {
     /**
      * Logger responsible for logging and debugging statements.
      */
@@ -49,7 +50,7 @@ public class TeletaskTestServer implements Runnable {
                 @Override
                 public void run() {
                     try {
-                        List<MessageSupport> messages = MessageUtilities.receive(LOG, TeletaskTestServer.this.getClient());
+                        List<MessageSupport> messages = MessageUtilities.receive(LOG, TeletaskTestServer.this);
                         for (MessageSupport message : messages) {
                             LOG.debug("Processing message: {}", message.toString());
                             TeletaskTestServer.this.outputStream.write(new byte[]{10});
@@ -95,10 +96,18 @@ public class TeletaskTestServer implements Runnable {
     public TeletaskClient getClient() {
         return this.client;
     }
+
+    @Override
+    public InputStream getInputStream() {
+        return this.inputStream;
+    }
+
+    @Override
     public ClientConfigSpec getConfig() {
         return this.getClient().getConfig();
     }
 
+    @Override
     public MessageHandler getMessageHandler() {
         return this.getClient().getMessageHandler();
     }

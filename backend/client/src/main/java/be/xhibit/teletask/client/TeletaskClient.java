@@ -1,5 +1,6 @@
 package be.xhibit.teletask.client;
 
+import be.xhibit.teletask.TeletaskReceiver;
 import be.xhibit.teletask.client.builder.composer.MessageHandler;
 import be.xhibit.teletask.client.builder.composer.MessageHandlerFactory;
 import be.xhibit.teletask.client.builder.message.MessageUtilities;
@@ -134,7 +135,7 @@ import java.util.concurrent.TimeUnit;
  * - These reports are coming on the socket you open, so you have to check the bytes that are coming in, but you don't have to open a listener on a port.
  * - You can send a keep alive to make sure that the central unit don't close the port because there is no activity
  */
-public final class TeletaskClient {
+public final class TeletaskClient implements TeletaskReceiver {
     /**
      * Logger responsible for logging and debugging statements.
      */
@@ -320,6 +321,7 @@ public final class TeletaskClient {
         }
     }
 
+    @Override
     public ClientConfigSpec getConfig() {
         return this.config;
     }
@@ -409,6 +411,7 @@ public final class TeletaskClient {
         this.getKeepAliveTimer().schedule(new KeepAliveService(keepAliveStrategy), 0, keepAliveStrategy.getIntervalMinutes() * 60 * 1000);
     }
 
+    @Override
     public MessageHandler getMessageHandler() {
         return MessageHandlerFactory.getMessageHandler(this.getConfig().getCentralUnitType());
     }
@@ -440,6 +443,7 @@ public final class TeletaskClient {
         return this.outputStream;
     }
 
+    @Override
     public InputStream getInputStream() {
         return this.inputStream;
     }
