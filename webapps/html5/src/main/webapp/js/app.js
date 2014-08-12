@@ -3,9 +3,9 @@ $(document).ready(function () {
     var full_url = window.location;
     var base_url = full_url.protocol + "//" + full_url.host + "/" + full_url.pathname.split('/')[1];
 
-    $(document).bind("mobileinit", function() {
+    /*$(document).bind("mobileinit", function() {
         $.mobile.page.prototype.options.addBackBtn = true;
-    });
+    });*/
 
     //TODO: make API call to get all components (JSON), and init all toggle objects accordingly
     //TODO: better to work with websockets (node.js): this way component state changes can be pushed to the app
@@ -49,22 +49,16 @@ $(document).ready(function () {
             type: "GET"
             ,url: url
         })
-            .done(function (data, textStatus, jqXHR) {
-                //sample response: {"response":{"success": "true","status": "1","relay": "41"}}
-                if ( console && console.log ) {
-                    console.log( "Data returned:", data );
-                }
-            })
-            .fail(function (jqXHR, textStatus, errorThrown) {
-                if ( console && console.log ) {
-                    console.log( "Component switch call failed. Error:", errorThrown );
-                }
-            })
-            .always(function(data, textStatus) {
-                if ( console && console.log ) {
-                    console.log( "Component switch call success. Data returned:", data );
-                }
-            });
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            if ( console && console.log ) {
+                console.log( "Component switch call failed. Error:", errorThrown );
+            }
+        })
+        .always(function(data, textStatus) {
+            if ( console && console.log ) {
+                console.log( "Component switch call success. Data returned:", JSON.stringify(data) );
+            }
+        });
 
         return false;
     });
@@ -77,24 +71,18 @@ $(document).ready(function () {
 
 
     // Update the contents of the toolbars
-    $( document ).on( "pageshow", "[data-role='page']", function() {
-        // Each of the four pages in this demo has a data-title attribute
-        // which value is equal to the text of the nav button
-        // For example, on first page: <div data-role="page" data-title="Info">
-        //TODO: implement
-        // var current = $( this ).jqmData( "title" );
-        // Change the heading
-        //$( "[data-role='header'] h1" ).text( current );
+    /*$( document ).on( "pageshow", "[data-role='page']", function() {
+        // Each of the four pages in this demo has a data-title attribute which value is equal to the text of the nav button
+        var current = $( this ).jqmData( "title" );
         // Remove active class from nav buttons
-        $( "[data-role='navbar'] a.ui-btn-active" ).removeClass( "ui-btn-active" );
+        //$( "[data-role='navbar'] a.ui-btn-active" ).removeClass( "ui-btn-active" );
         // Add active class to current nav button
-        /* TODO: implement
          $( "[data-role='navbar'] a" ).each(function() {
-         if ( $( this ).text() === current ) {
-         $( this ).addClass( "ui-btn-active" );
-         }
-         });*/
-    });
+            if ( $( this ).text() === current ) {
+                $( this ).addClass( "ui-btn-active" );
+            }
+         });
+    });*/
 
     if(!("WebSocket" in window)){
         $('<p>Oh no, you need a browser that supports WebSockets.</p>').appendTo('#page_start');
@@ -113,11 +101,12 @@ $(document).ready(function () {
             var baseWsUrl = document.URL.replace("https://", "wss://");
         }
         var wsocket = new WebSocket(baseWsUrl + 'state-changes');
-        console.log("Opening WebSocket connection: " +wsocket);
+        console.log("Opening WebSocket connection: " +wsocket.url);
 
         wsocket.onmessage = function (evt) {
 
             console.log("WebSocket msg: " +evt.data);
+            var components = jQuery.parseJSON( evt.data );
 
             /*$scope.$apply(function () {
                 var components = angular.fromJson(evt.data);

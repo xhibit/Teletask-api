@@ -30,27 +30,15 @@
         request.setAttribute("tds_relays", tdsConfig.getComponents(Function.RELAY));
         request.setAttribute("tds_locmoods", tdsConfig.getComponents(Function.LOCMOOD));
         request.setAttribute("tds_genmoods", tdsConfig.getComponents(Function.GENMOOD));
-        request.setAttribute("tds_screens", tdsConfig.getComponents(Function.MOTOR));
+        request.setAttribute("tds_motors", tdsConfig.getComponents(Function.MOTOR));
         request.setAttribute("tds_sensors", tdsConfig.getComponents(Function.SENSOR));
         request.setAttribute("tds_rooms", tdsConfig.getRooms());
     %>
 
-    <div data-role="header" data-position="fixed" data-theme="b">
+    <div data-role="header" data-position="fixed" data-theme="b" data-add-back-btn="true">
         <h1>Teletask UI</h1>
-        <!--<a href="#fav-panel" data-icon="bars" data-iconpos="notext">Menu</a>-->
+        <a href="#page_start" class="ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all">Home</a>
     </div>
-
-    <%--
-    <div data-role="panel" id="fav-panel">
-        <ul data-role="listview" data-theme="a" class="nav-search">
-            <li data-icon="delete"><a href="#" data-rel="close">Close menu</a></li>
-            <li><a href="#page_v_gelijkvloers">Gelijkvloers</a></li>
-            <li><a href="#page_v_verdiep1">Verdiep 1</a></li>
-            <li><a href="#page_v_verdiep2">Verdiep 2</a></li>
-            <li><a href="#page_v_buiten">Buiten</a></li>
-        </ul>
-    </div>
-    --%>
 
     <!-- ####################### page:start ####################### -->
     <div data-role="page" data-theme="a" id="page_start">
@@ -60,26 +48,23 @@
             <p><a href="#page_moods" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer">Moods</a></p>
             <p><a href="#page_screens" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu">Screens</a></p>
             <p><a href="#page_sensors" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-eye">Sensors</a></p>
-
-            <!--<p><a href="#page_rooms" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-home">Rooms</a></p>-->
         </div>
 
     </div>
     <!-- ####################### /page:start ####################### -->
 
     <!-- ####################### page:screens ####################### -->
-    <div data-role="page" data-theme="a" id="page_screens" data-add-back-btn="true">
+    <div data-role="page" data-theme="a" id="page_screens" data-add-back-btn="true" data-title="Screens">
 
         <div data-role="content">
             <h3 class="ui-bar ui-bar-a ui-corner-all">Screens:</h3>
 
             <div class="ui-body ui-body-a ui-corner-all">
-            <c:forEach items="${requestScope.tds_screens}" var="screen" varStatus="status">
+            <c:forEach items="${requestScope.tds_motors}" var="motor">
                 <p>
-                    <label for="screen-flip-<c:out value="${status.index}" />"><c:out value="${screen.description}" />:</label>
-                    <input type="checkbox" data-role="flipswitch" name="screen-flip-<c:out value="${status.index}" />" class="stateSwitch" data-on-text="Down" data-off-text="Up" data-wrapper-class="custom-label-flipswitch" id="screen-flip-<c:out value="${status.index}" />" data-tds-type="motor" data-tds-number="<c:out value="${screen.number}" />">
+                    <label for="MOTOR-SWITCH-<c:out value="${motor.number}" />"><c:out value="${motor.description}" />:</label>
+                    <input type="checkbox" data-role="flipswitch" name="MOTOR-SWITCH-<c:out value="${motor.number}" />" class="stateSwitch" data-on-text="Down" data-off-text="Up" data-wrapper-class="custom-label-flipswitch" id="MOTOR-SWITCH-<c:out value="${motor.number}" />" data-tds-type="motor" data-tds-number="<c:out value="${motor.number}" />">
                 </p>
-                <%--TODO: check state: <c:out value="${screen.state}"></c:out> --%>
             </c:forEach>
             </div>
 
@@ -89,30 +74,28 @@
     <!-- ####################### /page:screens ####################### -->
 
     <!-- ####################### page:moods ####################### -->
-    <div data-role="page" data-theme="a" id="page_moods" data-add-back-btn="true">
+    <div data-role="page" data-theme="a" id="page_moods" data-add-back-btn="true" data-title="Moods">
 
         <div data-role="content">
             <h3 class="ui-bar ui-bar-a ui-corner-all">Local Moods:</h3>
 
             <div class="ui-body ui-body-a ui-corner-all">
-            <c:forEach items="${requestScope.tds_locmoods}" var="locmoods" varStatus="status">
+            <c:forEach items="${requestScope.tds_locmoods}" var="locmood">
                 <p>
-                    <label for="locmood-flip-<c:out value="${status.index}" />"><c:out value="${locmoods.description}" />:</label>
-                    <input type="checkbox" data-role="flipswitch" name="locmood-flip-<c:out value="${status.index}" />" class="stateSwitch" id="locmood-flip-<c:out value="${status.index}" />" data-tds-type="locmood" data-tds-number="<c:out value="${locmoods.number}" />">
+                    <label for="LOCMOOD-SWITCH-<c:out value="${locmood.number}" />"><c:out value="${locmood.description}" />:</label>
+                    <input type="checkbox" data-role="flipswitch" name="LOCMOOD-SWITCH-<c:out value="${locmood.number}" />" class="stateSwitch" id="LOCMOOD-SWITCH-<c:out value="${locmood.number}" />" data-tds-type="locmood" data-tds-number="<c:out value="${locmood.number}" />">
                 </p>
-                <%--TODO: check state: <c:out value="${screen.state}"></c:out> --%>
             </c:forEach>
             </div>
 
             <h3 class="ui-bar ui-bar-a ui-corner-all">General Moods:</h3>
 
             <div class="ui-body ui-body-a ui-corner-all">
-            <c:forEach items="${requestScope.tds_genmoods}" var="genmoods" varStatus="status">
+            <c:forEach items="${requestScope.tds_genmoods}" var="genmood">
                 <p>
-                    <label for="genmood-flip-<c:out value="${status.index}" />"><c:out value="${genmoods.description}" />:</label>
-                    <input type="checkbox" data-role="flipswitch" name="genmood-flip-<c:out value="${status.index}" />" class="stateSwitch" id="genmood-flip-<c:out value="${status.index}" />" data-tds-type="genmood" data-tds-number="<c:out value="${genmoods.number}" />">
+                    <label for="GENMOOD-SWITCH-<c:out value="${genmood.number}" />"><c:out value="${genmood.description}" />:</label>
+                    <input type="checkbox" data-role="flipswitch" name="GENMOOD-SWITCH-<c:out value="${genmood.number}" />" class="stateSwitch" id="GENMOOD-SWITCH-<c:out value="${genmood.number}" />" data-tds-type="genmood" data-tds-number="<c:out value="${genmood.number}" />">
                 </p>
-                <%--TODO: check state: <c:out value="${screen.state}"></c:out> --%>
             </c:forEach>
             </div>
 
@@ -122,7 +105,7 @@
     <!-- ####################### /page:moods ####################### -->
 
     <!-- ####################### page:verlichting ####################### -->
-    <div data-role="page" data-theme="a" id="page_lights" data-add-back-btn="true">
+    <div data-role="page" data-theme="a" id="page_lights" data-add-back-btn="true" data-title="Lights">
 
         <div data-role="content">
 
@@ -131,14 +114,13 @@
                 <div data-role="collapsible">
                     <h3><c:out value="${room.name}" /></h3>
 
-                    <!--<div class="ui-body ui-body-a ui-corner-all">-->
-                        <c:forEach items="${room.relays}" var="relay" varStatus="status">
+                        <c:forEach items="${room.relays}" var="relay">
                         <p>
-                            <label for="flip-room-<c:out value="${room.id}" />-<c:out value="${status.index}" />"><c:out value="${relay.description}" /></label>
-                            <input type="checkbox" data-role="flipswitch" name="flip-room-<c:out value="${room.id}" />-<c:out value="${status.index}" />" class="stateSwitch" id="flip-room-<c:out value="${room.id}" />-<c:out value="${status.index}" />" data-tds-type="relay" data-tds-number="<c:out value="${relay.number}" />">
+                            <label for="RELAY-SWITCH-<c:out value="${relay.number}" />"><c:out value="${relay.description}" /></label>
+                            <input type="checkbox" data-role="flipswitch" name="RELAY-SWITCH-<c:out value="${relay.number}" />" class="stateSwitch" id="RELAY-SWITCH-<c:out value="${relay.number}" />" data-tds-type="relay" data-tds-number="<c:out value="${relay.number}" />">
                         </p>
                         </c:forEach>
-                    <!--</div>-->
+
                 </div>
             </c:forEach>
             </div>
@@ -148,7 +130,7 @@
     <!-- ####################### /page:verlichting ####################### -->
 
     <!-- ####################### page:sensor ####################### -->
-    <div data-role="page" data-theme="a" id="page_sensors" data-add-back-btn="true">
+    <div data-role="page" data-theme="a" id="page_sensors" data-add-back-btn="true" data-title="Sensors">
 
         <div data-role="content">
 
@@ -156,7 +138,7 @@
                 <c:forEach items="${requestScope.tds_sensors}" var="sensor">
                     <h3 class="ui-bar ui-bar-a ui-corner-all"><c:out value="${sensor.description}" /></h3>
                     <div class="ui-body">
-                        <p><c:out value="${sensor.state}" />&nbsp;</p>
+                        <p id="SENSOR-<c:out value="${sensor.type}" />-<c:out value="${sensor.number}" />"><c:out value="${sensor.state}" />&nbsp; Lux</p>
                     </div>
                 </c:forEach>
             </div>
@@ -172,7 +154,7 @@
                 <li><a href="#page_moods" id="navbar_sfeer" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer"></a></li>
                 <li><a href="#page_screens" id="navbar_screens" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu"></a></li>
                 <li><a href="#page_sensors" id="navbar_sensors" class="ui-nodisc-icon ui-btn-icon-bottom icon-eye"></a></li>
-                <!--<li><a href="#page_rooms" id="navbar_allesuit" class="ui-nodisc-icon ui-btn-icon-bottom icon-home"></a></li>-->
+                <!--<li><a href="#page_rooms" id="navbar_allesuit" class="ui-nodisc-icon ui-btn-icon-bottom icon-power"></a></li>-->
             </ul>
         </div>
     </div>
