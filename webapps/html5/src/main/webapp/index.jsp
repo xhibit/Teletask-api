@@ -18,7 +18,7 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 
     <script src="js/jquery-1.11.1.min.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/app-jsp.js"></script>
     <script src="js/jquery.mobile-1.4.3.min.js"></script>
 </head>
 <body>
