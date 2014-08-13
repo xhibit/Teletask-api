@@ -47,6 +47,19 @@ public class ComponentResource {
     }
 
     /**
+     * Gets a partial config in JSON.
+     * URI: (GET) http://localhost:8080/teletask/api/config/{function}
+     *
+     * @return JSON representation of the Teletask config in place..
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/config/{function}")
+    public Response config(@PathParam("function") String function) throws JsonProcessingException {
+        return this.buildsuccessResponse(WRITER.writeValueAsString(this.getClient().getConfig().getComponents(Function.valueOf(function.toUpperCase()))));
+    }
+
+    /**
      * Gets the complete config in JSON.
      * URI: (GET) http://localhost:8080/teletask/api/pretty-config
      *
