@@ -181,6 +181,17 @@ $(document).ready(function () {
                 $.each(components, function (i, component) {
                     console.log('Changing state' + ': ' + component.function + ':' + component.number + ' to ' + component.state);
 
+                    // set correct state of button
+                    var func = component.function;
+                    var componentID = func +'-SWITCH-' +component.number;
+                    var compEl = $("#"+componentID);
+                    if (component.state=='ON' || component.state=='DOWN') {
+                        //compEl.attr('checked','checked').flipswitch("refresh");
+                        compEl.attr('checked','checked').flipswitch("refresh");
+                    } else {
+                        compEl.removeAttr('checked').flipswitch("refresh");
+                    }
+
                     // get elements which starts with
                     //var element = $("input[id^=" + component.function + "]")
                 });
