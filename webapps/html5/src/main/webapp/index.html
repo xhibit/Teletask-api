@@ -10,7 +10,10 @@
 
     <link rel="stylesheet" href="css/jquery.mobile-1.4.3.min.css" />
     <link rel="stylesheet" href="css/style.css" />
-    <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+    <!--<link rel="apple-touch-startup-image" href="startup.png">-->
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
     <script src="js/jquery-1.11.1.min.js"></script>
     <script src="js/app.js"></script>
@@ -18,145 +21,115 @@
 </head>
 <body>
 
-<div data-role="header" data-position="fixed" data-theme="b" data-add-back-btn="true">
-    <h1>Teletask UI</h1>
-    <a href="#page_start" class="ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all">Home</a>
-</div>
-
-<!-- ####################### page:start ####################### -->
-<div data-role="page" data-theme="a" id="page_start">
-
-    <div data-role="content">
-        <p><a href="#page_lights" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-brightness-contrast">Lights</a></p>
-        <p><a href="#page_moods" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer">Moods</a></p>
-        <p><a href="#page_screens" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu">Screens</a></p>
-        <p><a href="#page_sensors" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-eye">Sensors</a></p>
+    <div data-role="header" data-position="fixed" data-theme="b" data-add-back-btn="true">
+        <h1>Teletask UI</h1>
+        <a href="#page_start" class="ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext ui-corner-all">Home</a>
     </div>
 
-</div>
-<!-- ####################### /page:start ####################### -->
+    <div id="pages">
 
-<!-- ####################### page:screens ####################### -->
-<div data-role="page" data-theme="a" id="page_screens" data-add-back-btn="true" data-title="Screens">
+        <!-- ####################### page:start ####################### -->
+        <div data-role="page" data-theme="a" id="page_start">
 
-    <div data-role="content">
-        <h3 class="ui-bar ui-bar-a ui-corner-all">Screens:</h3>
-
-        <div class="ui-body ui-body-a ui-corner-all">
-
-            <!--
-            <c:forEach items="${requestScope.tds_motors}" var="motor">
-                <p>
-                    <label for="MOTOR-SWITCH-<c:out value="${motor.number}" />"><c:out value="${motor.description}" />:</label>
-                    <input type="checkbox" data-role="flipswitch" name="MOTOR-SWITCH-<c:out value="${motor.number}" />" class="stateSwitch" data-on-text="Down" data-off-text="Up" data-wrapper-class="custom-label-flipswitch" id="MOTOR-SWITCH-<c:out value="${motor.number}" />" data-tds-type="motor" data-tds-number="<c:out value="${motor.number}" />">
-                </p>
-            </c:forEach>
-            -->
+            <div data-role="content">
+                <p><a href="#page_lights" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-brightness-contrast">Lights</a></p>
+                <p><a href="#page_moods" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer">Moods</a></p>
+                <p><a href="#page_screens" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu">Screens</a></p>
+                <p><a href="#page_sensors" data-role="button" data-icon="arrow-r" data-iconpos="bottom" class="ui-nodisc-icon ui-btn-icon-bottom icon-eye">Sensors</a></p>
+            </div>
 
         </div>
+        <!-- ####################### /page:start ####################### -->
 
-    </div>
+        <!-- ####################### page:screens ####################### -->
+        <div data-role="page" data-theme="a" id="page_screens" data-title="Screens">
 
-</div>
-<!-- ####################### /page:screens ####################### -->
+            <div data-role="content">
+                <h3 class="ui-bar ui-bar-a ui-corner-all">Screens:</h3>
+                <div class="ui-body ui-body-a ui-corner-all"></div>
+            </div>
 
-<!-- ####################### page:moods ####################### -->
-<div data-role="page" data-theme="a" id="page_moods" data-add-back-btn="true" data-title="Moods">
-
-    <div data-role="content">
-        <h3 class="ui-bar ui-bar-a ui-corner-all">Local Moods:</h3>
-
-        <!--
-        <div class="ui-body ui-body-a ui-corner-all">
-            <c:forEach items="${requestScope.tds_locmoods}" var="locmood">
-                <p>
-                    <label for="LOCMOOD-SWITCH-<c:out value="${locmood.number}" />"><c:out value="${locmood.description}" />:</label>
-                    <input type="checkbox" data-role="flipswitch" name="LOCMOOD-SWITCH-<c:out value="${locmood.number}" />" class="stateSwitch" id="LOCMOOD-SWITCH-<c:out value="${locmood.number}" />" data-tds-type="locmood" data-tds-number="<c:out value="${locmood.number}" />">
-                </p>
-            </c:forEach>
         </div>
-        -->
+        <!-- ####################### /page:screens ####################### -->
 
-        <h3 class="ui-bar ui-bar-a ui-corner-all">General Moods:</h3>
+        <!-- ####################### page:moods ####################### -->
+        <div data-role="page" data-theme="a" id="page_moods" data-title="Moods">
 
-        <!--
-        <div class="ui-body ui-body-a ui-corner-all">
-            <c:forEach items="${requestScope.tds_genmoods}" var="genmood">
-                <p>
-                    <label for="GENMOOD-SWITCH-<c:out value="${genmood.number}" />"><c:out value="${genmood.description}" />:</label>
-                    <input type="checkbox" data-role="flipswitch" name="GENMOOD-SWITCH-<c:out value="${genmood.number}" />" class="stateSwitch" id="GENMOOD-SWITCH-<c:out value="${genmood.number}" />" data-tds-type="genmood" data-tds-number="<c:out value="${genmood.number}" />">
-                </p>
-            </c:forEach>
+            <div data-role="content">
+                <h3 class="ui-bar ui-bar-a ui-corner-all">Moods:</h3>
+                <div class="ui-body ui-body-a ui-corner-all"></div>
+            </div>
+
         </div>
-        -->
+        <!-- ####################### /page:moods ####################### -->
 
-    </div>
+        <!-- ####################### page:verlichting ####################### -->
+        <div data-role="page" data-theme="a" id="page_lights" data-title="Lights">
 
-</div>
-<!-- ####################### /page:moods ####################### -->
+            <div data-role="content">
 
-<!-- ####################### page:verlichting ####################### -->
-<div data-role="page" data-theme="a" id="page_lights" data-add-back-btn="true" data-title="Lights">
+                <div data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
 
-    <div data-role="content">
+                    <!--
+                    <c:forEach items="${requestScope.tds_rooms}" var="room">
+                        <div data-role="collapsible">
+                            <h3><c:out value="${room.name}" /></h3>
 
-        <div data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+                            <c:forEach items="${room.relays}" var="relay">
+                                <p>
+                                    <label for="RELAY-SWITCH-<c:out value="${relay.number}" />"><c:out value="${relay.description}" /></label>
+                                    <input type="checkbox" data-role="flipswitch" name="RELAY-SWITCH-<c:out value="${relay.number}" />" class="stateSwitch" id="RELAY-SWITCH-<c:out value="${relay.number}" />" data-tds-type="relay" data-tds-number="<c:out value="${relay.number}" />">
+                                </p>
+                            </c:forEach>
 
-            <!--
-            <c:forEach items="${requestScope.tds_rooms}" var="room">
-                <div data-role="collapsible">
-                    <h3><c:out value="${room.name}" /></h3>
-
-                    <c:forEach items="${room.relays}" var="relay">
-                        <p>
-                            <label for="RELAY-SWITCH-<c:out value="${relay.number}" />"><c:out value="${relay.description}" /></label>
-                            <input type="checkbox" data-role="flipswitch" name="RELAY-SWITCH-<c:out value="${relay.number}" />" class="stateSwitch" id="RELAY-SWITCH-<c:out value="${relay.number}" />" data-tds-type="relay" data-tds-number="<c:out value="${relay.number}" />">
-                        </p>
+                        </div>
                     </c:forEach>
+                    -->
 
                 </div>
-            </c:forEach>
-            -->
+            </div>
 
         </div>
-    </div>
+        <!-- ####################### /page:verlichting ####################### -->
 
-</div>
-<!-- ####################### /page:verlichting ####################### -->
+        <!-- ####################### page:sensor ####################### -->
+        <div data-role="page" data-theme="a" id="page_sensors" data-title="Sensors">
 
-<!-- ####################### page:sensor ####################### -->
-<div data-role="page" data-theme="a" id="page_sensors" data-add-back-btn="true" data-title="Sensors">
+            <div data-role="content">
+                <h3 class="ui-bar ui-bar-a ui-corner-all">Sensors:</h3>
 
-    <div data-role="content">
+                <div class="ui-body ui-body-a ui-corner-all">
 
-        <div data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+                    <!--
+                    <c:forEach items="${requestScope.tds_sensors}" var="sensor">
+                        <h3 class="ui-bar ui-bar-a ui-corner-all"><c:out value="${sensor.description}" /></h3>
+                        <div class="ui-body">
+                            <p id="SENSOR-<c:out value="${sensor.type}" />-<c:out value="${sensor.number}" />"><c:out value="${sensor.state}" />&nbsp; Lux</p>
+                        </div>
+                    </c:forEach>
+                    -->
 
-            <!--
-            <c:forEach items="${requestScope.tds_sensors}" var="sensor">
-                <h3 class="ui-bar ui-bar-a ui-corner-all"><c:out value="${sensor.description}" /></h3>
-                <div class="ui-body">
-                    <p id="SENSOR-<c:out value="${sensor.type}" />-<c:out value="${sensor.number}" />"><c:out value="${sensor.state}" />&nbsp; Lux</p>
                 </div>
-            </c:forEach>
-            -->
+
+            </div>
+
 
         </div>
+        <!-- ####################### /page:sensor ####################### -->
+
     </div>
 
-</div>
-<!-- ####################### /page:sensor ####################### -->
-
-<div data-role="footer" data-position="fixed" data-theme="b">
-    <div data-role="navbar">
-        <ul>
-            <li><a href="#page_lights" id="navbar_verlichting" class="ui-nodisc-icon ui-btn-icon-bottom icon-brightness-contrast"></a></li>
-            <li><a href="#page_moods" id="navbar_sfeer" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer"></a></li>
-            <li><a href="#page_screens" id="navbar_screens" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu"></a></li>
-            <li><a href="#page_sensors" id="navbar_sensors" class="ui-nodisc-icon ui-btn-icon-bottom icon-eye"></a></li>
-            <!--<li><a href="#page_rooms" id="navbar_allesuit" class="ui-nodisc-icon ui-btn-icon-bottom icon-power"></a></li>-->
-        </ul>
+    <div data-role="footer" data-position="fixed" data-theme="b">
+        <div data-role="navbar">
+            <ul>
+                <li><a href="#page_lights" id="navbar_verlichting" class="ui-nodisc-icon ui-btn-icon-bottom icon-brightness-contrast"></a></li>
+                <li><a href="#page_moods" id="navbar_sfeer" class="ui-nodisc-icon ui-btn-icon-bottom icon-equalizer"></a></li>
+                <li><a href="#page_screens" id="navbar_screens" class="ui-nodisc-icon ui-btn-icon-bottom icon-menu"></a></li>
+                <li><a href="#page_sensors" id="navbar_sensors" class="ui-nodisc-icon ui-btn-icon-bottom icon-eye"></a></li>
+                <!--<li><a href="#page_rooms" id="navbar_allesuit" class="ui-nodisc-icon ui-btn-icon-bottom icon-power"></a></li>-->
+            </ul>
+        </div>
     </div>
-</div>
 
 </body>
 </html>

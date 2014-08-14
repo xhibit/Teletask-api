@@ -3,8 +3,10 @@ $.tdsScope = {};
 
 $(document).ready(function () {
 
+    $( "[data-role='navbar']" ).navbar();
+    $( "[data-role='header'], [data-role='footer']" ).toolbar();
+
     $().initComponents();
-    $().initStateSwitches();
     $().initWebSocket();
 
 });
@@ -13,6 +15,7 @@ $(document).ready(function () {
 
 /**
  * Init config, build DOM.
+ * TODO: better look into Backbone.js: http://demos.jquerymobile.com/1.4.3/backbone-requirejs/
  */
 (function( $ ){
     $.fn.initComponents = function() {
@@ -20,34 +23,20 @@ $(document).ready(function () {
         var full_url = window.location;
         $.tdsScope.baseUrl = full_url.protocol + "//" + full_url.host + "/" + full_url.pathname.split('/')[1];
 
-        //make API call to get all components (JSON), and init all objects accordingly
-        var configURL = $.tdsScope.baseUrl +"/api/config";
-        $.getJSON( configURL)
-            .done(function(json) {
-                console.log( "Loaded JSON for: " +json.centralUnitType);
-                $.tdsScope.config = json;
-                //TODO: parse JSON and compose HTML DOM
-                //TODO: better look into Backbone.js: http://demos.jquerymobile.com/1.4.3/backbone-requirejs/
-
-                $.each($.tdsScope.config.rooms, function(i, room) {
-                    //console.log(room.name);
-                });
-            })
-            .fail(function() {
-                console.log( "init error" );
-            })
-            .always(function() {
-                console.log( "init complete" );
+        $.getJSON( $.tdsScope.baseUrl +"/api/config/MOTOR")
+            .done(function(components) {
+                $().initDOM(components);
             });
 
+        $.getJSON( $.tdsScope.baseUrl +"/api/config/LOCMOOD")
+            .done(function(components) {
+                $().initDOM(components);
+            });
 
-
-
-        $(function() {
-            $( "[data-role='navbar']" ).navbar();
-            $( "[data-role='header'], [data-role='footer']" ).toolbar();
-        });
-
+        $.getJSON( $.tdsScope.baseUrl +"/api/config/GENMOOD")
+            .done(function(components) {
+                $().initDOM(components);
+            });
 
         // Update the contents of the toolbars
         /*$( document ).on( "pageshow", "[data-role='page']", function() {
@@ -68,19 +57,77 @@ $(document).ready(function () {
 
 
 /**
+ * Init DOM for the components.
+ */
+(function( $ ){
+    $.fn.initDOM = function(components) {
+
+        var pages= {
+            'MOTOR': '#page_screens .ui-body',
+            'LOCMOOD': '#page_moods .ui-body',
+            'GENMOOD': '#page_moods .ui-body'
+        }
+
+        $.each(components, function(i, component) {
+            //console.log("component: " +JSON.stringify(component));
+            //console.log("rendering DOM for component type: " +type);
+            var func = component.function;
+            var componentID = func +'-SWITCH-' +component.number;
+            var onTxt = func=='MOTOR' ? 'down' : 'on';
+            var offTxt = func=='MOTOR' ? 'up' : 'off';
+            var page = $(pages[func]);
+
+            $("<p>")
+                .append(
+                    $("<label>")
+                    .attr("for", componentID)
+                    .text(component.description +": ")
+                )
+                .append(
+                    $("<input>")
+                    .attr("type", "checkbox")
+                    .attr("id", componentID)
+                    .attr("name", componentID)
+                    .attr("class", "switchButton")
+                    .attr("data-role", "flipswitch")
+                    .attr("data-wrapper-class", "custom-label-flipswitch")
+                    .attr("data-on-text", onTxt)
+                    .attr("data-off-text", offTxt)
+                    .attr("data-tds-number", component.number)
+                    //.attr("data-tds-type", component.function)
+                )
+            .appendTo(page);
+
+            // set correct state of button
+            var compEl = $("#"+componentID);
+            if (component.state=='ON' || component.state=='DOWN') {
+                //compEl.attr('checked','checked').flipswitch("refresh");
+                compEl.attr('checked','checked');
+            }
+
+            // bind change event triggering REST call
+            compEl.change(function () {
+                $().switchComponentState($( this ));
+            });
+
+        });
+
+    };
+})( jQuery );
+
+/**
  * Init state switches.
  */
 (function( $ ){
-    $.fn.initStateSwitches = function() {
+    $.fn.switchComponentState = function(element) {
 
-        $( ".stateSwitch" ).bind( "change", function(event) {
-
-            var componentValue = $(this).data('tds-number');
-            var componentType = $(this).data('tds-type');
+            var componentValue = element.data('tds-number');
+            //var componentType = $(this).data('tds-type');
+            var componentType = element.attr('id').split('-')[0];
             var stateValue;
-            if (componentType === "relay" || componentType === "locmood" || componentType === "genmood") {
+            if (componentType === "RELAY" || componentType === "LOCMOOD" || componentType === "GENMOOD") {
                 stateValue = $(this).is(':checked') ? "on" : "off";
-            } else if (componentType === "motor") {
+            } else if (componentType === "MOTOR") {
                 stateValue = $(this).is(':checked') ? "down" : "up";
             }
 
@@ -90,19 +137,18 @@ $(document).ready(function () {
                 type: "GET"
                 ,url: url
             })
-                .fail(function (jqXHR, textStatus, errorThrown) {
-                    if ( console && console.log ) {
-                        console.log( "Component switch call failed. Error:", errorThrown );
-                    }
-                })
-                .always(function(data, textStatus) {
-                    if ( console && console.log ) {
-                        console.log( "Component switch call success. Data returned:", JSON.stringify(data) );
-                    }
-                });
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                if ( console && console.log ) {
+                    console.log( "Component switch call failed. Error:", errorThrown );
+                }
+            })
+            .always(function(data, textStatus) {
+                if ( console && console.log ) {
+                    console.log( "Component switch call success. Data returned:", JSON.stringify(data) );
+                }
+            });
 
             return false;
-        });
 
     };
 })( jQuery );
@@ -133,31 +179,12 @@ $(document).ready(function () {
 
                 //TODO: switch the components state
                 $.each(components, function (i, component) {
-                    console.log("RECIEVED: component: " + component.description + ", state: " + component.state);
+                    console.log('Changing state' + ': ' + component.function + ':' + component.number + ' to ' + component.state);
+
+                    // get elements which starts with
+                    //var element = $("input[id^=" + component.function + "]")
                 });
 
-                /*$scope.$apply(function () {
-                 var components = angular.fromJson(evt.data);
-                 angular.forEach($scope.config.rooms, function (room, key) {
-                 function changeComponentState(comps) {
-                 angular.forEach(comps, function (comp, key) {
-                 angular.forEach(components, function (component, key) {
-                 if (comp.number == component.number && comp.function == component.function) {
-                 console.log('Changing state in room ' + room.name + ': ' + component.function + ':' + component.number + ' to ' + component.state.value);
-                 comp.state.value = component.state.value;
-                 comp.state.state = component.state.state;
-                 }
-                 });
-                 });
-                 }
-                 changeComponentState(room.relays);
-                 changeComponentState(room.localMoods);
-                 changeComponentState(room.motors);
-                 changeComponentState(room.generalMoods);
-                 changeComponentState(room.dimmers);
-                 changeComponentState(room.conditions);
-                 });
-                 });*/
             };
         }
     };
