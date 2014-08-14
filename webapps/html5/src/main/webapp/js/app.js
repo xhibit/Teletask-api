@@ -177,7 +177,7 @@ $(document).ready(function () {
                 console.log("WebSocket msg: " + evt.data);
                 var components = $.parseJSON(evt.data);
 
-                //TODO: switch the components state
+                //TODO: switch the components button's state also triggers the "change" event again!!! Solve.
                 $.each(components, function (i, component) {
                     console.log('Changing state' + ': ' + component.function + ':' + component.number + ' to ' + component.state);
 
