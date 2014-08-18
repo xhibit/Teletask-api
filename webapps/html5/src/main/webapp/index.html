@@ -67,26 +67,7 @@
         <div data-role="page" data-theme="a" id="page_lights" data-title="Lights">
 
             <div data-role="content">
-
-                <div data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
-
-                    <!--
-                    <c:forEach items="${requestScope.tds_rooms}" var="room">
-                        <div data-role="collapsible">
-                            <h3><c:out value="${room.name}" /></h3>
-
-                            <c:forEach items="${room.relays}" var="relay">
-                                <p>
-                                    <label for="RELAY-SWITCH-<c:out value="${relay.number}" />"><c:out value="${relay.description}" /></label>
-                                    <input type="checkbox" data-role="flipswitch" name="RELAY-SWITCH-<c:out value="${relay.number}" />" class="stateSwitch" id="RELAY-SWITCH-<c:out value="${relay.number}" />" data-tds-type="relay" data-tds-number="<c:out value="${relay.number}" />">
-                                </p>
-                            </c:forEach>
-
-                        </div>
-                    </c:forEach>
-                    -->
-
-                </div>
+                <div id="rooms" data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u"></div>
             </div>
 
         </div>
@@ -98,18 +79,7 @@
             <div data-role="content">
                 <h3 class="ui-bar ui-bar-a ui-corner-all">Sensors:</h3>
 
-                <div class="ui-body ui-body-a ui-corner-all">
-
-                    <!--
-                    <c:forEach items="${requestScope.tds_sensors}" var="sensor">
-                        <h3 class="ui-bar ui-bar-a ui-corner-all"><c:out value="${sensor.description}" /></h3>
-                        <div class="ui-body">
-                            <p id="SENSOR-<c:out value="${sensor.type}" />-<c:out value="${sensor.number}" />"><c:out value="${sensor.state}" />&nbsp; Lux</p>
-                        </div>
-                    </c:forEach>
-                    -->
-
-                </div>
+                <div class="ui-body ui-body-a ui-corner-all"></div>
 
             </div>
 

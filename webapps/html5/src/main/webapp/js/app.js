@@ -23,19 +23,29 @@ $(document).ready(function () {
         var full_url = window.location;
         $.tdsScope.baseUrl = full_url.protocol + "//" + full_url.host + "/" + full_url.pathname.split('/')[1];
 
+        $.getJSON( $.tdsScope.baseUrl +"/api/config")
+            .done(function(config) {
+                $().initRoomDOM(config.rooms);
+            });
+
         $.getJSON( $.tdsScope.baseUrl +"/api/config/MOTOR")
             .done(function(components) {
-                $().initDOM(components);
+                $().initDOM(components, $('#page_screens .ui-body'));
             });
 
         $.getJSON( $.tdsScope.baseUrl +"/api/config/LOCMOOD")
             .done(function(components) {
-                $().initDOM(components);
+                $().initDOM(components, $('#page_moods .ui-body'));
             });
 
         $.getJSON( $.tdsScope.baseUrl +"/api/config/GENMOOD")
             .done(function(components) {
-                $().initDOM(components);
+                $().initDOM(components, $('#page_moods .ui-body'));
+            });
+
+        $.getJSON( $.tdsScope.baseUrl +"/api/config/SENSOR")
+            .done(function(components) {
+                $().initDOM(components, $('#page_sensors .ui-body'));
             });
 
         // Update the contents of the toolbars
@@ -55,36 +65,49 @@ $(document).ready(function () {
     };
 })( jQuery );
 
+/**
+ * Init Room DOM.
+ */
+(function( $ ){
+    $.fn.initRoomDOM = function(rooms) {
+
+        var page = $('#rooms');
+        $.each(rooms, function(i, room) {
+
+            var placeholder = $("<div>")
+                .attr("data-role", "collapsible")
+                .attr("id", "ROOM_" +room.id)
+                .append(
+                    $("<h3>").text(room.name)
+                );
+
+            var components = room.relays;
+            $().initDOM(components, placeholder);
+
+            placeholder.appendTo(page);
+        });
+
+    };
+})( jQuery );
+
+
 
 /**
  * Init DOM for the components.
  */
 (function( $ ){
-    $.fn.initDOM = function(components) {
-
-        var pages= {
-            'MOTOR': '#page_screens .ui-body',
-            'LOCMOOD': '#page_moods .ui-body',
-            'GENMOOD': '#page_moods .ui-body'
-        }
+    $.fn.initDOM = function(components, page) {
 
         $.each(components, function(i, component) {
             //console.log("component: " +JSON.stringify(component));
-            //console.log("rendering DOM for component type: " +type);
             var func = component.function;
-            var componentID = func +'-SWITCH-' +component.number;
-            var onTxt = func=='MOTOR' ? 'down' : 'on';
-            var offTxt = func=='MOTOR' ? 'up' : 'off';
-            var page = $(pages[func]);
 
-            $("<p>")
-                .append(
-                    $("<label>")
-                    .attr("for", componentID)
-                    .text(component.description +": ")
-                )
-                .append(
-                    $("<input>")
+            if (func === "RELAY" || func === "LOCMOOD" || func === "GENMOOD" || func === "MOTOR") {
+
+                var componentID = func + '-SWITCH-' + component.number;
+                var onTxt = func == 'MOTOR' ? 'down' : 'on';
+                var offTxt = func == 'MOTOR' ? 'up' : 'off';
+                var switchButton = $("<input>")
                     .attr("type", "checkbox")
                     .attr("id", componentID)
                     .attr("name", componentID)
@@ -93,22 +116,40 @@ $(document).ready(function () {
                     .attr("data-wrapper-class", "custom-label-flipswitch")
                     .attr("data-on-text", onTxt)
                     .attr("data-off-text", offTxt)
-                    .attr("data-tds-number", component.number)
-                    //.attr("data-tds-type", component.function)
-                )
-            .appendTo(page);
+                    .attr("data-tds-number", component.number);
 
-            // set correct state of button
-            var compEl = $("#"+componentID);
-            if (component.state=='ON' || component.state=='DOWN') {
-                //compEl.attr('checked','checked').flipswitch("refresh");
-                compEl.attr('checked','checked');
+                $("<p>")
+                    .append(
+                        $("<label>").attr("for", componentID).text(component.description + ": ")
+                    )
+                    .append(switchButton)
+                .appendTo(page);
+
+                // set correct state of button
+                if (component.state == 'ON' || component.state == 'DOWN') {
+                    switchButton.attr('checked', true);
+                }
+
+                // bind change event triggering REST call
+                switchButton.change(function () {
+                    $().switchComponentState($(this));
+                });
+
+            } else if (func === "SENSOR") {
+
+                $("<h3>")
+                    .attr("class", "ui-bar ui-bar-a ui-corner-all")
+                    .text(component.description)
+                .appendTo(page);
+
+                $("<div>")
+                    .attr("class", "ui-body")
+                    .append(
+                        $("<p>").attr("id", "SENSOR"+component.type+"-"+component.number).text(component.state +" Lux")
+                    )
+                .appendTo(page);
+
             }
-
-            // bind change event triggering REST call
-            compEl.change(function () {
-                $().switchComponentState($( this ));
-            });
 
         });
 
@@ -122,13 +163,12 @@ $(document).ready(function () {
     $.fn.switchComponentState = function(element) {
 
             var componentValue = element.data('tds-number');
-            //var componentType = $(this).data('tds-type');
             var componentType = element.attr('id').split('-')[0];
             var stateValue;
             if (componentType === "RELAY" || componentType === "LOCMOOD" || componentType === "GENMOOD") {
-                stateValue = $(this).is(':checked') ? "on" : "off";
+                stateValue = element.is(':checked') ? "on" : "off";
             } else if (componentType === "MOTOR") {
-                stateValue = $(this).is(':checked') ? "down" : "up";
+                stateValue = element.is(':checked') ? "down" : "up";
             }
 
             var url = $.tdsScope.baseUrl +'/api/component/' +componentType +"/" +componentValue +"/state/" +stateValue
@@ -177,24 +217,45 @@ $(document).ready(function () {
                 console.log("WebSocket msg: " + evt.data);
                 var components = $.parseJSON(evt.data);
 
-                //TODO: switch the components button's state also triggers the "change" event again!!! Solve.
-                $.each(components, function (i, component) {
-                    console.log('Changing state' + ': ' + component.function + ':' + component.number + ' to ' + component.state);
+                // made more robust: getting null events (need to find cause).
+                if (components != null && components.length > 0 && components[0] != null) {
+                    $.each(components, function (i, component) {
+                        console.log('Changing state' + ': ' + component.function + ':' + component.number + ' to ' + component.state);
 
-                    // set correct state of button
-                    var func = component.function;
-                    var componentID = func +'-SWITCH-' +component.number;
-                    var compEl = $("#"+componentID);
-                    if (component.state=='ON' || component.state=='DOWN') {
-                        //compEl.attr('checked','checked').flipswitch("refresh");
-                        compEl.attr('checked','checked').flipswitch("refresh");
-                    } else {
-                        compEl.removeAttr('checked').flipswitch("refresh");
-                    }
+                        var func = component.function;
 
-                    // get elements which starts with
-                    //var element = $("input[id^=" + component.function + "]")
-                });
+                        if (func === "RELAY" || func === "LOCMOOD" || func === "GENMOOD" || func === "MOTOR") {
+                            var componentID = func +'-SWITCH-' +component.number;
+                            var compEl = $("#"+componentID);
+
+                            // unbind the change event to prevent it from being executed
+                            compEl.unbind('change');
+
+                            // set correct state of button
+                            if (component.state=='ON' || component.state=='DOWN') {
+                                compEl.attr('checked',true);
+                                compEl.flipswitch();
+                                compEl.flipswitch("refresh");
+                                compEl.parent().addClass("ui-flipswitch-active");
+                            } else {
+                                compEl.attr('checked',false);
+                                compEl.flipswitch();
+                                compEl.flipswitch("refresh");
+                                compEl.parent().removeClass("ui-flipswitch-active");
+                            }
+
+                            // unbind the change event again
+                            compEl.change(function () {
+                                $().switchComponentState($( this ));
+                            });
+
+                        } else if (func === "SENSOR") {
+                            var componentID = 'SENSOR' +component.type+"-"+component.number;
+                            var compEl = $("#"+componentID);
+                            compEl.text(component.state +" Lux");
+                        }
+                    });
+                }
 
             };
         }
