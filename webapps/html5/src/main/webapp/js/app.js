@@ -3,6 +3,10 @@ $.tdsScope = {};
 
 $(document).ready(function () {
 
+    var full_url = window.location;
+    $.tdsScope.baseUrl = full_url.protocol + "//" + full_url.host + "/" + full_url.pathname.split('/')[1];
+    //$.tdsScope.baseUrl = "https://home.xhibit.be:8080/teletask";
+
     $( "[data-role='navbar']" ).navbar();
     $( "[data-role='header'], [data-role='footer']" ).toolbar();
 
@@ -20,33 +24,35 @@ $(document).ready(function () {
 (function( $ ){
     $.fn.initComponents = function() {
 
-        var full_url = window.location;
-        $.tdsScope.baseUrl = full_url.protocol + "//" + full_url.host + "/" + full_url.pathname.split('/')[1];
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config", crossDomain:true, cache:false
+        }).done(function(config) {
+            $().initRoomDOM(config.rooms);
+        });
 
-        $.getJSON( $.tdsScope.baseUrl +"/api/config")
-            .done(function(config) {
-                $().initRoomDOM(config.rooms);
-            });
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config/MOTOR", crossDomain:true, cache:false
+        }).done(function(components) {
+            $().initDOM(components, $('#page_screens .ui-body'));
+        });
 
-        $.getJSON( $.tdsScope.baseUrl +"/api/config/MOTOR")
-            .done(function(components) {
-                $().initDOM(components, $('#page_screens .ui-body'));
-            });
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config/LOCMOOD", crossDomain:true, cache:false
+        }).done(function(components) {
+            $().initDOM(components, $('#page_moods .ui-body'));
+        });
 
-        $.getJSON( $.tdsScope.baseUrl +"/api/config/LOCMOOD")
-            .done(function(components) {
-                $().initDOM(components, $('#page_moods .ui-body'));
-            });
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config/GENMOOD", crossDomain:true, cache:false
+        }).done(function(components) {
+            $().initDOM(components, $('#page_moods .ui-body'));
+        });
 
-        $.getJSON( $.tdsScope.baseUrl +"/api/config/GENMOOD")
-            .done(function(components) {
-                $().initDOM(components, $('#page_moods .ui-body'));
-            });
-
-        $.getJSON( $.tdsScope.baseUrl +"/api/config/SENSOR")
-            .done(function(components) {
-                $().initDOM(components, $('#page_sensors .ui-body'));
-            });
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config/SENSOR", crossDomain:true, cache:false
+        }).done(function(components) {
+            $().initDOM(components, $('#page_sensors .ui-body'));
+        });
 
         // Update the contents of the toolbars
         /*$( document ).on( "pageshow", "[data-role='page']", function() {
@@ -176,6 +182,8 @@ $(document).ready(function () {
             $.ajax({
                 type: "GET"
                 ,url: url
+                ,crossDomain : true
+                ,cache:false
             })
             .fail(function (jqXHR, textStatus, errorThrown) {
                 if ( console && console.log ) {
