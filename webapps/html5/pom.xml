@@ -16,12 +16,6 @@
     <name>Teletask API - HTML5 Interface</name>
     <description>The html5 interface code for working with teletask central unit</description>
 
-    <properties>
-        <servlet.version>3.0.1</servlet.version>
-        <javax.el.version>2.2</javax.el.version>
-        <jstl.version>1.2</jstl.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
