@@ -25,12 +25,28 @@
         <jackson.version>2.4.1.1</jackson.version>
         <guava.version>17.0</guava.version>
         <log4j-api.version>2.0</log4j-api.version>
+        <!--Currently only snapshots work-->
+        <paho.version>1.0.1-SNAPSHOT</paho.version>
     </properties>
 
     <repositories>
         <repository>
             <id>JBoss repository</id>
             <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+        <repository>
+            <id>Eclipse Paho Repo</id>
+            <url>https://repo.eclipse.org/content/repositories/paho-snapshots/</url>
+        </repository>
+        <repository>
+            <id>bintray</id>
+            <url>http://dl.bintray.com/andsel/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -59,6 +75,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>teletask-api-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>teletask-api-clientholder</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -137,6 +158,17 @@
                 <version>1.0</version>
                 <scope>provided</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.eclipse.paho</groupId>
+                <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+                <version>${paho.version}</version>
+            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>org.dna.mqtt</groupId>-->
+                <!--<artifactId>moquette-broker</artifactId>-->
+                <!--<version>0.6</version>-->
+            <!--</dependency>-->
 
             <!--<dependency>-->
                 <!--<groupId>org.glassfish.tyrus</groupId>-->

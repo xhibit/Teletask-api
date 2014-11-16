@@ -24,7 +24,7 @@ public class StateChangeListenerEndpoint extends JSONBroadcastingWebSocket {
     static {
         ClientHolder.getClient().registerStateChangeListener(new StateChangeListener() {
             @Override
-            public void event(List<ComponentSpec> components) {
+            public void receive(List<ComponentSpec> components) {
                 try {
                     sendAll(components);
                 } catch (JsonProcessingException e) {

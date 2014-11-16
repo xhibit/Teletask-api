@@ -20,16 +20,6 @@
         <module>rest</module>
         <module>html5</module>
         <module>angular</module>
+        <module>polymer</module>
     </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>teletask-api-config-spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>teletask-api-client</artifactId>
-        </dependency>
-    </dependencies>
 </project>

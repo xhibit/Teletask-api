@@ -58,7 +58,7 @@ public class SetMessage extends FunctionStateBasedMessageSupport {
                 LOG.error("Exception ({}) caught in set: {}", e.getClass().getName(), e.getMessage(), e);
             }
             try {
-                client.handleEvents(MessageUtilities.receive(LOG, client));
+                client.handleReceiveEvents(MessageUtilities.receive(LOG, client));
             } catch (Exception e) {
                 LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
             }

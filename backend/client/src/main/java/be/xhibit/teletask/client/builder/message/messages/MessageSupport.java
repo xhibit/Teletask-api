@@ -79,7 +79,7 @@ public abstract class MessageSupport {
                 LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
             }
             try {
-                client.handleEvents(MessageUtilities.receive(LOG, client, this));
+                client.handleReceiveEvents(MessageUtilities.receive(LOG, client, this));
             } catch (Exception e) {
                 LOG.error("Exception ({}) caught in execute: {}", e.getClass().getName(), e.getMessage(), e);
             }
