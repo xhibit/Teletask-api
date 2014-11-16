@@ -16,6 +16,9 @@ public interface ClientConfigSpec {
     @JsonIgnore
     List<? extends ComponentSpec> getComponents(Function function);
 
+    @JsonIgnore
+    List<? extends ComponentSpec> getAllComponents();
+
     CentralUnitType getCentralUnitType();
 
     List<? extends RoomSpec> getRooms();

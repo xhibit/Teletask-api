@@ -1,9 +1,9 @@
 package be.xhibit.teletask.webapp.rest;
 
+import be.xhibit.teletask.ClientHolder;
 import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
-import be.xhibit.teletask.webapp.ClientHolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;

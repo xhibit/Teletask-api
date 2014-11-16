@@ -1,6 +1,6 @@
 package be.xhibit.teletask.webapp.rest;
 
-import be.xhibit.teletask.webapp.ClientHolder;
+import be.xhibit.teletask.ClientHolder;
 import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
 
 import javax.servlet.ServletConfig;
