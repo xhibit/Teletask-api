@@ -29,6 +29,7 @@ public class TDSClientConfig implements ClientConfigSpec {
     private int port;
     private Map<Function, List<TDSComponent>> componentsTypes;
     private List<Room> rooms;
+    private List<TDSComponent> allComponents;
 
     /**
      * Default constructor.
@@ -105,6 +106,17 @@ public class TDSClientConfig implements ClientConfigSpec {
     @Override
     public List<? extends ComponentSpec> getComponents(Function function) {
         return this.componentsTypes.get(function);
+    }
+
+    @Override
+    public List<? extends ComponentSpec> getAllComponents() {
+        if (this.allComponents == null) {
+            this.allComponents = new ArrayList<>();
+            for (List<TDSComponent> components : componentsTypes.values()) {
+                this.allComponents.addAll(components);
+            }
+        }
+        return this.allComponents;
     }
 
     public List<Room> getRooms(int level) {

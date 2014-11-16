@@ -262,4 +262,9 @@ public class CentralUnit implements ClientConfigSpec {
     private String getIndex(Function function, int id) {
         return function + ":" + id;
     }
+
+    @Override
+    public List<? extends ComponentSpec> getAllComponents() {
+        return this.getComponents();
+    }
 }
