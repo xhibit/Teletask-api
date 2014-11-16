@@ -12,6 +12,8 @@ import be.xhibit.teletask.client.builder.message.messages.impl.LogMessage;
 import be.xhibit.teletask.client.builder.message.messages.impl.SetMessage;
 import be.xhibit.teletask.client.builder.message.strategy.KeepAliveStrategy;
 import be.xhibit.teletask.client.listener.StateChangeListener;
+import be.xhibit.teletask.client.mqtt.MqttPublisher;
+import be.xhibit.teletask.client.mqtt.MqttStateChangeListener;
 import be.xhibit.teletask.model.spec.ClientConfigSpec;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
@@ -342,6 +344,8 @@ public final class TeletaskClient implements TeletaskReceiver {
 
         host = this.startTestServer(host, port);
 
+        this.registerMqttPublisher();
+
         this.connect(host, port);
 
         this.startEventListener();
@@ -351,6 +355,22 @@ public final class TeletaskClient implements TeletaskReceiver {
         this.startKeepAlive();
 
         this.sendLogEventMessages("ON");
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                TeletaskClient.this.stop();
+            }
+        });
+    }
+
+    private void registerMqttPublisher() {
+        String mqttHost = System.getProperty("mqtt.host");
+        if (mqttHost != null) {
+            String mqttPort = System.getProperty("mqtt.port", "1883");
+            MqttPublisher publisher = new MqttPublisher(mqttHost, mqttPort);
+            this.registerStateChangeListener(new MqttStateChangeListener(publisher));
+        }
     }
 
     private String startTestServer(String host, int port) {
@@ -452,30 +472,30 @@ public final class TeletaskClient implements TeletaskReceiver {
         @Override
         public void run() {
             try {
-                TeletaskClient.this.handleEvents(MessageUtilities.receive(LOG, TeletaskClient.this));
+                TeletaskClient.this.handleReceiveEvents(MessageUtilities.receive(LOG, TeletaskClient.this));
             } catch (Exception e) {
                 LOG.error("Exception ({}) caught in run: {}", e.getClass().getName(), e.getMessage(), e);
             }
         }
     }
 
-    public void handleEvents(List<MessageSupport> messages) {
+    public void handleReceiveEvents(List<MessageSupport> messages) {
         List<ComponentSpec> components = new ArrayList<>();
         for (MessageSupport message : messages) {
             if (message instanceof EventMessage) {
                 EventMessage eventMessage = (EventMessage) message;
-                this.handleEvent(LOG, this.getConfig(), eventMessage);
+                this.handleReceiveEvent(LOG, this.getConfig(), eventMessage);
                 components.add(this.getConfig().getComponent(eventMessage.getFunction(), eventMessage.getNumber()));
             }
         }
         if (!components.isEmpty()) {
             for (StateChangeListener stateChangeListener : this.getStateChangeListeners()) {
-                stateChangeListener.event(components);
+                stateChangeListener.receive(components);
             }
         }
     }
 
-    public void handleEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
+    public void handleReceiveEvent(Logger logger, ClientConfigSpec config, EventMessage eventMessage) {
         ComponentSpec component = config.getComponent(eventMessage.getFunction(), eventMessage.getNumber());
         if (component != null) {
             if (logger.isDebugEnabled()) {

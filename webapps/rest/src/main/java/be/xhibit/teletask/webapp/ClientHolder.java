@@ -1,4 +1,4 @@
-package be.xhibit.teletask;
+package be.xhibit.teletask.webapp;
 
 import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.config.model.json.TDSClientConfig;

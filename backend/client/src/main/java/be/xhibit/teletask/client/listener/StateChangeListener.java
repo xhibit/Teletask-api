@@ -5,5 +5,5 @@ import be.xhibit.teletask.model.spec.ComponentSpec;
 import java.util.List;
 
 public interface StateChangeListener {
-    void event(List<ComponentSpec> components);
+    void receive(List<ComponentSpec> components);
 }

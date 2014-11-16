@@ -15,6 +15,14 @@
             </Policies>
             <DefaultRolloverStrategy max="5"/>
         </RollingFile>
+        <RollingFile name="mqtt" fileName="${sys:mqtt.logfile}" append="true" filePattern="${sys:mqtt.logfile}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
         <Root level="warn">
@@ -25,6 +33,9 @@
         </Logger>
         <Logger name="org.jboss.resteasy" level="debug" additivity="false">
             <AppenderRef ref="teletask"/>
+        </Logger>
+        <Logger name="be.xhibit.teletask.client.mqtt" level="debug" additivity="false">
+            <AppenderRef ref="mqtt"/>
         </Logger>
     </Loggers>
 </Configuration>

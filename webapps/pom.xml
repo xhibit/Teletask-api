@@ -17,22 +17,9 @@
     <description>The webapps base code for working with teletask central unit</description>
 
     <modules>
-        <module>clientholder</module>
-        <module>mqtt</module>
         <module>rest</module>
         <module>html5</module>
         <module>angular</module>
         <module>polymer</module>
     </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>teletask-api-config-spec</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>teletask-api-client</artifactId>
-        </dependency>
-    </dependencies>
 </project>
