@@ -1,59 +1,189 @@
+// define a namespace for storing global variables
+$.tdsScope = {};
+
 $(document).ready(function () {
 
     var full_url = window.location;
-    var base_url = full_url.protocol + "//" + full_url.host + "/" + full_url.pathname.split('/')[1];
+    $.tdsScope.baseUrl = full_url.protocol + "//" + full_url.host + "/" + full_url.pathname.split('/')[1];
+    //$.tdsScope.baseUrl = "https://home.xhibit.be:8080/teletask";
 
-    $(document).bind("mobileinit", function() {
-        $.mobile.page.prototype.options.addBackBtn = true;
-    });
+    $( "[data-role='navbar']" ).navbar();
+    $( "[data-role='header'], [data-role='footer']" ).toolbar();
 
-    //TODO: make API call to get all components (JSON), and init all toggle objects accordingly
-    //TODO: better to work with websockets (node.js): this way component state changes can be pushed to the app
-    /*var configURL = base_url +"config";
-     var jqxhr = $.getJSON( configURL)
-     .done(function(json) {
-     console.log( "process json: " +json);
-     //TODO: parse JSON and compose HTML DOM
-     //TODO: better look into Backbone.js: http://demos.jquerymobile.com/1.4.3/backbone-requirejs/
-     })
-     .fail(function() {
-     console.log( "init error" );
-     })
-     .always(function() {
-     console.log( "init complete" );
-     });*/
+    $().initComponents();
+    $().initWebSocket();
 
-    /**
-     * SWITCH RELAY STATE
-     * URI: PUT <base_url>/api/relay/{number}/state/{off/on}
-     *
-     * SWITCH MOTOR STATE
-     * URI: PUT <base_url>/api/motor/{number}/state/{down/up}
-     */
-    $( ".stateSwitch" ).bind( "change", function(event) {
+});
 
-        var componentValue = $(this).data('tds-number');
-        var componentType = $(this).data('tds-type');
-        var stateValue;
-        if (componentType === "relay" || componentType === "locmood" || componentType === "genmood") {
-            // relay needs to send 1 for "on"
-            stateValue = $(this).is(':checked') ? "on" : "off";
-        } else if (componentType === "motor") {
-            // motor needs to send 0 for "down"
-            stateValue = $(this).is(':checked') ? "down" : "up";
-        }
 
-        var url = base_url +'/api/component/' +componentType +"/" +componentValue +"/state/" +stateValue
+
+/**
+ * Init config, build DOM.
+ * TODO: better look into Backbone.js: http://demos.jquerymobile.com/1.4.3/backbone-requirejs/
+ */
+(function( $ ){
+    $.fn.initComponents = function() {
 
         $.ajax({
-            type: "GET"
-            ,url: url
-        })
-            .done(function (data, textStatus, jqXHR) {
-                //sample response: {"response":{"success": "true","status": "1","relay": "41"}}
-                if ( console && console.log ) {
-                    console.log( "Data returned:", data );
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config", crossDomain:true, cache:false
+        }).done(function(config) {
+            $().initRoomDOM(config.rooms);
+        });
+
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config/MOTOR", crossDomain:true, cache:false
+        }).done(function(components) {
+            $().initDOM(components, $('#page_screens .ui-body'));
+        });
+
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config/LOCMOOD", crossDomain:true, cache:false
+        }).done(function(components) {
+            $().initDOM(components, $('#page_moods .ui-body'));
+        });
+
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config/GENMOOD", crossDomain:true, cache:false
+        }).done(function(components) {
+            $().initDOM(components, $('#page_moods .ui-body'));
+        });
+
+        $.ajax({
+            type: "GET", url: $.tdsScope.baseUrl +"/api/config/SENSOR", crossDomain:true, cache:false
+        }).done(function(components) {
+            $().initDOM(components, $('#page_sensors .ui-body'));
+        });
+
+        // Update the contents of the toolbars
+        /*$( document ).on( "pageshow", "[data-role='page']", function() {
+         // Each of the four pages in this demo has a data-title attribute which value is equal to the text of the nav button
+         var current = $( this ).jqmData( "title" );
+         // Remove active class from nav buttons
+         //$( "[data-role='navbar'] a.ui-btn-active" ).removeClass( "ui-btn-active" );
+         // Add active class to current nav button
+         $( "[data-role='navbar'] a" ).each(function() {
+         if ( $( this ).text() === current ) {
+         $( this ).addClass( "ui-btn-active" );
+         }
+         });
+         });*/
+
+    };
+})( jQuery );
+
+/**
+ * Init Room DOM.
+ */
+(function( $ ){
+    $.fn.initRoomDOM = function(rooms) {
+
+        var page = $('#rooms');
+        $.each(rooms, function(i, room) {
+
+            var placeholder = $("<div>")
+                .attr("data-role", "collapsible")
+                .attr("id", "ROOM_" +room.id)
+                .append(
+                    $("<h3>").text(room.name)
+                );
+
+            var components = room.relays;
+            $().initDOM(components, placeholder);
+
+            placeholder.appendTo(page);
+        });
+
+    };
+})( jQuery );
+
+
+
+/**
+ * Init DOM for the components.
+ */
+(function( $ ){
+    $.fn.initDOM = function(components, page) {
+
+        $.each(components, function(i, component) {
+            //console.log("component: " +JSON.stringify(component));
+            var func = component.function;
+
+            if (func === "RELAY" || func === "LOCMOOD" || func === "GENMOOD" || func === "MOTOR") {
+
+                var componentID = func + '-SWITCH-' + component.number;
+                var onTxt = func == 'MOTOR' ? 'down' : 'on';
+                var offTxt = func == 'MOTOR' ? 'up' : 'off';
+                var switchButton = $("<input>")
+                    .attr("type", "checkbox")
+                    .attr("id", componentID)
+                    .attr("name", componentID)
+                    .attr("class", "switchButton")
+                    .attr("data-role", "flipswitch")
+                    .attr("data-wrapper-class", "custom-label-flipswitch")
+                    .attr("data-on-text", onTxt)
+                    .attr("data-off-text", offTxt)
+                    .attr("data-tds-number", component.number);
+
+                $("<p>")
+                    .append(
+                        $("<label>").attr("for", componentID).text(component.description + ": ")
+                    )
+                    .append(switchButton)
+                .appendTo(page);
+
+                // set correct state of button
+                if (component.state == 'ON' || component.state == 'DOWN') {
+                    switchButton.attr('checked', true);
                 }
+
+                // bind change event triggering REST call
+                switchButton.change(function () {
+                    $().switchComponentState($(this));
+                });
+
+            } else if (func === "SENSOR") {
+
+                $("<h3>")
+                    .attr("class", "ui-bar ui-bar-a ui-corner-all")
+                    .text(component.description)
+                .appendTo(page);
+
+                $("<div>")
+                    .attr("class", "ui-body")
+                    .append(
+                        $("<p>").attr("id", "SENSOR"+component.type+"-"+component.number).text(component.state +" Lux")
+                    )
+                .appendTo(page);
+
+            }
+
+        });
+
+    };
+})( jQuery );
+
+/**
+ * Init state switches.
+ */
+(function( $ ){
+    $.fn.switchComponentState = function(element) {
+
+            var componentValue = element.data('tds-number');
+            var componentType = element.attr('id').split('-')[0];
+            var stateValue;
+            if (componentType === "RELAY" || componentType === "LOCMOOD" || componentType === "GENMOOD") {
+                stateValue = element.is(':checked') ? "on" : "off";
+            } else if (componentType === "MOTOR") {
+                stateValue = element.is(':checked') ? "down" : "up";
+            }
+
+            var url = $.tdsScope.baseUrl +'/api/component/' +componentType +"/" +componentValue +"/state/" +stateValue
+
+            $.ajax({
+                type: "GET"
+                ,url: url
+                ,crossDomain : true
+                ,cache:false
             })
             .fail(function (jqXHR, textStatus, errorThrown) {
                 if ( console && console.log ) {
@@ -62,86 +192,80 @@ $(document).ready(function () {
             })
             .always(function(data, textStatus) {
                 if ( console && console.log ) {
-                    console.log( "Component switch call success. Data returned:", data );
+                    console.log( "Component switch call success. Data returned:", JSON.stringify(data) );
                 }
             });
 
-        return false;
-    });
+            return false;
+
+    };
+})( jQuery );
 
 
-    $(function() {
-        $( "[data-role='navbar']" ).navbar();
-        $( "[data-role='header'], [data-role='footer']" ).toolbar();
-    });
 
-
-    // Update the contents of the toolbars
-    $( document ).on( "pageshow", "[data-role='page']", function() {
-        // Each of the four pages in this demo has a data-title attribute
-        // which value is equal to the text of the nav button
-        // For example, on first page: <div data-role="page" data-title="Info">
-        //TODO: implement
-        // var current = $( this ).jqmData( "title" );
-        // Change the heading
-        //$( "[data-role='header'] h1" ).text( current );
-        // Remove active class from nav buttons
-        $( "[data-role='navbar'] a.ui-btn-active" ).removeClass( "ui-btn-active" );
-        // Add active class to current nav button
-        /* TODO: implement
-         $( "[data-role='navbar'] a" ).each(function() {
-         if ( $( this ).text() === current ) {
-         $( this ).addClass( "ui-btn-active" );
-         }
-         });*/
-    });
-
-    if(!("WebSocket" in window)){
-        $('<p>Oh no, you need a browser that supports WebSockets.</p>').appendTo('#page_start');
-    }else {
-        //The user has WebSockets
-        $().openWebSocket();
-    }
-
-});
-
+/**
+ * Websocket function.
+ */
 (function( $ ){
-    $.fn.openWebSocket = function() {
-        if (document.URL.indexOf('http:') == 0) {
-            var baseWsUrl = document.URL.replace("http://", "ws://");
-        } else {
-            var baseWsUrl = document.URL.replace("https://", "wss://");
-        }
-        var wsocket = new WebSocket(baseWsUrl + '/state-changes');
-        console.log("Opening WebSocket connection: " +wsocket);
+    $.fn.initWebSocket = function() {
 
-        wsocket.onmessage = function (evt) {
+        if(!("WebSocket" in window)){
+            $('<p>Oh no, you need a browser that supports WebSockets.</p>').appendTo('#page_start');
+        }else {
+            if (document.URL.indexOf('http:') == 0) {
+                var baseWsUrl = $.tdsScope.baseUrl.replace("http://", "ws://");
+            } else {
+                var baseWsUrl = $.tdsScope.baseUrl.replace("https://", "wss://");
+            }
+            var wsocket = new WebSocket(baseWsUrl + '/state-changes');
+            console.log("Opening WebSocket connection: " + wsocket.url);
 
-            console.log("WebSocket msg: " +evt.data);
+            wsocket.onmessage = function (evt) {
 
-            /*$scope.$apply(function () {
-                var components = angular.fromJson(evt.data);
-                angular.forEach($scope.config.rooms, function (room, key) {
-                    function changeComponentState(comps) {
-                        angular.forEach(comps, function (comp, key) {
-                            angular.forEach(components, function (component, key) {
-                                if (comp.number == component.number && comp.function == component.function) {
-                                    console.log('Changing state in room ' + room.name + ': ' + component.function + ':' + component.number + ' to ' + component.state.value);
-                                    comp.state.value = component.state.value;
-                                    comp.state.state = component.state.state;
-                                }
+                console.log("WebSocket msg: " + evt.data);
+                var components = $.parseJSON(evt.data);
+
+                // made more robust: getting null events (need to find cause).
+                if (components != null && components.length > 0 && components[0] != null) {
+                    $.each(components, function (i, component) {
+                        console.log('Changing state' + ': ' + component.function + ':' + component.number + ' to ' + component.state);
+
+                        var func = component.function;
+
+                        if (func === "RELAY" || func === "LOCMOOD" || func === "GENMOOD" || func === "MOTOR") {
+                            var componentID = func +'-SWITCH-' +component.number;
+                            var compEl = $("#"+componentID);
+
+                            // unbind the change event to prevent it from being executed
+                            compEl.unbind('change');
+
+                            // set correct state of button
+                            if (component.state=='ON' || component.state=='DOWN') {
+                                compEl.attr('checked',true);
+                                compEl.flipswitch();
+                                compEl.flipswitch("refresh");
+                                compEl.parent().addClass("ui-flipswitch-active");
+                            } else {
+                                compEl.attr('checked',false);
+                                compEl.flipswitch();
+                                compEl.flipswitch("refresh");
+                                compEl.parent().removeClass("ui-flipswitch-active");
+                            }
+
+                            // unbind the change event again
+                            compEl.change(function () {
+                                $().switchComponentState($( this ));
                             });
-                        });
-                    }
-                    changeComponentState(room.relays);
-                    changeComponentState(room.localMoods);
-                    changeComponentState(room.motors);
-                    changeComponentState(room.generalMoods);
-                    changeComponentState(room.dimmers);
-                    changeComponentState(room.conditions);
-                });
-            });*/
-        };
-        //return this;
+
+                        } else if (func === "SENSOR") {
+                            var componentID = 'SENSOR' +component.type+"-"+component.number;
+                            var compEl = $("#"+componentID);
+                            compEl.text(component.state +" Lux");
+                        }
+                    });
+                }
+
+            };
+        }
     };
 })( jQuery );
