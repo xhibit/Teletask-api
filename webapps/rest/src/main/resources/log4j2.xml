@@ -23,7 +23,7 @@
             </Policies>
             <DefaultRolloverStrategy max="5"/>
         </RollingFile>
-        <RollingFile name="ota" fileName="${sys:mqtt.logfile}" append="true" filePattern="${sys:ota.logfile}-%d{yyyy-MM-dd}-%i.log.gz">
+        <RollingFile name="ota" fileName="${sys:ota.logfile}" append="true" filePattern="${sys:ota.logfile}-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="${pattern}" />
             <Policies>
                 <TimeBasedTriggeringPolicy />

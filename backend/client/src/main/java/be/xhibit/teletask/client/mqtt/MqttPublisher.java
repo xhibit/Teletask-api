@@ -44,16 +44,6 @@ public class MqttPublisher {
         try {
             this.client = new MqttClient(broker, clientId, persistence);
             this.connect(this.client);
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        MqttPublisher.this.client.disconnect();
-                    } catch (MqttException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            });
         } catch (MqttException me) {
             LOG.error("Exception ({}) caught in getClient: {}", me.getClass().getName(), me.getMessage(), me);
         }
@@ -86,5 +76,19 @@ public class MqttPublisher {
 
     private String toTopic(ComponentSpec component) {
         return String.format("/teletask-api/%s/%s", component.getFunction().toString().toLowerCase(), component.getNumber());
+    }
+
+    public void stop() {
+        if (this.client != null && this.client.isConnected()) {
+            try {
+                this.client.disconnect();
+            } catch (MqttException e) {
+                try {
+                    this.client.disconnectForcibly();
+                } catch (MqttException e1) {
+                    LOG.error("Exception ({}) caught in stop: {}", e1.getClass().getName(), e1.getMessage(), e1);
+                }
+            }
+        }
     }
 }
