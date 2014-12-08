@@ -18,7 +18,7 @@ public class OneTimeAccessTokenStoreMemoryImpl implements OneTimeAccessTokenStor
 
     @Override
     public OneTimeAccessToken generate(Function function, int number, String state) {
-        OneTimeAccessTokenSupport token = new TimedOneTimeAccessToken(function, number, state);
+        OneTimeAccessTokenSupport token = new TimedOneTimeAccessTokenImpl(function, number, state);
 
         this.getTokens().put(token.getToken(), token);
 
