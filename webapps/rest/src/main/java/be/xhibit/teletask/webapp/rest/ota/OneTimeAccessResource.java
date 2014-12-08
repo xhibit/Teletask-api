@@ -44,6 +44,7 @@ public class OneTimeAccessResource extends ResourceSupport {
     @Path("/generate/{apiKey}/{function}/{number}/{state}")
     public Response generate(@PathParam("apiKey") String apiKey, @PathParam("function") String function, @PathParam("number") int number, @PathParam("state") String state) {
         OneTimeAccessToken response = OneTimeAccessResource.this.getOneTimeAccessTokenStore().generate(Function.valueOf(function.toUpperCase()), number, state);
+        LOG.debug("Generated One Time Access Token: {}", response);
         return this.handle(apiKey, response);
     }
 
@@ -54,6 +55,7 @@ public class OneTimeAccessResource extends ResourceSupport {
         OneTimeAccessExecutionResult response = null;
         OneTimeAccessToken token = this.getOneTimeAccessTokenStore().get(tokenId);
         if (token != null && token.isValid()) {
+            LOG.debug("Using One Time Access Token: {}", token);
             try {
                 ClientHolder.getClient().set(token.getFunction(), token.getNumber(), token.getState());
                 response = this.createExecutionResult(token, "OK");

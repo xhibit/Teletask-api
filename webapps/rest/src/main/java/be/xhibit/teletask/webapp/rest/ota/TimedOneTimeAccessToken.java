@@ -23,4 +23,14 @@ public class TimedOneTimeAccessToken extends OneTimeAccessTokenSupport {
         return LocalDateTime.now().isBefore(this.getValidUntil());
     }
 
+    @Override
+    public String toString() {
+        return "TimedOneTimeAccessToken{" +
+                "token='" + this.getToken() + '\'' +
+                ", function=" + this.getFunction() +
+                ", number=" + this.getNumber() +
+                ", state='" + this.getState() + '\'' +
+                ", validUntil=" + this.getValidUntil() +
+                '}';
+    }
 }
