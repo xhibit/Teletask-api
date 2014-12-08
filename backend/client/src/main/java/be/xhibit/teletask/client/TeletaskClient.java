@@ -428,7 +428,7 @@ public final class TeletaskClient implements TeletaskReceiver {
 
     private void startKeepAlive() {
         KeepAliveStrategy keepAliveStrategy = this.getMessageHandler().getKeepAliveStrategy();
-        this.getKeepAliveTimer().schedule(new KeepAliveService(keepAliveStrategy), 0, keepAliveStrategy.getIntervalMinutes() * 60 * 1000);
+        this.getKeepAliveTimer().schedule(new KeepAliveService(keepAliveStrategy), 0, TimeUnit.MINUTES.toMillis(keepAliveStrategy.getIntervalMinutes()));
     }
 
     @Override
@@ -479,7 +479,7 @@ public final class TeletaskClient implements TeletaskReceiver {
         }
     }
 
-    public void handleReceiveEvents(List<MessageSupport> messages) {
+    public void handleReceiveEvents(Iterable<MessageSupport> messages) {
         List<ComponentSpec> components = new ArrayList<>();
         for (MessageSupport message : messages) {
             if (message instanceof EventMessage) {

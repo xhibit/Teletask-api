@@ -1,9 +1,10 @@
-package be.xhibit.teletask.webapp.rest;
+package be.xhibit.teletask.webapp.rest.component;
 
 import be.xhibit.teletask.client.TeletaskClient;
 import be.xhibit.teletask.model.spec.ComponentSpec;
 import be.xhibit.teletask.model.spec.Function;
 import be.xhibit.teletask.webapp.ClientHolder;
+import be.xhibit.teletask.webapp.rest.ResourceSupport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -18,8 +19,8 @@ import javax.ws.rs.core.Response;
 /**
  * The ComponentResource lists all REST API methods available for the Teletask service.
  */
-@Path("/")
-public class ComponentResource {
+@Path("/component")
+public class ComponentResource extends ResourceSupport {
     private static final ObjectWriter PRETTY_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
     private static final ObjectWriter WRITER = new ObjectMapper().writer();
 
@@ -35,7 +36,7 @@ public class ComponentResource {
 
     /**
      * Gets the complete config in JSON.
-     * URI: (GET) http://localhost:8080/teletask/api/config
+     * URI: (GET) http://localhost:8080/teletask/api/component/config
      *
      * @return JSON representation of the complete Teletask config in place..
      */
@@ -43,12 +44,12 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/config")
     public Response config() throws JsonProcessingException {
-        return this.buildsuccessResponse(WRITER.writeValueAsString(this.getClient().getConfig()));
+        return this.buildSuccessResponse(WRITER.writeValueAsString(this.getClient().getConfig()));
     }
 
     /**
      * Gets a partial config in JSON.
-     * URI: (GET) http://localhost:8080/teletask/api/config/{function}
+     * URI: (GET) http://localhost:8080/teletask/api/component/config/{function}
      *
      * @return JSON representation of the Teletask config in place..
      */
@@ -56,12 +57,12 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/config/{function}")
     public Response config(@PathParam("function") String function) throws JsonProcessingException {
-        return this.buildsuccessResponse(WRITER.writeValueAsString(this.getClient().getConfig().getComponents(Function.valueOf(function.toUpperCase()))));
+        return this.buildSuccessResponse(WRITER.writeValueAsString(this.getClient().getConfig().getComponents(Function.valueOf(function.toUpperCase()))));
     }
 
     /**
      * Gets the complete config in JSON.
-     * URI: (GET) http://localhost:8080/teletask/api/pretty-config
+     * URI: (GET) http://localhost:8080/teletask/api/component/pretty-config
      *
      * @return JSON response confirming if the switch request was successful, together with the correct state.
      */
@@ -69,15 +70,15 @@ public class ComponentResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pretty-config")
     public Response prettyConfig() throws JsonProcessingException {
-        return this.buildsuccessResponse(PRETTY_WRITER.writeValueAsString(this.getClient().getConfig()));
+        return this.buildSuccessResponse(PRETTY_WRITER.writeValueAsString(this.getClient().getConfig()));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/component/{function}/{number}")
+    @Path("/{function}/{number}")
     public Response component(@PathParam("function") String function, @PathParam("number") int number) {
         APIResponse response = new APIResponse("success", this.getClient().getConfig().getComponent(Function.valueOf(function.toUpperCase()), number));
-        return this.buildsuccessResponse(response);
+        return this.buildSuccessResponse(response);
     }
 
     @GET
@@ -87,12 +88,12 @@ public class ComponentResource {
         ComponentSpec component = this.getClient().getConfig().getComponent(Function.valueOf(function.toUpperCase()), number);
         this.getClient().get(component);
         APIResponse response = new APIResponse("success", component);
-        return this.buildsuccessResponse(response);
+        return this.buildSuccessResponse(response);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/component/{function}/{number}/state/{state}")
+    @Path("/{function}/{number}/state/{state}")
     public Response component(@PathParam("function") String function, @PathParam("number") int number, @PathParam("state") String state) {
         Function functionEnum = Function.valueOf(function.toUpperCase());
 
@@ -111,11 +112,7 @@ public class ComponentResource {
 
     private Response buildGetResponse(ComponentSpec... component) {
         APIResponse apiResponse = new APIResponse("success", component);
-        return Response.status(200).entity(apiResponse).header("Access-Control-Allow-Origin", "*").build();
-    }
-
-    private Response buildsuccessResponse(Object response) {
-        return Response.status(200).entity(response).header("Access-Control-Allow-Origin", "*").build();
+        return this.buildSuccessResponse(apiResponse);
     }
 
     private TeletaskClient getClient() {
