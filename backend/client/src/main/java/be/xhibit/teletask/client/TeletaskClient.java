@@ -267,6 +267,7 @@ public final class TeletaskClient implements TeletaskReceiver {
         // close all log events to stop reporting
         this.sendLogEventMessages("OFF");
         this.stopEventListener();
+        this.stopStateChangeListeners();
         this.stopKeepAliveService();
         this.stopExecutorService();
         this.closeInputStream();
@@ -274,6 +275,12 @@ public final class TeletaskClient implements TeletaskReceiver {
         this.closeSocket();
         this.stopTestServer();
 
+    }
+
+    private void stopStateChangeListeners() {
+        for (StateChangeListener stateChangeListener : this.getStateChangeListeners()) {
+            stateChangeListener.stop();
+        }
     }
 
     private void stopTestServer() {
@@ -355,13 +362,6 @@ public final class TeletaskClient implements TeletaskReceiver {
         this.startKeepAlive();
 
         this.sendLogEventMessages("ON");
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                TeletaskClient.this.stop();
-            }
-        });
     }
 
     private void registerMqttPublisher() {
@@ -428,7 +428,7 @@ public final class TeletaskClient implements TeletaskReceiver {
 
     private void startKeepAlive() {
         KeepAliveStrategy keepAliveStrategy = this.getMessageHandler().getKeepAliveStrategy();
-        this.getKeepAliveTimer().schedule(new KeepAliveService(keepAliveStrategy), 0, keepAliveStrategy.getIntervalMinutes() * 60 * 1000);
+        this.getKeepAliveTimer().schedule(new KeepAliveService(keepAliveStrategy), 0, TimeUnit.MINUTES.toMillis(keepAliveStrategy.getIntervalMinutes()));
     }
 
     @Override
@@ -479,7 +479,7 @@ public final class TeletaskClient implements TeletaskReceiver {
         }
     }
 
-    public void handleReceiveEvents(List<MessageSupport> messages) {
+    public void handleReceiveEvents(Iterable<MessageSupport> messages) {
         List<ComponentSpec> components = new ArrayList<>();
         for (MessageSupport message : messages) {
             if (message instanceof EventMessage) {

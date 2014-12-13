@@ -6,7 +6,7 @@
     app.controller('ConfigController', ['$rootScope', '$scope', '$http', function ($rootScope, $scope, $http) {
         $scope.config = [];
 
-        $http.get($rootScope.baseUrl + '/config').success(function (data, status, headers, config) {
+        $http.get($rootScope.baseUrl + '/component/config').success(function (data, status, headers, config) {
             $scope.config = data;
         });
 

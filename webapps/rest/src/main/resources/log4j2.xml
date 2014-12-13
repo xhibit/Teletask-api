@@ -23,6 +23,14 @@
             </Policies>
             <DefaultRolloverStrategy max="5"/>
         </RollingFile>
+        <RollingFile name="ota" fileName="${sys:ota.logfile}" append="true" filePattern="${sys:ota.logfile}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${pattern}" />
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
     </Appenders>
     <Loggers>
         <Root level="warn">
@@ -36,6 +44,9 @@
         </Logger>
         <Logger name="be.xhibit.teletask.client.mqtt" level="debug" additivity="false">
             <AppenderRef ref="mqtt"/>
+        </Logger>
+        <Logger name="be.xhibit.teletask.webapp.rest.ota" level="debug" additivity="false">
+            <AppenderRef ref="ota"/>
         </Logger>
     </Loggers>
 </Configuration>

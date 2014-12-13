@@ -31,6 +31,11 @@ public class StateChangeListenerEndpoint extends JSONBroadcastingWebSocket {
                     LOG.error("Exception ({}) caught in event: {}", e.getClass().getName(), e.getMessage(), e);
                 }
             }
+
+            @Override
+            public void stop() {
+
+            }
         });
     }
 

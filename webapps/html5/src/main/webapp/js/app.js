@@ -25,31 +25,31 @@ $(document).ready(function () {
     $.fn.initComponents = function() {
 
         $.ajax({
-            type: "GET", url: $.tdsScope.baseUrl +"/api/config", crossDomain:true, cache:false
+            type: "GET", url: $.tdsScope.baseUrl +"/api/component/config", crossDomain:true, cache:false
         }).done(function(config) {
             $().initRoomDOM(config.rooms);
         });
 
         $.ajax({
-            type: "GET", url: $.tdsScope.baseUrl +"/api/config/MOTOR", crossDomain:true, cache:false
+            type: "GET", url: $.tdsScope.baseUrl +"/api/component/config/MOTOR", crossDomain:true, cache:false
         }).done(function(components) {
             $().initDOM(components, $('#page_screens .ui-body'));
         });
 
         $.ajax({
-            type: "GET", url: $.tdsScope.baseUrl +"/api/config/LOCMOOD", crossDomain:true, cache:false
+            type: "GET", url: $.tdsScope.baseUrl +"/api/component/config/LOCMOOD", crossDomain:true, cache:false
         }).done(function(components) {
             $().initDOM(components, $('#page_moods .ui-body'));
         });
 
         $.ajax({
-            type: "GET", url: $.tdsScope.baseUrl +"/api/config/GENMOOD", crossDomain:true, cache:false
+            type: "GET", url: $.tdsScope.baseUrl +"/api/component/config/GENMOOD", crossDomain:true, cache:false
         }).done(function(components) {
             $().initDOM(components, $('#page_moods .ui-body'));
         });
 
         $.ajax({
-            type: "GET", url: $.tdsScope.baseUrl +"/api/config/SENSOR", crossDomain:true, cache:false
+            type: "GET", url: $.tdsScope.baseUrl +"/api/component/config/SENSOR", crossDomain:true, cache:false
         }).done(function(components) {
             $().initDOM(components, $('#page_sensors .ui-body'));
         });

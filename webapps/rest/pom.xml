@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>teletask-api-clientholder</artifactId>
+            <artifactId>teletask-api-client</artifactId>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -67,6 +67,11 @@
             <groupId>javax.websocket</groupId>
             <artifactId>javax.websocket-api</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
         </dependency>
 
         <!--<dependency>-->

@@ -30,4 +30,9 @@ public class MqttStateChangeListener implements StateChangeListener {
             }
         }
     }
+
+    @Override
+    public void stop() {
+        this.publisher.stop();
+    }
 }

@@ -1,4 +1,4 @@
-package be.xhibit.teletask.webapp.rest;
+package be.xhibit.teletask.webapp.rest.component;
 
 public class GroupGetParams {
     private int[] numbers;

@@ -1,4 +1,4 @@
-package be.xhibit.teletask.webapp.rest;
+package be.xhibit.teletask.webapp.rest.component;
 
 import be.xhibit.teletask.model.spec.ComponentSpec;
 

@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface StateChangeListener {
     void receive(List<ComponentSpec> components);
+
+    void stop();
 }
