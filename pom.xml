@@ -26,7 +26,7 @@
         <guava.version>17.0</guava.version>
         <log4j-api.version>2.0</log4j-api.version>
         <!--Currently only snapshots work-->
-        <paho.version>1.0.1-SNAPSHOT</paho.version>
+        <paho.version>1.0.2</paho.version>
     </properties>
 
     <repositories>
@@ -36,7 +36,7 @@
         </repository>
         <repository>
             <id>Eclipse Paho Repo</id>
-            <url>https://repo.eclipse.org/content/repositories/paho-snapshots/</url>
+            <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
         </repository>
         <repository>
             <id>bintray</id>
