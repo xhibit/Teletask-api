@@ -36,7 +36,7 @@ public class ComponentResource extends ResourceSupport {
 
     /**
      * Gets the complete config in JSON.
-     * URI: (GET) http://localhost:8080/teletask/api/component/config
+     * URI: (GET) {protocol}://{host}:{port}/{context}/api/component/config
      *
      * @return JSON representation of the complete Teletask config in place..
      */
@@ -49,7 +49,7 @@ public class ComponentResource extends ResourceSupport {
 
     /**
      * Gets a partial config in JSON.
-     * URI: (GET) http://localhost:8080/teletask/api/component/config/{function}
+     * URI: (GET) {protocol}://{host}:{port}/{context}/api/component/config/{function}
      *
      * @return JSON representation of the Teletask config in place..
      */
@@ -62,7 +62,7 @@ public class ComponentResource extends ResourceSupport {
 
     /**
      * Gets the complete config in JSON.
-     * URI: (GET) http://localhost:8080/teletask/api/component/pretty-config
+     * URI: (GET) {protocol}://{host}:{port}/{context}/api/component/pretty-config
      *
      * @return JSON response confirming if the switch request was successful, together with the correct state.
      */
@@ -73,6 +73,12 @@ public class ComponentResource extends ResourceSupport {
         return this.buildSuccessResponse(PRETTY_WRITER.writeValueAsString(this.getClient().getConfig()));
     }
 
+    /**
+     * Gets the status of a specific function in JSON.
+     * URI: (GET) {protocol}://{host}:{port}/{context}/api/component/{function}/{number}
+     *
+     * @return JSON response representing the correct state.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{function}/{number}")
@@ -81,6 +87,12 @@ public class ComponentResource extends ResourceSupport {
         return this.buildSuccessResponse(response);
     }
 
+    /**
+     * Gets the status of a specific function in JSON, but using a forced refresh (?).
+     * URI: (GET) {protocol}://{host}:{port}/{context}/api/component/refresh/{function}/{number}
+     *
+     * @return JSON response representing the correct state.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/refresh/{function}/{number}")
@@ -91,6 +103,30 @@ public class ComponentResource extends ResourceSupport {
         return this.buildSuccessResponse(response);
     }
 
+    /**
+     * Gets the simple state of a specific function, either 0|1.
+     * Method can be used in services expecting this simple type of response, like the HomeBridge and home-assistant.io projects.
+     * URI: (GET) {protocol}://{host}:{port}/{context}/api/component/state/{function}/{number}
+     *
+     * @return Value representing the state: 0 for "off", 1 for "on".
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/state/{function}/{number}")
+    public Response state(@PathParam("function") String function, @PathParam("number") int number) {
+        ComponentSpec component = this.getClient().getConfig().getComponent(Function.valueOf(function.toUpperCase()), number);
+        String stateValue = component.getState();
+        Integer state = "ON".equalsIgnoreCase(stateValue) ? 1 : 0;
+        return this.buildSuccessResponse(state);
+    }
+
+    /**
+     * Switches the status of a specific function into the desired state.
+     * URI: (GET) {protocol}://{host}:{port}/{context}/api/component/{function}/{number}/state/{state}
+     * Note: should actually be a PUT, but used a GET for easier testing purpose.
+     *
+     * @return JSON response representing the correct component state.
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{function}/{number}/state/{state}")
