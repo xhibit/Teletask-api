@@ -1,34 +1,26 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Teletask-api by xhibit</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Teletask-api</h1>
-        <p>An open source java REST API for Teletask domotics.</p>
-        <p class="view"><a href="https://github.com/xhibit/Teletask-api">View the Project on GitHub <small>xhibit/Teletask-api</small></a></p>
-        <ul>
-          <li><a href="https://github.com/xhibit/Teletask-api/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/xhibit/Teletask-api/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/xhibit/Teletask-api">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
-<a name="teletask-api" class="anchor" href="#teletask-api"><span class="octicon octicon-link"></span></a>Teletask-api</h1>
+    <section class="page-header">
+      <h1 class="project-name">Teletask-api</h1>
+      <h2 class="project-tagline">An open source java REST API for Teletask domotics.</h2>
+      <a href="https://github.com/xhibit/Teletask-api" class="btn">View on GitHub</a>
+      <a href="https://github.com/xhibit/Teletask-api/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/xhibit/Teletask-api/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="teletask-api" class="anchor" href="#teletask-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Teletask-api</h1>
 
 <p>An open source java JSON REST API for Teletask domotics.</p>
 
@@ -43,17 +35,20 @@ Bought me a RS232 &gt; LAN converter (TDS10118) so I could access my MICROS serv
 <p>Initially only setting and getting RELAYS, MTRUPDOWN, GENMOOD, LOCMOOD, COND, FLAG is supported.</p>
 
 <h3>
-<a name="how-this-api-works" class="anchor" href="#how-this-api-works"><span class="octicon octicon-link"></span></a>How this API works:</h3>
+<a id="how-this-api-works" class="anchor" href="#how-this-api-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How this API works:</h3>
 
 <ul>
-<li>Your Teletask config is read from the tds-config.json file.  This file holds all info on your personal setup.</li>
+<li>Your Teletask config is read from the tds-config.json file.  This file holds all info on your personal setup. An example config can be downloaded from <a href="https://github.com/xhibit/Teletask-api/blob/master/backend/config-json/src/main/resources/tds-config.json">here</a>
+</li>
 <li>Once configured correctly, build the war file using maven.</li>
 <li>Deploy to a java app server on a device on your local network, so it has access to your MICROS server.  I used a low power <a href="http://www.raspberrypi.org">Raspberry PI</a>
 </li>
-</ul><p><strong>UPDATE</strong>: Added a basic HTML 5 GUI for access on a mobile device.  Fastest implementation proved to be jQuery Mobile.   Will be improved in the future, but for now I have a dynamical UI which suits it's purpose...</p>
+</ul>
+
+<p><strong>UPDATE</strong>: Added a basic HTML 5 GUI for access on a mobile device.  Fastest implementation proved to be jQuery Mobile.   Will be improved in the future, but for now I have a dynamical UI which suits it's purpose...</p>
 
 <h4>
-<a name="libraries--technologies" class="anchor" href="#libraries--technologies"><span class="octicon octicon-link"></span></a>Libraries / Technologies</h4>
+<a id="libraries--technologies" class="anchor" href="#libraries--technologies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Libraries / Technologies</h4>
 
 <ul>
 <li>Maven 3</li>
@@ -61,74 +56,96 @@ Bought me a RS232 &gt; LAN converter (TDS10118) so I could access my MICROS serv
 <li>Jackson JSON processor</li>
 <li>jQuery Mobile</li>
 <li>...</li>
-</ul><h3>
-<a name="rest-api" class="anchor" href="#rest-api"><span class="octicon octicon-link"></span></a>REST API</h3>
+</ul>
+
+<h3>
+<a id="rest-api" class="anchor" href="#rest-api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>REST API</h3>
 
 <p>Base URL API
-http://:/teletask/api</p>
+<code>http://&lt;host&gt;:&lt;port&gt;/teletask/api</code></p>
+
+<p><strong>Config</strong></p>
+
+<ul>
+<li>URI: GET <code>&lt;base_url&gt;/component/config</code>
+
+<ul>
+<li>Description: Gets the complete configuration in JSON.</li>
+</ul>
+</li>
+</ul>
 
 <p><strong>Relay</strong></p>
 
 <ul>
-<li>URI: GET /relay/{number}
+<li>URI: GET <code>&lt;base_url&gt;/component/state/relay/{number}</code>
 
 <ul>
 <li>Description: Gets the relay state.  Returns 0 for off, 1 for on.</li>
 </ul>
 </li>
-<li>URI: PUT /relay/{number}/state/{0/1}
+<li>URI: PUT <code>&lt;base_url&gt;/component/relay/{number}/state/{on/off}</code>
 
 <ul>
-<li>Description: Switches the relay on/off.  Use 0 for off, 1 for on. </li>
+<li>Description: Switches the relay on/off.<br>
+</li>
 </ul>
 </li>
-</ul><p><strong>Motor</strong></p>
+</ul>
+
+<p><strong>Local Mood</strong></p>
 
 <ul>
-<li>URI: GET /motor/{number}
+<li>URI: GET <code>&lt;base_url&gt;/component/state/mood/local/{number}</code>
+
+<ul>
+<li>Description: Gets the mood state.  Returns 0 for off, 1 for on.</li>
+</ul>
+</li>
+<li>URI: PUT <code>&lt;base_url&gt;/mood/local/{number}/state/{on/off}</code>
+
+<ul>
+<li>Description: Switches the mood on/off.<br>
+</li>
+</ul>
+</li>
+</ul>
+
+<p><strong>General Mood</strong></p>
+
+<ul>
+<li>URI: GET <code>&lt;base_url&gt;/component/state/mood/general/{number}</code>
+
+<ul>
+<li>Description: Gets the mood state.  Returns 0 for off, 1 for on.</li>
+</ul>
+</li>
+<li>URI: PUT <code>&lt;base_url&gt;/mood/general/{number}/state/{on/off}</code>
+
+<ul>
+<li>Description: Switches the mood on/off.<br>
+</li>
+</ul>
+</li>
+</ul>
+
+<p><strong>Motor</strong></p>
+
+<ul>
+<li>URI: GET <code>&lt;base_url&gt;/component/state/motor/{number}</code>
 
 <ul>
 <li>Description: Gets the motor state.  1 for down, 0 for up.</li>
 </ul>
 </li>
-<li>URI: PUT /motor/{number}/state/{0/1}
+<li>URI: PUT <code>&lt;base_url&gt;/motor/{number}/state/{down/up}</code>
 
 <ul>
-<li>Description: Switches the motor up or down.  Use 0 for up, 1 for down.</li>
+<li>Description: Switches the motor up or down. 
+### Roadmap:</li>
 </ul>
 </li>
-</ul><p><strong>Local Mood</strong></p>
-
-<ul>
-<li>URI: GET /mood/local/{number}
-
-<ul>
-<li>Description: Gets the mood state.  Returns 0 for off, 1 for on.</li>
 </ul>
-</li>
-<li>URI: PUT /mood/local/{number}/state/{0/1}
-
-<ul>
-<li>Description: Switches the mood on/off.  Use 0 for off, 1 for on. </li>
-</ul>
-</li>
-</ul><p><strong>General Mood</strong></p>
-
-<ul>
-<li>URI: GET /mood/general/{number}
-
-<ul>
-<li>Description: Gets the mood state.  Returns 0 for off, 1 for on.</li>
-</ul>
-</li>
-<li>URI: PUT /mood/general/{number}/state/{0/1}
-
-<ul>
-<li>Description: Switches the mood on/off.  Use 0 for off, 1 for on. </li>
-</ul>
-</li>
-</ul><h3>
-<a name="roadmap" class="anchor" href="#roadmap"><span class="octicon octicon-link"></span></a>Roadmap:</h3>
 
 <p>Current status: fully working REST API &amp; UI.</p>
 
@@ -140,13 +157,15 @@ http://:/teletask/api</p>
 <li>Add support for an <a href="http://www.globalcache.com/products/itachflex/">iTach Flex</a> device so I can control additional devices through IR (airco units, projector, tv, ....</li>
 <li>A more advanced HTML 5 GUI for access on a mobile device (possibly using Twitter Bootstrap, Sencha Touch, ...).</li>
 </ul>
-      </section>
-    </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/xhibit">xhibit</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/xhibit/Teletask-api">Teletask-api</a> is maintained by <a href="https://github.com/xhibit">xhibit</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
   </body>
 </html>
