@@ -27,6 +27,7 @@
 <p>It is the purpose to generate a REST API for software developers or domotics enthusiasts, who are interested in generating their own control environment for the TELETASK domotics systems, so you can create your own user interface and connected solutions and services.</p>
 
 <p>If you own a Teletask MICROS (note: not the latest MICROS+), you have access to the free DLL32 LIBRARY (TDS15132).  However, if you're a java programmer like myself, you don't want to use a windows dll :-)
+The API also supports the MICROS+, but you'll have to buy a licence to be able to make TCP calls.
 Bought me a RS232 &gt; LAN converter (TDS10118) so I could access my MICROS server through regular IP.</p>
 
 <p>Started discussing the possibilities on the Teletask forum: <a href="http://www.teletask.be/forum/default.aspx?g=posts&amp;t=195">http://www.teletask.be/forum/default.aspx?g=posts&amp;t=195</a>
@@ -34,18 +35,24 @@ Bought me a RS232 &gt; LAN converter (TDS10118) so I could access my MICROS serv
 
 <p>Initially only setting and getting RELAYS, MTRUPDOWN, GENMOOD, LOCMOOD, COND, FLAG is supported.</p>
 
+<p>Added a basic HTML 5 GUI for access on a mobile device.  Fastest implementation proved to be jQuery Mobile (at the time of creation).<br>
+However I highly recommend using <strong>Home Assistant</strong>: <a href="https://home-assistant.io">https://home-assistant.io</a>
+Currently the API uses an internal MQTT broker, but support for an external broker will be added to bridge with Home Assistant.
+You can however already use the REST interface to make calls from Home Assistant to the TeleTask server.</p>
+
 <h3>
 <a id="how-this-api-works" class="anchor" href="#how-this-api-works" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How this API works:</h3>
 
 <ul>
-<li>Your Teletask config is read from the tds-config.json file.  This file holds all info on your personal setup. An example config can be downloaded from <a href="https://github.com/xhibit/Teletask-api/blob/master/backend/config-json/src/main/resources/tds-config.json">here</a>
+<li>Build the war file using maven (<code>mvn clean package</code>).</li>
+<li>Your Teletask config is read from the tds-config.json file.  This file holds all info on your personal setup. An example config can be downloaded from <a href="https://github.com/xhibit/Teletask-api/blob/master/backend/config-json/src/main/resources/tds-config.json">here</a>.  Create one which corresponds to your setup, and store it accessible to the app server.</li>
+<li>Deploy the war to a java app server on a device on your local network, so it has access to your MICROS server.  I used a low power <a href="http://www.raspberrypi.org">Raspberry PI</a>
 </li>
-<li>Once configured correctly, build the war file using maven.</li>
-<li>Deploy to a java app server on a device on your local network, so it has access to your MICROS server.  I used a low power <a href="http://www.raspberrypi.org">Raspberry PI</a>
-</li>
+<li>Add these VM parameters to your java app server:</li>
 </ul>
 
-<p><strong>UPDATE</strong>: Added a basic HTML 5 GUI for access on a mobile device.  Fastest implementation proved to be jQuery Mobile.   Will be improved in the future, but for now I have a dynamical UI which suits it's purpose...</p>
+<div class="highlight highlight-source-java"><pre><span class="pl-c1">JAVA_OPTS</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>$JAVA_OPTS -DconfigFile=/home/pi/teletask/tds-config.json<span class="pl-pds">"</span></span>
+<span class="pl-c1">JAVA_OPTS</span><span class="pl-k">=</span><span class="pl-s"><span class="pl-pds">"</span>$JAVA_OPTS -Dlogfile=/home/pi/teletask/teletask.log<span class="pl-pds">"</span></span></pre></div>
 
 <h4>
 <a id="libraries--technologies" class="anchor" href="#libraries--technologies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Libraries / Technologies</h4>
