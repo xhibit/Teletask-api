@@ -13,9 +13,9 @@ Started discussing the possibilities on the Teletask forum: http://www.teletask.
 
 Initially only setting and getting RELAYS, MTRUPDOWN, GENMOOD, LOCMOOD, COND, FLAG is supported.
 
-Added a basic HTML 5 GUI for access on a mobile device.  Fastest implementation proved to be jQuery Mobile.   
+Added a basic HTML 5 GUI for access on a mobile device.  Fastest implementation proved to be jQuery Mobile (at the time of creation).   
 However I highly recommend using Home Assistant: https://home-assistant.io
 Currently the API uses an internal MQTT broker, but support for an external broker will be added to bridge with Home Assistant.
 You can however already use the REST interface to make calls from Home Assistant to the TeleTask server.
 
-Read more how to make use of the API and web apps on the [WIKI](http://xhibit.github.io/Teletask-api/).
+Read more how to make use of the API and web apps on the [here](http://xhibit.github.io/Teletask-api/).
